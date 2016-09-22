@@ -1,0 +1,46 @@
+# stuff "git status" should ignore
+
+# build output
+.libs
+.deps
+.dirstamp
+*.o
+*.obj
+*.pp
+*.o.??????
+*.a
+*.lo
+*.la
+*.in
+*.iso
+
+# editor files
+*.swp
+
+# configure/autotools output
+aclocal.m4
+autom4te.cache
+compile
+config.*
+configure
+depcomp
+doxygen
+doxygen.log
+Doxyfile
+install-sh
+libtool
+ltmain.sh
+Makefile
+mdate-sh
+missing
+stamp-h1
+stamp-vti
+INSTALL
+NOTES
+
+# coexist with quilt
+patches
+*.patch
+
+# ctags tag files
+tags
