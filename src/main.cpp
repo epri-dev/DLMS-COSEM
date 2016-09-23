@@ -6,9 +6,6 @@
 #include <asio.hpp>
 #include <asio/steady_timer.hpp>
 
-// this allows us to use string literals such as "5ms" or "1s"
-using namespace std::chrono_literals;
-
 /* simple count down class showing use of asio service
  *
  * This is based on a tutorial sample for an asynchronous timer
@@ -19,7 +16,7 @@ class CountDown
 {
 public:
     CountDown(asio::io_service &io, int startvalue, std::string msg) :
-        timer_{io, 1s},
+        timer_{io, std::chrono::seconds{1}},
         count_{startvalue},
         message_{msg}
     {
@@ -32,7 +29,7 @@ public:
         if (count_) {
             std::cout << count_ << std::endl;
             --count_;
-            timer_.expires_from_now(1s);
+            timer_.expires_from_now(std::chrono::seconds{1});
             timer_.async_wait(std::bind(&CountDown::print, this));
         }
     }
