@@ -5,4 +5,8 @@ cd build
 cmake ..
 make
 
+If this fails with not finding the Asio installation folder,
 
+Define the _Asio_INCLUDE_DIRS environment variable to be the path to your installation.
+   Or define via the cmake command line:
+       cmake .. -D_Asio_INCLUDE_DIRS=MyFolder
