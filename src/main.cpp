@@ -3,6 +3,7 @@
 #include <string>
 #include <functional>
 #include <chrono>
+#define ASIO_STANDALONE 1
 #include <asio.hpp>
 #include <asio/steady_timer.hpp>
 
@@ -18,7 +19,7 @@ public:
     CountDown(asio::io_service &io, int startvalue, std::string msg) :
         timer_{io, std::chrono::seconds{1}},
         count_{startvalue},
-        message_{msg}
+        message_(msg)
     {
         timer_.async_wait(std::bind(&CountDown::print, this));
     }
