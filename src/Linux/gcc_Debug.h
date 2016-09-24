@@ -444,6 +444,9 @@
 #ifndef __DEC64_MANT_DIG__
 #define __DEC64_MANT_DIG__ 16
 #endif
+#ifndef ASIO_STANDALONE
+#define ASIO_STANDALONE 1
+#endif
 #ifndef __UINT_LEAST32_MAX__
 #define __UINT_LEAST32_MAX__ 4294967295U
 #endif
