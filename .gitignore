@@ -16,6 +16,7 @@
 
 # editor files
 *.swp
+*.opensdf
 
 # configure/autotools output
 aclocal.m4
