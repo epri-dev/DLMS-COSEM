@@ -2242,6 +2242,7 @@
     <None Include="install-sh" />
     <None Include="Makefile.in" />
     <None Include="missing" />
+    <None Include=".gitignore" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="LICENSE_1_0.txt" />
