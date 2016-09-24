@@ -36,31 +36,31 @@
     <ClInclude Include="DLMS-COSEM.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\DLMS-COSEM\BaseComponent.h">
+    <ClInclude Include="include\BaseComponent.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\DLMS-COSEM\BaseLibrary.h">
+    <ClInclude Include="include\BaseLibrary.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\DLMS-COSEM\Core.h">
+    <ClInclude Include="include\Core.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\DLMS-COSEM\ERROR_TYPE.h">
+    <ClInclude Include="include\ERROR_TYPE.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\DLMS-COSEM\IBaseComponent.h">
+    <ClInclude Include="include\IBaseComponent.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\DLMS-COSEM\IBaseLibrary.h">
+    <ClInclude Include="include\IBaseLibrary.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\DLMS-COSEM\ICore.h">
+    <ClInclude Include="include\ICore.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\DLMS-COSEM\IMemory.h">
+    <ClInclude Include="include\IMemory.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\DLMS-COSEM\ISerial.h">
+    <ClInclude Include="include\ISerial.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,0 +1,2223 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{c3122980-fcdd-4a22-878f-637a848d461f}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header files">
+      <UniqueIdentifier>{c1d4a4e9-1451-4a01-90b1-f20eeb2dec75}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource files">
+      <UniqueIdentifier>{a642637b-b612-41bc-ba36-f322022ce5e3}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Header files\include">
+      <UniqueIdentifier>{574b8a6c-8277-424f-84ff-9d4eb55b98a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\asio">
+      <UniqueIdentifier>{681dd599-6f64-43af-94da-d76bc81bd518}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\asio\detail">
+      <UniqueIdentifier>{099c02f9-3494-4932-8494-357d082cd427}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\asio\detail\impl">
+      <UniqueIdentifier>{08ca7168-7a00-4850-891c-c6443cd95278}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\asio\generic">
+      <UniqueIdentifier>{170b1db6-5bc2-4b64-8723-5c855cc11de5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\asio\generic\detail">
+      <UniqueIdentifier>{30ecd164-9e85-417e-a63e-17b0905403c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\include">
+      <UniqueIdentifier>{05d351ee-1d0f-4d26-9eef-9e8ef12e9eb4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\include\asio">
+      <UniqueIdentifier>{2ac03ec0-7bc0-4ddd-b43a-5727bf869802}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\include\asio\impl">
+      <UniqueIdentifier>{ec4d1081-f301-4830-9a53-d353dc19dc99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\asio\impl">
+      <UniqueIdentifier>{7b4bb16c-23ac-4d9d-80e7-3da9d405e7f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\asio\ip">
+      <UniqueIdentifier>{a8664af0-5f9e-492d-9498-2d13f403d43c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\asio\ip\detail">
+      <UniqueIdentifier>{3ebc7297-39a9-47d4-9859-241de4acaa31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\asio\ip\impl">
+      <UniqueIdentifier>{c2f75576-403d-4eef-9236-c1666a65ffad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\asio\local">
+      <UniqueIdentifier>{54e803c0-543c-4639-9811-d7b4749627bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\asio\local\detail">
+      <UniqueIdentifier>{90e0fdef-8972-4117-a52f-435d03c64399}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\asio\posix">
+      <UniqueIdentifier>{8ef61ceb-1d84-4fbd-afa3-8ea4c003015a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\asio\ssl">
+      <UniqueIdentifier>{c628b17e-7a25-411e-97dc-135daaea9117}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\asio\ssl\detail">
+      <UniqueIdentifier>{dc1e230f-0619-42bf-a870-53c71d23d51f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\asio\ssl\impl">
+      <UniqueIdentifier>{dcffac5a-6646-4c48-bdf6-81f795773153}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\asio\ssl\old">
+      <UniqueIdentifier>{4b1597e0-318a-4169-9f36-ca971a29604a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\asio\ssl\old\detail">
+      <UniqueIdentifier>{9a3e0c83-fcea-4809-ba2d-5d0a843a7738}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\asio\windows">
+      <UniqueIdentifier>{943b2350-d961-489e-9de5-5ae835fd5746}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src">
+      <UniqueIdentifier>{ab8d1adb-233c-4a58-bc29-b568d1b34279}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples">
+      <UniqueIdentifier>{78f00bb1-bfc9-4797-857b-d3f8ee8e106c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03">
+      <UniqueIdentifier>{86ae52b9-9fcb-403b-960a-cf454ea9c2cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\allocation">
+      <UniqueIdentifier>{29cb5cdc-eaac-43a1-969e-8d6e53879b04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\buffers">
+      <UniqueIdentifier>{b14a53a1-0169-47b5-a91b-4f2977a86792}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\chat">
+      <UniqueIdentifier>{41d8c99b-c855-4992-8777-a26aa1229b16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src">
+      <UniqueIdentifier>{24f68324-f4ae-41bf-a639-44b2702d6841}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\examples">
+      <UniqueIdentifier>{c6b6e8ce-456d-49ea-9083-0de62737a0c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\examples\cpp03">
+      <UniqueIdentifier>{6c6254c6-47ce-4051-9a4e-1da79637826d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\examples\cpp03\chat">
+      <UniqueIdentifier>{82d3bc67-1468-4b74-9abc-697f7ef7cd96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\echo">
+      <UniqueIdentifier>{fdebd688-842a-4502-845b-2e6f1e02704e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\fork">
+      <UniqueIdentifier>{b1fe52fe-8e8b-47e3-be79-291f1b3b142c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\http">
+      <UniqueIdentifier>{8d3d4efe-7cf3-496c-9881-50c13ed24346}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\http\client">
+      <UniqueIdentifier>{abc85aac-28c6-4563-9b8c-93fa9fff4634}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\http\server">
+      <UniqueIdentifier>{313106b0-1745-4a20-93e3-8c68f8993dd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\examples\cpp03\http">
+      <UniqueIdentifier>{2be382c7-960c-4d63-beb8-d96207fa84c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\examples\cpp03\http\server">
+      <UniqueIdentifier>{56dcaf91-6779-44c3-9e2b-556c44e8c53c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\http\server2">
+      <UniqueIdentifier>{c7605afb-e32a-4691-b853-41a4a852378a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\examples\cpp03\http\server2">
+      <UniqueIdentifier>{f04c3441-70e1-4fb9-a7b2-15ab04a387df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\http\server3">
+      <UniqueIdentifier>{57330f1a-3916-40c3-ad9b-f77f8cf08a7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\examples\cpp03\http\server3">
+      <UniqueIdentifier>{2f80d6fb-01b5-4305-9e2f-27cd93abb689}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\http\server4">
+      <UniqueIdentifier>{62ffb078-c059-4d93-bf69-7883578f042f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\examples\cpp03\http\server4">
+      <UniqueIdentifier>{0c1f392c-7ba9-43f8-aee6-c3c961d1bd08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\icmp">
+      <UniqueIdentifier>{ec8bb605-0814-45a7-96e6-1b5a2ab47549}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\examples\cpp03\icmp">
+      <UniqueIdentifier>{99b6c08c-b790-4f20-920c-fe8ac6f1e6ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\invocation">
+      <UniqueIdentifier>{621e8155-5739-4024-80b3-909351aae9ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\iostreams">
+      <UniqueIdentifier>{df60683b-5ebf-49ae-a50a-2cbbc256a6b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\local">
+      <UniqueIdentifier>{a629586c-44ff-4c83-a81c-55b447d227a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\multicast">
+      <UniqueIdentifier>{004713d0-b28e-4b3a-8921-e313ed200f4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\nonblocking">
+      <UniqueIdentifier>{08b38653-18cc-4ae0-88a9-cb15bbd07e6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\porthopper">
+      <UniqueIdentifier>{206b52fc-c933-44f4-9ad6-13d0a9fc5038}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\examples\cpp03\porthopper">
+      <UniqueIdentifier>{ee73eeca-8d38-4b3c-bbd9-6780c2a9f2fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\serialization">
+      <UniqueIdentifier>{a5ec9fce-b61c-44be-9ce3-184a7b8589b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\examples\cpp03\serialization">
+      <UniqueIdentifier>{70877231-02ce-45a4-b751-00dc6328d92c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\services">
+      <UniqueIdentifier>{0b837042-60c1-4470-a5ff-9f4248db3a5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\examples\cpp03\services">
+      <UniqueIdentifier>{36ea8834-1ff8-4e21-90ae-ea978e72d3e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\socks4">
+      <UniqueIdentifier>{42c7f7ec-c745-4050-a007-418f6aad72c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\examples\cpp03\socks4">
+      <UniqueIdentifier>{76d27590-460f-4596-b73f-7c9ae5738836}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\spawn">
+      <UniqueIdentifier>{92b9e4a0-1b9a-44fd-bd8b-2ef8b65d604c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\ssl">
+      <UniqueIdentifier>{a033e444-ea56-4c0d-9313-7512e1aa72e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\timeouts">
+      <UniqueIdentifier>{67700715-0673-463c-b943-eef8b3788565}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\timers">
+      <UniqueIdentifier>{d5b6a8ae-2deb-4522-84ca-aaf342492d56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\tutorial">
+      <UniqueIdentifier>{3c43fdee-4c4a-4f51-b66c-16ce4f00ae7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\tutorial\daytime1">
+      <UniqueIdentifier>{4411b26a-78f3-48c7-bdb5-fdcd46afb997}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\tutorial\daytime2">
+      <UniqueIdentifier>{35ea38ed-643e-40ce-b0d9-648631a17fef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\tutorial\daytime3">
+      <UniqueIdentifier>{26e89db7-71f2-47a7-988e-7a2a3a5c1a96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\tutorial\daytime4">
+      <UniqueIdentifier>{185cd3f5-1891-4c9a-a4c0-2546c65b9748}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\tutorial\daytime5">
+      <UniqueIdentifier>{cd552e14-482a-4380-ae61-7d43ccbe16ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\tutorial\daytime6">
+      <UniqueIdentifier>{f73ae71a-9062-4d1d-a7ae-00d16702065d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\tutorial\daytime7">
+      <UniqueIdentifier>{3660e08a-7929-42cd-8373-f3f31e4864ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\tutorial\timer1">
+      <UniqueIdentifier>{f8795b4c-b06a-4258-b182-a6e7768e5215}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\tutorial\timer2">
+      <UniqueIdentifier>{2bbb2633-22b7-4d38-850f-5e2f52ace9ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\tutorial\timer3">
+      <UniqueIdentifier>{b5295375-18c0-496c-aca1-0c2bce1ea73b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\tutorial\timer4">
+      <UniqueIdentifier>{6b2b3c6e-2d68-4c22-a9a6-49dd27aa20d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\tutorial\timer5">
+      <UniqueIdentifier>{681ce3d7-75e2-4748-ada8-06781b642ace}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp03\windows">
+      <UniqueIdentifier>{42d0667d-4d81-4555-a438-47baf1637101}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp11">
+      <UniqueIdentifier>{d4009f73-f5a3-4ccd-b851-ef7b711c5a85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp11\allocation">
+      <UniqueIdentifier>{ad64837e-c1d4-446d-8f6b-f7227f50a21f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp11\buffers">
+      <UniqueIdentifier>{173e35cc-f5df-4b98-8771-cde6cc5d90d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp11\chat">
+      <UniqueIdentifier>{6002e9ef-003c-4af4-8099-967ee91b2e2f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\examples\cpp11">
+      <UniqueIdentifier>{c5e8ca9f-e8a8-4560-b955-655b2c0ec4af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\examples\cpp11\chat">
+      <UniqueIdentifier>{cbbab8c9-3385-4228-b27e-38f65a1a07ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp11\echo">
+      <UniqueIdentifier>{e17489d6-71d4-4dc9-af7b-c85095695be6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp11\futures">
+      <UniqueIdentifier>{4fc7efdd-47ba-4e64-ae75-8a878fede83d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp11\http">
+      <UniqueIdentifier>{553310c7-ac0e-4f76-aa41-d963be36fb89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp11\http\server">
+      <UniqueIdentifier>{bb0d3b34-f995-4830-b47f-f16ef3bc4f11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\examples\cpp11\http">
+      <UniqueIdentifier>{18b2f6c4-158d-43f0-b4dd-8a23b2e119c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\examples\cpp11\http\server">
+      <UniqueIdentifier>{6c5e3f3d-c011-46b1-8202-55d15305dec3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\examples\cpp11\spawn">
+      <UniqueIdentifier>{ad2714d4-b031-43ce-a6f0-87181791a27d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\tests">
+      <UniqueIdentifier>{84debc8b-588b-4c32-924e-811f531eb24d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\tests\latency">
+      <UniqueIdentifier>{5ddf2c59-a934-4e92-bf49-ba3bad627530}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\tests">
+      <UniqueIdentifier>{7cdc1d9f-6143-4aba-af8e-f28c09c91cc6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\tests\latency">
+      <UniqueIdentifier>{ed92b6eb-39fb-4b78-bc9f-1f5d4ed55203}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\tests\performance">
+      <UniqueIdentifier>{3caaa3ee-b3f3-4f1c-b282-98ecff7c323d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\tests\performance">
+      <UniqueIdentifier>{7d95fec8-a959-4edf-80ca-e9bdc6472abb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\tests\unit">
+      <UniqueIdentifier>{4aac50e9-12ba-4b1f-9148-c45a7f72d316}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\tests\unit">
+      <UniqueIdentifier>{1f154fa5-7ca3-4c69-8d76-0b4705bc6e9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src\tests\unit\archetypes">
+      <UniqueIdentifier>{d5c638dd-df7a-4874-b587-794275ab4c34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\tests\unit\generic">
+      <UniqueIdentifier>{4536b0a5-aad6-4f30-9fba-c48a16a6105a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\tests\unit\ip">
+      <UniqueIdentifier>{999c36ed-723b-4074-be53-9b1812f064e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\tests\unit\local">
+      <UniqueIdentifier>{b0fe4a5a-db66-42a2-a62d-072365f9fdd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\tests\unit\posix">
+      <UniqueIdentifier>{7d6a2feb-5d7d-4208-9191-bc461dc58fd3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\tests\unit\ssl">
+      <UniqueIdentifier>{f13088cb-a01c-4810-8caa-5df8d738f2d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src\tests\unit\windows">
+      <UniqueIdentifier>{7c83009e-4dcf-4c2f-b465-7c8682692e7d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\asio.hpp">
+      <Filter>Header files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\async_result.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\basic_datagram_socket.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\basic_deadline_timer.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\basic_io_object.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\basic_raw_socket.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\basic_seq_packet_socket.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\basic_serial_port.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\basic_signal_set.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\basic_socket.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\basic_socket_acceptor.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\basic_socket_iostream.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\basic_socket_streambuf.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\basic_streambuf.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\basic_streambuf_fwd.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\basic_stream_socket.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\basic_waitable_timer.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\buffer.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\buffered_read_stream.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\buffered_read_stream_fwd.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\buffered_stream.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\buffered_stream_fwd.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\buffered_write_stream.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\buffered_write_stream_fwd.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\buffers_iterator.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\completion_condition.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\connect.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\coroutine.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\datagram_socket_service.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\deadline_timer.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\deadline_timer_service.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\error.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\error_code.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\handler_alloc_hook.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\handler_continuation_hook.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\handler_invoke_hook.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\handler_type.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\high_resolution_timer.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\io_service.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\is_read_buffered.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\is_write_buffered.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\placeholders.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\raw_socket_service.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\read.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\read_at.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\read_until.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\seq_packet_socket_service.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\serial_port.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\serial_port_base.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\serial_port_service.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\signal_set.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\signal_set_service.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\socket_acceptor_service.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\socket_base.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\spawn.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\steady_timer.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\strand.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\streambuf.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\stream_socket_service.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\system_error.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\system_timer.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\thread.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\time_traits.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\unyield.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\use_future.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\version.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\waitable_timer_service.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\wait_traits.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\write.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\write_at.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\yield.hpp">
+      <Filter>Header files\include\asio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\addressof.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\array.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\array_fwd.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\assert.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\atomic_count.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\base_from_completion_cond.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\bind_handler.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\buffered_stream_storage.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\buffer_resize_guard.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\buffer_sequence_adapter.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\call_stack.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\chrono_time_traits.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\completion_handler.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\config.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\consuming_buffers.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\cstdint.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\date_time_fwd.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\deadline_timer_service.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\dependent_type.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\descriptor_ops.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\descriptor_read_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\descriptor_write_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\dev_poll_reactor.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\epoll_reactor.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\event.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\eventfd_select_interrupter.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\fd_set_adapter.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\fenced_block.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\function.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\gcc_arm_fenced_block.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\gcc_hppa_fenced_block.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\gcc_sync_fenced_block.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\gcc_x86_fenced_block.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\handler_alloc_helpers.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\handler_cont_helpers.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\handler_invoke_helpers.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\handler_tracking.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\handler_type_requirements.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\hash_map.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\io_control.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\keyword_tss_ptr.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\kqueue_reactor.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\limits.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\local_free_on_block_exit.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\macos_fenced_block.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\mutex.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\noncopyable.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\null_event.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\null_fenced_block.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\null_mutex.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\null_reactor.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\null_signal_blocker.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\null_socket_service.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\null_static_mutex.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\null_thread.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\null_tss_ptr.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\object_pool.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\old_win_sdk_compat.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\operation.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\op_queue.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\pipe_select_interrupter.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\pop_options.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\posix_event.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\posix_fd_set_adapter.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\posix_mutex.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\posix_signal_blocker.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\posix_static_mutex.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\posix_thread.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\posix_tss_ptr.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\push_options.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\reactive_descriptor_service.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\reactive_null_buffers_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\reactive_serial_port_service.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\reactive_socket_accept_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\reactive_socket_connect_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\reactive_socket_recvfrom_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\reactive_socket_recvmsg_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\reactive_socket_recv_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\reactive_socket_sendto_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\reactive_socket_send_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\reactive_socket_service.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\reactive_socket_service_base.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\reactor.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\reactor_fwd.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\reactor_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\reactor_op_queue.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\regex_fwd.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\resolver_service.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\resolver_service_base.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\resolve_endpoint_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\resolve_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\scoped_lock.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\scoped_ptr.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\select_interrupter.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\select_reactor.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\service_registry.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\shared_ptr.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\signal_blocker.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\signal_handler.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\signal_init.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\signal_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\signal_set_service.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\socket_holder.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\socket_ops.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\socket_option.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\socket_select_interrupter.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\socket_types.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\solaris_fenced_block.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\static_mutex.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\std_event.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\std_mutex.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\std_static_mutex.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\std_thread.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\strand_service.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\task_io_service.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\task_io_service_operation.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\task_io_service_thread_info.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\thread.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\thread_info_base.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\throw_error.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\throw_exception.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\timer_queue.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\timer_queue_base.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\timer_queue_ptime.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\timer_queue_set.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\timer_scheduler.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\timer_scheduler_fwd.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\tss_ptr.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\type_traits.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\variadic_templates.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\wait_handler.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\wait_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\weak_ptr.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\wince_thread.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\winrt_async_manager.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\winrt_async_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\winrt_resolver_service.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\winrt_resolve_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\winrt_socket_connect_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\winrt_socket_recv_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\winrt_socket_send_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\winrt_ssocket_service.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\winrt_ssocket_service_base.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\winrt_timer_scheduler.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\winrt_utils.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\winsock_init.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_event.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_fd_set_adapter.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_fenced_block.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_iocp_handle_read_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_iocp_handle_service.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_iocp_handle_write_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_iocp_io_service.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_iocp_null_buffers_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_iocp_operation.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_iocp_overlapped_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_iocp_overlapped_ptr.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_iocp_serial_port_service.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_iocp_socket_accept_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_iocp_socket_connect_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_iocp_socket_recvfrom_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_iocp_socket_recvmsg_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_iocp_socket_recv_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_iocp_socket_send_op.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_iocp_socket_service.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_iocp_socket_service_base.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_iocp_thread_info.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_mutex.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_object_handle_service.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_static_mutex.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_thread.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\win_tss_ptr.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\wrapped_handler.hpp">
+      <Filter>Header files\include\asio\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\impl\dev_poll_reactor.hpp">
+      <Filter>Header files\include\asio\detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\impl\epoll_reactor.hpp">
+      <Filter>Header files\include\asio\detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\impl\kqueue_reactor.hpp">
+      <Filter>Header files\include\asio\detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\impl\select_reactor.hpp">
+      <Filter>Header files\include\asio\detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\impl\service_registry.hpp">
+      <Filter>Header files\include\asio\detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\impl\strand_service.hpp">
+      <Filter>Header files\include\asio\detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\impl\task_io_service.hpp">
+      <Filter>Header files\include\asio\detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\impl\winrt_timer_scheduler.hpp">
+      <Filter>Header files\include\asio\detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\detail\impl\win_iocp_io_service.hpp">
+      <Filter>Header files\include\asio\detail\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\generic\basic_endpoint.hpp">
+      <Filter>Header files\include\asio\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\generic\datagram_protocol.hpp">
+      <Filter>Header files\include\asio\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\generic\raw_protocol.hpp">
+      <Filter>Header files\include\asio\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\generic\seq_packet_protocol.hpp">
+      <Filter>Header files\include\asio\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\generic\stream_protocol.hpp">
+      <Filter>Header files\include\asio\generic</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\generic\detail\endpoint.hpp">
+      <Filter>Header files\include\asio\generic\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\impl\buffered_read_stream.hpp">
+      <Filter>Header files\include\asio\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\impl\buffered_write_stream.hpp">
+      <Filter>Header files\include\asio\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\impl\connect.hpp">
+      <Filter>Header files\include\asio\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\impl\io_service.hpp">
+      <Filter>Header files\include\asio\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\impl\read.hpp">
+      <Filter>Header files\include\asio\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\impl\read_at.hpp">
+      <Filter>Header files\include\asio\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\impl\read_until.hpp">
+      <Filter>Header files\include\asio\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\impl\serial_port_base.hpp">
+      <Filter>Header files\include\asio\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\impl\spawn.hpp">
+      <Filter>Header files\include\asio\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\impl\src.hpp">
+      <Filter>Header files\include\asio\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\impl\use_future.hpp">
+      <Filter>Header files\include\asio\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\impl\write.hpp">
+      <Filter>Header files\include\asio\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\impl\write_at.hpp">
+      <Filter>Header files\include\asio\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\address.hpp">
+      <Filter>Header files\include\asio\ip</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\address_v4.hpp">
+      <Filter>Header files\include\asio\ip</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\address_v6.hpp">
+      <Filter>Header files\include\asio\ip</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\basic_endpoint.hpp">
+      <Filter>Header files\include\asio\ip</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\basic_resolver.hpp">
+      <Filter>Header files\include\asio\ip</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\basic_resolver_entry.hpp">
+      <Filter>Header files\include\asio\ip</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\basic_resolver_iterator.hpp">
+      <Filter>Header files\include\asio\ip</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\basic_resolver_query.hpp">
+      <Filter>Header files\include\asio\ip</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\host_name.hpp">
+      <Filter>Header files\include\asio\ip</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\icmp.hpp">
+      <Filter>Header files\include\asio\ip</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\multicast.hpp">
+      <Filter>Header files\include\asio\ip</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\resolver_query_base.hpp">
+      <Filter>Header files\include\asio\ip</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\resolver_service.hpp">
+      <Filter>Header files\include\asio\ip</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\tcp.hpp">
+      <Filter>Header files\include\asio\ip</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\udp.hpp">
+      <Filter>Header files\include\asio\ip</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\unicast.hpp">
+      <Filter>Header files\include\asio\ip</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\v6_only.hpp">
+      <Filter>Header files\include\asio\ip</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\detail\endpoint.hpp">
+      <Filter>Header files\include\asio\ip\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\detail\socket_option.hpp">
+      <Filter>Header files\include\asio\ip\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\impl\address.hpp">
+      <Filter>Header files\include\asio\ip\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\impl\address_v4.hpp">
+      <Filter>Header files\include\asio\ip\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\impl\address_v6.hpp">
+      <Filter>Header files\include\asio\ip\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ip\impl\basic_endpoint.hpp">
+      <Filter>Header files\include\asio\ip\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\local\basic_endpoint.hpp">
+      <Filter>Header files\include\asio\local</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\local\connect_pair.hpp">
+      <Filter>Header files\include\asio\local</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\local\datagram_protocol.hpp">
+      <Filter>Header files\include\asio\local</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\local\stream_protocol.hpp">
+      <Filter>Header files\include\asio\local</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\local\detail\endpoint.hpp">
+      <Filter>Header files\include\asio\local\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\posix\basic_descriptor.hpp">
+      <Filter>Header files\include\asio\posix</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\posix\basic_stream_descriptor.hpp">
+      <Filter>Header files\include\asio\posix</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\posix\descriptor_base.hpp">
+      <Filter>Header files\include\asio\posix</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\posix\stream_descriptor.hpp">
+      <Filter>Header files\include\asio\posix</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\posix\stream_descriptor_service.hpp">
+      <Filter>Header files\include\asio\posix</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\basic_context.hpp">
+      <Filter>Header files\include\asio\ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\context.hpp">
+      <Filter>Header files\include\asio\ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\context_base.hpp">
+      <Filter>Header files\include\asio\ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\context_service.hpp">
+      <Filter>Header files\include\asio\ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\error.hpp">
+      <Filter>Header files\include\asio\ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\rfc2818_verification.hpp">
+      <Filter>Header files\include\asio\ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\stream.hpp">
+      <Filter>Header files\include\asio\ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\stream_base.hpp">
+      <Filter>Header files\include\asio\ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\stream_service.hpp">
+      <Filter>Header files\include\asio\ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\verify_context.hpp">
+      <Filter>Header files\include\asio\ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\verify_mode.hpp">
+      <Filter>Header files\include\asio\ssl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\detail\buffered_handshake_op.hpp">
+      <Filter>Header files\include\asio\ssl\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\detail\engine.hpp">
+      <Filter>Header files\include\asio\ssl\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\detail\handshake_op.hpp">
+      <Filter>Header files\include\asio\ssl\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\detail\io.hpp">
+      <Filter>Header files\include\asio\ssl\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\detail\openssl_init.hpp">
+      <Filter>Header files\include\asio\ssl\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\detail\openssl_types.hpp">
+      <Filter>Header files\include\asio\ssl\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\detail\password_callback.hpp">
+      <Filter>Header files\include\asio\ssl\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\detail\read_op.hpp">
+      <Filter>Header files\include\asio\ssl\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\detail\shutdown_op.hpp">
+      <Filter>Header files\include\asio\ssl\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\detail\stream_core.hpp">
+      <Filter>Header files\include\asio\ssl\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\detail\verify_callback.hpp">
+      <Filter>Header files\include\asio\ssl\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\detail\write_op.hpp">
+      <Filter>Header files\include\asio\ssl\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\impl\context.hpp">
+      <Filter>Header files\include\asio\ssl\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\impl\src.hpp">
+      <Filter>Header files\include\asio\ssl\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\old\basic_context.hpp">
+      <Filter>Header files\include\asio\ssl\old</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\old\context_service.hpp">
+      <Filter>Header files\include\asio\ssl\old</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\old\stream.hpp">
+      <Filter>Header files\include\asio\ssl\old</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\old\stream_service.hpp">
+      <Filter>Header files\include\asio\ssl\old</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\old\detail\openssl_context_service.hpp">
+      <Filter>Header files\include\asio\ssl\old\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\old\detail\openssl_operation.hpp">
+      <Filter>Header files\include\asio\ssl\old\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\ssl\old\detail\openssl_stream_service.hpp">
+      <Filter>Header files\include\asio\ssl\old\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\windows\basic_handle.hpp">
+      <Filter>Header files\include\asio\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\windows\basic_object_handle.hpp">
+      <Filter>Header files\include\asio\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\windows\basic_random_access_handle.hpp">
+      <Filter>Header files\include\asio\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\windows\basic_stream_handle.hpp">
+      <Filter>Header files\include\asio\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\windows\object_handle.hpp">
+      <Filter>Header files\include\asio\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\windows\object_handle_service.hpp">
+      <Filter>Header files\include\asio\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\windows\overlapped_ptr.hpp">
+      <Filter>Header files\include\asio\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\windows\random_access_handle.hpp">
+      <Filter>Header files\include\asio\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\windows\random_access_handle_service.hpp">
+      <Filter>Header files\include\asio\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\windows\stream_handle.hpp">
+      <Filter>Header files\include\asio\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="include\asio\windows\stream_handle_service.hpp">
+      <Filter>Header files\include\asio\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\chat\chat_message.hpp">
+      <Filter>Header files\src\examples\cpp03\chat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server\connection.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server\connection_manager.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server\header.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server\mime_types.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server\reply.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server\request.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server\request_handler.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server\request_parser.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server\server.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server2\connection.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server2</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server2\header.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server2</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server2\io_service_pool.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server2</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server2\mime_types.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server2</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server2\reply.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server2</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server2\request.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server2</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server2\request_handler.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server2</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server2\request_parser.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server2</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server2\server.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server2</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server3\connection.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server3</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server3\header.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server3</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server3\mime_types.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server3</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server3\reply.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server3</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server3\request.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server3</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server3\request_handler.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server3</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server3\request_parser.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server3</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server3\server.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server3</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server4\file_handler.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server4</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server4\header.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server4</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server4\mime_types.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server4</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server4\reply.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server4</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server4\request.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server4</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server4\request_parser.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server4</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\http\server4\server.hpp">
+      <Filter>Header files\src\examples\cpp03\http\server4</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\icmp\icmp_header.hpp">
+      <Filter>Header files\src\examples\cpp03\icmp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\icmp\ipv4_header.hpp">
+      <Filter>Header files\src\examples\cpp03\icmp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\porthopper\protocol.hpp">
+      <Filter>Header files\src\examples\cpp03\porthopper</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\serialization\connection.hpp">
+      <Filter>Header files\src\examples\cpp03\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\serialization\stock.hpp">
+      <Filter>Header files\src\examples\cpp03\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\services\basic_logger.hpp">
+      <Filter>Header files\src\examples\cpp03\services</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\services\logger.hpp">
+      <Filter>Header files\src\examples\cpp03\services</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\services\logger_service.hpp">
+      <Filter>Header files\src\examples\cpp03\services</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\services\stream_socket_service.hpp">
+      <Filter>Header files\src\examples\cpp03\services</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp03\socks4\socks4.hpp">
+      <Filter>Header files\src\examples\cpp03\socks4</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp11\chat\chat_message.hpp">
+      <Filter>Header files\src\examples\cpp11\chat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp11\http\server\connection.hpp">
+      <Filter>Header files\src\examples\cpp11\http\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp11\http\server\connection_manager.hpp">
+      <Filter>Header files\src\examples\cpp11\http\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp11\http\server\header.hpp">
+      <Filter>Header files\src\examples\cpp11\http\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp11\http\server\mime_types.hpp">
+      <Filter>Header files\src\examples\cpp11\http\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp11\http\server\reply.hpp">
+      <Filter>Header files\src\examples\cpp11\http\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp11\http\server\request.hpp">
+      <Filter>Header files\src\examples\cpp11\http\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp11\http\server\request_handler.hpp">
+      <Filter>Header files\src\examples\cpp11\http\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp11\http\server\request_parser.hpp">
+      <Filter>Header files\src\examples\cpp11\http\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\examples\cpp11\http\server\server.hpp">
+      <Filter>Header files\src\examples\cpp11\http\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tests\latency\allocator.hpp">
+      <Filter>Header files\src\tests\latency</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tests\latency\coroutine.hpp">
+      <Filter>Header files\src\tests\latency</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tests\latency\high_res_clock.hpp">
+      <Filter>Header files\src\tests\latency</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tests\latency\unyield.hpp">
+      <Filter>Header files\src\tests\latency</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tests\latency\yield.hpp">
+      <Filter>Header files\src\tests\latency</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tests\performance\handler_allocator.hpp">
+      <Filter>Header files\src\tests\performance</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tests\unit\unit_test.hpp">
+      <Filter>Header files\src\tests\unit</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tests\unit\archetypes\async_result.hpp">
+      <Filter>Header files\src\tests\unit\archetypes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tests\unit\archetypes\gettable_socket_option.hpp">
+      <Filter>Header files\src\tests\unit\archetypes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tests\unit\archetypes\io_control_command.hpp">
+      <Filter>Header files\src\tests\unit\archetypes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tests\unit\archetypes\settable_socket_option.hpp">
+      <Filter>Header files\src\tests\unit\archetypes</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="include\asio\impl\src.cpp">
+      <Filter>Source files\include\asio\impl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\asio.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\asio_ssl.cpp">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\allocation\server.cpp">
+      <Filter>Source files\src\examples\cpp03\allocation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\buffers\reference_counted.cpp">
+      <Filter>Source files\src\examples\cpp03\buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\chat\chat_client.cpp">
+      <Filter>Source files\src\examples\cpp03\chat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\chat\chat_server.cpp">
+      <Filter>Source files\src\examples\cpp03\chat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\chat\posix_chat_client.cpp">
+      <Filter>Source files\src\examples\cpp03\chat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\echo\async_tcp_echo_server.cpp">
+      <Filter>Source files\src\examples\cpp03\echo</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\echo\async_udp_echo_server.cpp">
+      <Filter>Source files\src\examples\cpp03\echo</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\echo\blocking_tcp_echo_client.cpp">
+      <Filter>Source files\src\examples\cpp03\echo</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\echo\blocking_tcp_echo_server.cpp">
+      <Filter>Source files\src\examples\cpp03\echo</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\echo\blocking_udp_echo_client.cpp">
+      <Filter>Source files\src\examples\cpp03\echo</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\echo\blocking_udp_echo_server.cpp">
+      <Filter>Source files\src\examples\cpp03\echo</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\fork\daemon.cpp">
+      <Filter>Source files\src\examples\cpp03\fork</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\fork\process_per_connection.cpp">
+      <Filter>Source files\src\examples\cpp03\fork</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\client\async_client.cpp">
+      <Filter>Source files\src\examples\cpp03\http\client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\client\sync_client.cpp">
+      <Filter>Source files\src\examples\cpp03\http\client</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server\connection.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server\connection_manager.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server\main.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server\mime_types.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server\reply.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server\request_handler.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server\request_parser.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server\server.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server2\connection.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server2\io_service_pool.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server2\main.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server2\mime_types.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server2\reply.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server2\request_handler.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server2\request_parser.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server2\server.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server3\connection.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server3</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server3\main.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server3</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server3\mime_types.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server3</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server3\reply.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server3</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server3\request_handler.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server3</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server3\request_parser.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server3</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server3\server.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server3</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server4\file_handler.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server4</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server4\main.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server4</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server4\mime_types.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server4</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server4\reply.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server4</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server4\request_parser.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server4</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\http\server4\server.cpp">
+      <Filter>Source files\src\examples\cpp03\http\server4</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\icmp\ping.cpp">
+      <Filter>Source files\src\examples\cpp03\icmp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\invocation\prioritised_handlers.cpp">
+      <Filter>Source files\src\examples\cpp03\invocation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\iostreams\daytime_client.cpp">
+      <Filter>Source files\src\examples\cpp03\iostreams</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\iostreams\daytime_server.cpp">
+      <Filter>Source files\src\examples\cpp03\iostreams</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\iostreams\http_client.cpp">
+      <Filter>Source files\src\examples\cpp03\iostreams</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\local\connect_pair.cpp">
+      <Filter>Source files\src\examples\cpp03\local</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\local\iostream_client.cpp">
+      <Filter>Source files\src\examples\cpp03\local</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\local\stream_client.cpp">
+      <Filter>Source files\src\examples\cpp03\local</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\local\stream_server.cpp">
+      <Filter>Source files\src\examples\cpp03\local</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\multicast\receiver.cpp">
+      <Filter>Source files\src\examples\cpp03\multicast</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\multicast\sender.cpp">
+      <Filter>Source files\src\examples\cpp03\multicast</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\nonblocking\third_party_lib.cpp">
+      <Filter>Source files\src\examples\cpp03\nonblocking</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\porthopper\client.cpp">
+      <Filter>Source files\src\examples\cpp03\porthopper</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\porthopper\server.cpp">
+      <Filter>Source files\src\examples\cpp03\porthopper</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\serialization\client.cpp">
+      <Filter>Source files\src\examples\cpp03\serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\serialization\server.cpp">
+      <Filter>Source files\src\examples\cpp03\serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\services\daytime_client.cpp">
+      <Filter>Source files\src\examples\cpp03\services</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\services\logger_service.cpp">
+      <Filter>Source files\src\examples\cpp03\services</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\socks4\sync_client.cpp">
+      <Filter>Source files\src\examples\cpp03\socks4</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\spawn\echo_server.cpp">
+      <Filter>Source files\src\examples\cpp03\spawn</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\ssl\client.cpp">
+      <Filter>Source files\src\examples\cpp03\ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\ssl\server.cpp">
+      <Filter>Source files\src\examples\cpp03\ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\timeouts\async_tcp_client.cpp">
+      <Filter>Source files\src\examples\cpp03\timeouts</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\timeouts\blocking_tcp_client.cpp">
+      <Filter>Source files\src\examples\cpp03\timeouts</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\timeouts\blocking_udp_client.cpp">
+      <Filter>Source files\src\examples\cpp03\timeouts</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\timeouts\server.cpp">
+      <Filter>Source files\src\examples\cpp03\timeouts</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\timers\tick_count_timer.cpp">
+      <Filter>Source files\src\examples\cpp03\timers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\timers\time_t_timer.cpp">
+      <Filter>Source files\src\examples\cpp03\timers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\tutorial\daytime1\client.cpp">
+      <Filter>Source files\src\examples\cpp03\tutorial\daytime1</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\tutorial\daytime2\server.cpp">
+      <Filter>Source files\src\examples\cpp03\tutorial\daytime2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\tutorial\daytime3\server.cpp">
+      <Filter>Source files\src\examples\cpp03\tutorial\daytime3</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\tutorial\daytime4\client.cpp">
+      <Filter>Source files\src\examples\cpp03\tutorial\daytime4</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\tutorial\daytime5\server.cpp">
+      <Filter>Source files\src\examples\cpp03\tutorial\daytime5</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\tutorial\daytime6\server.cpp">
+      <Filter>Source files\src\examples\cpp03\tutorial\daytime6</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\tutorial\daytime7\server.cpp">
+      <Filter>Source files\src\examples\cpp03\tutorial\daytime7</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\tutorial\timer1\timer.cpp">
+      <Filter>Source files\src\examples\cpp03\tutorial\timer1</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\tutorial\timer2\timer.cpp">
+      <Filter>Source files\src\examples\cpp03\tutorial\timer2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\tutorial\timer3\timer.cpp">
+      <Filter>Source files\src\examples\cpp03\tutorial\timer3</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\tutorial\timer4\timer.cpp">
+      <Filter>Source files\src\examples\cpp03\tutorial\timer4</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\tutorial\timer5\timer.cpp">
+      <Filter>Source files\src\examples\cpp03\tutorial\timer5</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp03\windows\transmit_file.cpp">
+      <Filter>Source files\src\examples\cpp03\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\allocation\server.cpp">
+      <Filter>Source files\src\examples\cpp11\allocation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\buffers\reference_counted.cpp">
+      <Filter>Source files\src\examples\cpp11\buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\chat\chat_client.cpp">
+      <Filter>Source files\src\examples\cpp11\chat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\chat\chat_server.cpp">
+      <Filter>Source files\src\examples\cpp11\chat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\echo\async_tcp_echo_server.cpp">
+      <Filter>Source files\src\examples\cpp11\echo</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\echo\async_udp_echo_server.cpp">
+      <Filter>Source files\src\examples\cpp11\echo</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\echo\blocking_tcp_echo_client.cpp">
+      <Filter>Source files\src\examples\cpp11\echo</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\echo\blocking_tcp_echo_server.cpp">
+      <Filter>Source files\src\examples\cpp11\echo</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\echo\blocking_udp_echo_client.cpp">
+      <Filter>Source files\src\examples\cpp11\echo</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\echo\blocking_udp_echo_server.cpp">
+      <Filter>Source files\src\examples\cpp11\echo</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\futures\daytime_client.cpp">
+      <Filter>Source files\src\examples\cpp11\futures</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\http\server\connection.cpp">
+      <Filter>Source files\src\examples\cpp11\http\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\http\server\connection_manager.cpp">
+      <Filter>Source files\src\examples\cpp11\http\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\http\server\main.cpp">
+      <Filter>Source files\src\examples\cpp11\http\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\http\server\mime_types.cpp">
+      <Filter>Source files\src\examples\cpp11\http\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\http\server\reply.cpp">
+      <Filter>Source files\src\examples\cpp11\http\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\http\server\request_handler.cpp">
+      <Filter>Source files\src\examples\cpp11\http\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\http\server\request_parser.cpp">
+      <Filter>Source files\src\examples\cpp11\http\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\http\server\server.cpp">
+      <Filter>Source files\src\examples\cpp11\http\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\examples\cpp11\spawn\echo_server.cpp">
+      <Filter>Source files\src\examples\cpp11\spawn</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\latency\tcp_client.cpp">
+      <Filter>Source files\src\tests\latency</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\latency\tcp_server.cpp">
+      <Filter>Source files\src\tests\latency</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\latency\udp_client.cpp">
+      <Filter>Source files\src\tests\latency</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\latency\udp_server.cpp">
+      <Filter>Source files\src\tests\latency</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\performance\client.cpp">
+      <Filter>Source files\src\tests\performance</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\performance\server.cpp">
+      <Filter>Source files\src\tests\performance</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\basic_datagram_socket.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\basic_deadline_timer.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\basic_raw_socket.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\basic_seq_packet_socket.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\basic_serial_port.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\basic_signal_set.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\basic_socket_acceptor.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\basic_streambuf.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\basic_stream_socket.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\basic_waitable_timer.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\buffer.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\buffered_read_stream.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\buffered_stream.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\buffered_write_stream.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\buffers_iterator.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\completion_condition.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\connect.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\coroutine.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\datagram_socket_service.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\deadline_timer.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\deadline_timer_service.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\error.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\high_resolution_timer.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\io_service.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\is_read_buffered.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\is_write_buffered.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\placeholders.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\raw_socket_service.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\read.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\read_at.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\read_until.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\seq_packet_socket_service.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\serial_port.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\serial_port_base.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\serial_port_service.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\signal_set.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\signal_set_service.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\socket_acceptor_service.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\socket_base.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\steady_timer.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\strand.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\streambuf.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\stream_socket_service.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\system_timer.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\thread.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\time_traits.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\waitable_timer_service.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\wait_traits.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\write.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\write_at.cpp">
+      <Filter>Source files\src\tests\unit</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\generic\basic_endpoint.cpp">
+      <Filter>Source files\src\tests\unit\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\generic\datagram_protocol.cpp">
+      <Filter>Source files\src\tests\unit\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\generic\raw_protocol.cpp">
+      <Filter>Source files\src\tests\unit\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\generic\seq_packet_protocol.cpp">
+      <Filter>Source files\src\tests\unit\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\generic\stream_protocol.cpp">
+      <Filter>Source files\src\tests\unit\generic</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ip\address.cpp">
+      <Filter>Source files\src\tests\unit\ip</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ip\address_v4.cpp">
+      <Filter>Source files\src\tests\unit\ip</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ip\address_v6.cpp">
+      <Filter>Source files\src\tests\unit\ip</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ip\basic_endpoint.cpp">
+      <Filter>Source files\src\tests\unit\ip</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ip\basic_resolver.cpp">
+      <Filter>Source files\src\tests\unit\ip</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ip\basic_resolver_entry.cpp">
+      <Filter>Source files\src\tests\unit\ip</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ip\basic_resolver_iterator.cpp">
+      <Filter>Source files\src\tests\unit\ip</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ip\basic_resolver_query.cpp">
+      <Filter>Source files\src\tests\unit\ip</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ip\host_name.cpp">
+      <Filter>Source files\src\tests\unit\ip</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ip\icmp.cpp">
+      <Filter>Source files\src\tests\unit\ip</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ip\multicast.cpp">
+      <Filter>Source files\src\tests\unit\ip</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ip\resolver_query_base.cpp">
+      <Filter>Source files\src\tests\unit\ip</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ip\resolver_service.cpp">
+      <Filter>Source files\src\tests\unit\ip</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ip\tcp.cpp">
+      <Filter>Source files\src\tests\unit\ip</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ip\udp.cpp">
+      <Filter>Source files\src\tests\unit\ip</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ip\unicast.cpp">
+      <Filter>Source files\src\tests\unit\ip</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ip\v6_only.cpp">
+      <Filter>Source files\src\tests\unit\ip</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\local\basic_endpoint.cpp">
+      <Filter>Source files\src\tests\unit\local</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\local\connect_pair.cpp">
+      <Filter>Source files\src\tests\unit\local</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\local\datagram_protocol.cpp">
+      <Filter>Source files\src\tests\unit\local</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\local\stream_protocol.cpp">
+      <Filter>Source files\src\tests\unit\local</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\posix\basic_descriptor.cpp">
+      <Filter>Source files\src\tests\unit\posix</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\posix\basic_stream_descriptor.cpp">
+      <Filter>Source files\src\tests\unit\posix</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\posix\descriptor_base.cpp">
+      <Filter>Source files\src\tests\unit\posix</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\posix\stream_descriptor.cpp">
+      <Filter>Source files\src\tests\unit\posix</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\posix\stream_descriptor_service.cpp">
+      <Filter>Source files\src\tests\unit\posix</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ssl\basic_context.cpp">
+      <Filter>Source files\src\tests\unit\ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ssl\context.cpp">
+      <Filter>Source files\src\tests\unit\ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ssl\context_base.cpp">
+      <Filter>Source files\src\tests\unit\ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ssl\context_service.cpp">
+      <Filter>Source files\src\tests\unit\ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ssl\rfc2818_verification.cpp">
+      <Filter>Source files\src\tests\unit\ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ssl\stream.cpp">
+      <Filter>Source files\src\tests\unit\ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ssl\stream_base.cpp">
+      <Filter>Source files\src\tests\unit\ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\ssl\stream_service.cpp">
+      <Filter>Source files\src\tests\unit\ssl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\windows\basic_handle.cpp">
+      <Filter>Source files\src\tests\unit\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\windows\basic_object_handle.cpp">
+      <Filter>Source files\src\tests\unit\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\windows\basic_random_access_handle.cpp">
+      <Filter>Source files\src\tests\unit\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\windows\basic_stream_handle.cpp">
+      <Filter>Source files\src\tests\unit\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\windows\object_handle.cpp">
+      <Filter>Source files\src\tests\unit\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\windows\object_handle_service.cpp">
+      <Filter>Source files\src\tests\unit\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\windows\overlapped_ptr.cpp">
+      <Filter>Source files\src\tests\unit\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\windows\random_access_handle.cpp">
+      <Filter>Source files\src\tests\unit\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\windows\random_access_handle_service.cpp">
+      <Filter>Source files\src\tests\unit\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\windows\stream_handle.cpp">
+      <Filter>Source files\src\tests\unit\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tests\unit\windows\stream_handle_service.cpp">
+      <Filter>Source files\src\tests\unit\windows</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
