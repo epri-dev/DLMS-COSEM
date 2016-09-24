@@ -3,7 +3,6 @@
 
 cmake_minimum_required(VERSION 2.7)
 project(Linux)
-set(LIBRARIES_FROM_REFERENCES ${CMAKE_SOURCE_DIR}/../../lib/DLMS-COSEM/Debug/)
 add_executable(Linux Linux.cpp LinuxBaseLibrary.cpp LinuxCore.cpp LinuxMemory.cpp LinuxSerial.cpp)
 target_link_libraries(Linux -L${CMAKE_SOURCE_DIR}/../../lib/DLMS-COSEM/Debug -lDLMS-COSEM "${LIBRARIES_FROM_REFERENCES}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++11 -DASIO_STANDALONE")
