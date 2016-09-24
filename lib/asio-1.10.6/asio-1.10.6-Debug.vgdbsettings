@@ -45,8 +45,8 @@
         <Transport>SSH</Transport>
         <UserName>gbarrett</UserName>
       </RemoteHost>
-      <Command>configure</Command>
-      <Arguments />
+      <Command>/bin/sh</Command>
+      <Arguments>configure</Arguments>
       <WorkingDirectory>$(BuildDir)</WorkingDirectory>
       <Environment>
         <Records>

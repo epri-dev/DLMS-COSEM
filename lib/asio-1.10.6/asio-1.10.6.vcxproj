@@ -71,6 +71,7 @@
     <None Include="configure.ac" />
     <None Include="COPYING" />
     <None Include="depcomp" />
+    <None Include="include\Makefile.in" />
     <None Include="INSTALL" />
     <None Include="install-sh" />
     <None Include="Makefile.am" />
