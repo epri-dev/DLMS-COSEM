@@ -1,0 +1,386 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{0965f99d-caae-4126-bba0-50b76a89a110}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header files">
+      <UniqueIdentifier>{8119484c-0484-441d-a68a-037eca6e6e83}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource files">
+      <UniqueIdentifier>{5c5b3030-1e5e-482c-b729-7a3aeee09103}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Source files\codegear">
+      <UniqueIdentifier>{fab10f60-672e-43ad-8969-05f54ef2e508}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\codegear">
+      <UniqueIdentifier>{1c2b1391-f1be-4534-a793-f1e7746849a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\include">
+      <UniqueIdentifier>{1888889d-69ac-4740-afb6-dce6436fa6d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include">
+      <UniqueIdentifier>{e03fdef5-b00b-4f85-97e3-4882c0e11365}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\include\gtest">
+      <UniqueIdentifier>{2bf8d00e-f6f5-4fd5-8ca4-8f0312ed0c41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\gtest">
+      <UniqueIdentifier>{e95142a3-f2f2-4b9c-92e5-e2f2314c0a6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\include\gtest\internal">
+      <UniqueIdentifier>{4cffa5d6-6893-4c03-8bea-1296e9dbaf99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\include\gtest\internal">
+      <UniqueIdentifier>{4086311b-6564-4b87-9166-d3f87c3d24f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\samples">
+      <UniqueIdentifier>{96495345-03eb-4484-ace5-adc868a70b65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\samples">
+      <UniqueIdentifier>{397e6de8-240d-45cd-be51-0e6d82821c5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\src">
+      <UniqueIdentifier>{80a2c0df-54e5-4c0d-9c56-63fa2465063d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\src">
+      <UniqueIdentifier>{345c158e-b64b-499f-814b-18d20eaf1738}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\test">
+      <UniqueIdentifier>{79c8c5d4-a08f-40d7-b1ae-1f12250e2990}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\test">
+      <UniqueIdentifier>{6b102680-9ee9-4e36-9b77-2d606ef7b072}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\xcode">
+      <UniqueIdentifier>{9c575b3c-1d9d-49d9-94a2-bafd270266d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\xcode">
+      <UniqueIdentifier>{be41c5cc-1a55-49dd-8530-ac8d4773330a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\xcode\Samples">
+      <UniqueIdentifier>{d0895dc3-a499-40e4-a6e3-0dcfb99b56a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\xcode\Samples">
+      <UniqueIdentifier>{a894060f-9146-4faf-8b26-21066b9973e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source files\xcode\Samples\FrameworkSample">
+      <UniqueIdentifier>{9b5be99e-951a-4344-8c03-e71a1d497599}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\xcode\Samples\FrameworkSample">
+      <UniqueIdentifier>{a6a36ca7-2e99-4c7f-9a09-23fd910e8190}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CMake files">
+      <UniqueIdentifier>{5fd217f7-962e-4088-b958-ff040fd0083c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="codegear\gtest_all.cc">
+      <Filter>Source files\codegear</Filter>
+    </ClCompile>
+    <ClCompile Include="codegear\gtest_link.cc">
+      <Filter>Source files\codegear</Filter>
+    </ClCompile>
+    <ClCompile Include="samples\sample1.cc">
+      <Filter>Source files\samples</Filter>
+    </ClCompile>
+    <ClCompile Include="samples\sample10_unittest.cc">
+      <Filter>Source files\samples</Filter>
+    </ClCompile>
+    <ClCompile Include="samples\sample1_unittest.cc">
+      <Filter>Source files\samples</Filter>
+    </ClCompile>
+    <ClCompile Include="samples\sample2.cc">
+      <Filter>Source files\samples</Filter>
+    </ClCompile>
+    <ClCompile Include="samples\sample2_unittest.cc">
+      <Filter>Source files\samples</Filter>
+    </ClCompile>
+    <ClCompile Include="samples\sample3_unittest.cc">
+      <Filter>Source files\samples</Filter>
+    </ClCompile>
+    <ClCompile Include="samples\sample4.cc">
+      <Filter>Source files\samples</Filter>
+    </ClCompile>
+    <ClCompile Include="samples\sample4_unittest.cc">
+      <Filter>Source files\samples</Filter>
+    </ClCompile>
+    <ClCompile Include="samples\sample5_unittest.cc">
+      <Filter>Source files\samples</Filter>
+    </ClCompile>
+    <ClCompile Include="samples\sample6_unittest.cc">
+      <Filter>Source files\samples</Filter>
+    </ClCompile>
+    <ClCompile Include="samples\sample7_unittest.cc">
+      <Filter>Source files\samples</Filter>
+    </ClCompile>
+    <ClCompile Include="samples\sample8_unittest.cc">
+      <Filter>Source files\samples</Filter>
+    </ClCompile>
+    <ClCompile Include="samples\sample9_unittest.cc">
+      <Filter>Source files\samples</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gtest-all.cc">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gtest-death-test.cc">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gtest-filepath.cc">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gtest-port.cc">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gtest-printers.cc">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gtest-test-part.cc">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gtest-typed-test.cc">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gtest.cc">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gtest_main.cc">
+      <Filter>Source files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest-death-test_ex_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest-death-test_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest-filepath_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest-linked_ptr_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest-listener_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest-message_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest-options_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest-param-test2_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest-param-test_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest-port_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest-printers_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest-test-part_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest-tuple_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest-typed-test2_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest-typed-test_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest-unittest-api_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_all_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_break_on_failure_unittest_.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_catch_exceptions_test_.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_color_test_.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_environment_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_env_var_test_.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_filter_unittest_.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_help_test_.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_list_tests_unittest_.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_main_unittest.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_no_test_unittest.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_output_test_.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_pred_impl_unittest.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_premature_exit_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_prod_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_repeat_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_shuffle_test_.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_sole_header_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_stress_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_throw_on_failure_ex_test.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_throw_on_failure_test_.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_uninitialized_test_.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_unittest.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_xml_outfile1_test_.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_xml_outfile2_test_.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\gtest_xml_output_unittest_.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\production.cc">
+      <Filter>Source files\test</Filter>
+    </ClCompile>
+    <ClCompile Include="xcode\Samples\FrameworkSample\widget.cc">
+      <Filter>Source files\xcode\Samples\FrameworkSample</Filter>
+    </ClCompile>
+    <ClCompile Include="xcode\Samples\FrameworkSample\widget_test.cc">
+      <Filter>Source files\xcode\Samples\FrameworkSample</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\gtest\gtest-death-test.h">
+      <Filter>Header files\include\gtest</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gtest\gtest-message.h">
+      <Filter>Header files\include\gtest</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gtest\gtest-param-test.h">
+      <Filter>Header files\include\gtest</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gtest\gtest-printers.h">
+      <Filter>Header files\include\gtest</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gtest\gtest-spi.h">
+      <Filter>Header files\include\gtest</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gtest\gtest-test-part.h">
+      <Filter>Header files\include\gtest</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gtest\gtest-typed-test.h">
+      <Filter>Header files\include\gtest</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gtest\gtest.h">
+      <Filter>Header files\include\gtest</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gtest\gtest_pred_impl.h">
+      <Filter>Header files\include\gtest</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gtest\gtest_prod.h">
+      <Filter>Header files\include\gtest</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gtest\internal\gtest-death-test-internal.h">
+      <Filter>Header files\include\gtest\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gtest\internal\gtest-filepath.h">
+      <Filter>Header files\include\gtest\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gtest\internal\gtest-internal.h">
+      <Filter>Header files\include\gtest\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gtest\internal\gtest-linked_ptr.h">
+      <Filter>Header files\include\gtest\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gtest\internal\gtest-param-util-generated.h">
+      <Filter>Header files\include\gtest\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gtest\internal\gtest-param-util.h">
+      <Filter>Header files\include\gtest\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gtest\internal\gtest-port.h">
+      <Filter>Header files\include\gtest\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gtest\internal\gtest-string.h">
+      <Filter>Header files\include\gtest\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gtest\internal\gtest-tuple.h">
+      <Filter>Header files\include\gtest\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gtest\internal\gtest-type-util.h">
+      <Filter>Header files\include\gtest\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="samples\prime_tables.h">
+      <Filter>Header files\samples</Filter>
+    </ClInclude>
+    <ClInclude Include="samples\sample1.h">
+      <Filter>Header files\samples</Filter>
+    </ClInclude>
+    <ClInclude Include="samples\sample2.h">
+      <Filter>Header files\samples</Filter>
+    </ClInclude>
+    <ClInclude Include="samples\sample3-inl.h">
+      <Filter>Header files\samples</Filter>
+    </ClInclude>
+    <ClInclude Include="samples\sample4.h">
+      <Filter>Header files\samples</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gtest-internal-inl.h">
+      <Filter>Header files\src</Filter>
+    </ClInclude>
+    <ClInclude Include="test\gtest-param-test_test.h">
+      <Filter>Header files\test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\gtest-typed-test_test.h">
+      <Filter>Header files\test</Filter>
+    </ClInclude>
+    <ClInclude Include="test\production.h">
+      <Filter>Header files\test</Filter>
+    </ClInclude>
+    <ClInclude Include="xcode\Samples\FrameworkSample\widget.h">
+      <Filter>Header files\xcode\Samples\FrameworkSample</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt">
+      <Filter>CMake files</Filter>
+    </Text>
+  </ItemGroup>
+</Project>

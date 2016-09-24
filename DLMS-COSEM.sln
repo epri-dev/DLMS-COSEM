@@ -12,6 +12,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Linux", "src\Linux\Linux.vc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "asio-1.10.6", "lib\asio-1.10.6\asio-1.10.6.vcxproj", "{BBABC129-D3F1-4953-8A57-D473DEA91689}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DLMS-COSEM-TEST", "test\DLMS-COSEM-TEST\DLMS-COSEM-TEST.vcxproj", "{25AE38DE-88A0-4726-8605-75FEA93F1AC2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BBABC129-D3F1-4953-8A57-D473DEA91689} = {BBABC129-D3F1-4953-8A57-D473DEA91689}
+		{8713FA82-D30F-4C49-A8EA-F592C7DE80A1} = {8713FA82-D30F-4C49-A8EA-F592C7DE80A1}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "googletest-release-1.7.0", "lib\googletest-release-1.7.0\googletest-release-1.7.0.vcxproj", "{8713FA82-D30F-4C49-A8EA-F592C7DE80A1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -30,6 +38,14 @@ Global
 		{BBABC129-D3F1-4953-8A57-D473DEA91689}.Debug|x86.Build.0 = Debug|Win32
 		{BBABC129-D3F1-4953-8A57-D473DEA91689}.Release|x86.ActiveCfg = Release|Win32
 		{BBABC129-D3F1-4953-8A57-D473DEA91689}.Release|x86.Build.0 = Release|Win32
+		{25AE38DE-88A0-4726-8605-75FEA93F1AC2}.Debug|x86.ActiveCfg = Debug|Win32
+		{25AE38DE-88A0-4726-8605-75FEA93F1AC2}.Debug|x86.Build.0 = Debug|Win32
+		{25AE38DE-88A0-4726-8605-75FEA93F1AC2}.Release|x86.ActiveCfg = Release|Win32
+		{25AE38DE-88A0-4726-8605-75FEA93F1AC2}.Release|x86.Build.0 = Release|Win32
+		{8713FA82-D30F-4C49-A8EA-F592C7DE80A1}.Debug|x86.ActiveCfg = Debug|Win32
+		{8713FA82-D30F-4C49-A8EA-F592C7DE80A1}.Debug|x86.Build.0 = Debug|Win32
+		{8713FA82-D30F-4C49-A8EA-F592C7DE80A1}.Release|x86.ActiveCfg = Release|Win32
+		{8713FA82-D30F-4C49-A8EA-F592C7DE80A1}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

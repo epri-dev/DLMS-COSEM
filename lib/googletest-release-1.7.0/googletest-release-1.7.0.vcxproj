@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{8713FA82-D30F-4C49-A8EA-F592C7DE80A1}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\c++\4.8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\x86_64-linux-gnu\c++\4.8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\c++\4.8\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0001\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0002\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Debug;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
+    <NMakeOutput>$(ProjectDir)googletest-release-1.7.0-Debug.vgdbsettings</NMakeOutput>
+    <IncludePath />
+    <ReferencePath />
+    <LibraryPath />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\c++\4.8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\x86_64-linux-gnu\c++\4.8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\c++\4.8\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0001\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0002\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(ProjectDir)\gcc_Release.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
+    <NMakeOutput>$(ProjectDir)googletest-release-1.7.0-Release.vgdbsettings</NMakeOutput>
+    <IncludePath />
+    <ReferencePath />
+    <LibraryPath />
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="codegear\gtest_all.cc" />
+    <ClCompile Include="codegear\gtest_link.cc" />
+    <ClCompile Include="samples\sample1.cc" />
+    <ClCompile Include="samples\sample10_unittest.cc" />
+    <ClCompile Include="samples\sample1_unittest.cc" />
+    <ClCompile Include="samples\sample2.cc" />
+    <ClCompile Include="samples\sample2_unittest.cc" />
+    <ClCompile Include="samples\sample3_unittest.cc" />
+    <ClCompile Include="samples\sample4.cc" />
+    <ClCompile Include="samples\sample4_unittest.cc" />
+    <ClCompile Include="samples\sample5_unittest.cc" />
+    <ClCompile Include="samples\sample6_unittest.cc" />
+    <ClCompile Include="samples\sample7_unittest.cc" />
+    <ClCompile Include="samples\sample8_unittest.cc" />
+    <ClCompile Include="samples\sample9_unittest.cc" />
+    <ClCompile Include="src\gtest-all.cc" />
+    <ClCompile Include="src\gtest-death-test.cc" />
+    <ClCompile Include="src\gtest-filepath.cc" />
+    <ClCompile Include="src\gtest-port.cc" />
+    <ClCompile Include="src\gtest-printers.cc" />
+    <ClCompile Include="src\gtest-test-part.cc" />
+    <ClCompile Include="src\gtest-typed-test.cc" />
+    <ClCompile Include="src\gtest.cc" />
+    <ClCompile Include="src\gtest_main.cc" />
+    <ClCompile Include="test\gtest-death-test_ex_test.cc" />
+    <ClCompile Include="test\gtest-death-test_test.cc" />
+    <ClCompile Include="test\gtest-filepath_test.cc" />
+    <ClCompile Include="test\gtest-linked_ptr_test.cc" />
+    <ClCompile Include="test\gtest-listener_test.cc" />
+    <ClCompile Include="test\gtest-message_test.cc" />
+    <ClCompile Include="test\gtest-options_test.cc" />
+    <ClCompile Include="test\gtest-param-test2_test.cc" />
+    <ClCompile Include="test\gtest-param-test_test.cc" />
+    <ClCompile Include="test\gtest-port_test.cc" />
+    <ClCompile Include="test\gtest-printers_test.cc" />
+    <ClCompile Include="test\gtest-test-part_test.cc" />
+    <ClCompile Include="test\gtest-tuple_test.cc" />
+    <ClCompile Include="test\gtest-typed-test2_test.cc" />
+    <ClCompile Include="test\gtest-typed-test_test.cc" />
+    <ClCompile Include="test\gtest-unittest-api_test.cc" />
+    <ClCompile Include="test\gtest_all_test.cc" />
+    <ClCompile Include="test\gtest_break_on_failure_unittest_.cc" />
+    <ClCompile Include="test\gtest_catch_exceptions_test_.cc" />
+    <ClCompile Include="test\gtest_color_test_.cc" />
+    <ClCompile Include="test\gtest_environment_test.cc" />
+    <ClCompile Include="test\gtest_env_var_test_.cc" />
+    <ClCompile Include="test\gtest_filter_unittest_.cc" />
+    <ClCompile Include="test\gtest_help_test_.cc" />
+    <ClCompile Include="test\gtest_list_tests_unittest_.cc" />
+    <ClCompile Include="test\gtest_main_unittest.cc" />
+    <ClCompile Include="test\gtest_no_test_unittest.cc" />
+    <ClCompile Include="test\gtest_output_test_.cc" />
+    <ClCompile Include="test\gtest_pred_impl_unittest.cc" />
+    <ClCompile Include="test\gtest_premature_exit_test.cc" />
+    <ClCompile Include="test\gtest_prod_test.cc" />
+    <ClCompile Include="test\gtest_repeat_test.cc" />
+    <ClCompile Include="test\gtest_shuffle_test_.cc" />
+    <ClCompile Include="test\gtest_sole_header_test.cc" />
+    <ClCompile Include="test\gtest_stress_test.cc" />
+    <ClCompile Include="test\gtest_throw_on_failure_ex_test.cc" />
+    <ClCompile Include="test\gtest_throw_on_failure_test_.cc" />
+    <ClCompile Include="test\gtest_uninitialized_test_.cc" />
+    <ClCompile Include="test\gtest_unittest.cc" />
+    <ClCompile Include="test\gtest_xml_outfile1_test_.cc" />
+    <ClCompile Include="test\gtest_xml_outfile2_test_.cc" />
+    <ClCompile Include="test\gtest_xml_output_unittest_.cc" />
+    <ClCompile Include="test\production.cc" />
+    <ClCompile Include="xcode\Samples\FrameworkSample\widget.cc" />
+    <ClCompile Include="xcode\Samples\FrameworkSample\widget_test.cc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\gtest\gtest-death-test.h" />
+    <ClInclude Include="include\gtest\gtest-message.h" />
+    <ClInclude Include="include\gtest\gtest-param-test.h" />
+    <ClInclude Include="include\gtest\gtest-printers.h" />
+    <ClInclude Include="include\gtest\gtest-spi.h" />
+    <ClInclude Include="include\gtest\gtest-test-part.h" />
+    <ClInclude Include="include\gtest\gtest-typed-test.h" />
+    <ClInclude Include="include\gtest\gtest.h" />
+    <ClInclude Include="include\gtest\gtest_pred_impl.h" />
+    <ClInclude Include="include\gtest\gtest_prod.h" />
+    <ClInclude Include="include\gtest\internal\gtest-death-test-internal.h" />
+    <ClInclude Include="include\gtest\internal\gtest-filepath.h" />
+    <ClInclude Include="include\gtest\internal\gtest-internal.h" />
+    <ClInclude Include="include\gtest\internal\gtest-linked_ptr.h" />
+    <ClInclude Include="include\gtest\internal\gtest-param-util-generated.h" />
+    <ClInclude Include="include\gtest\internal\gtest-param-util.h" />
+    <ClInclude Include="include\gtest\internal\gtest-port.h" />
+    <ClInclude Include="include\gtest\internal\gtest-string.h" />
+    <ClInclude Include="include\gtest\internal\gtest-tuple.h" />
+    <ClInclude Include="include\gtest\internal\gtest-type-util.h" />
+    <ClInclude Include="samples\prime_tables.h" />
+    <ClInclude Include="samples\sample1.h" />
+    <ClInclude Include="samples\sample2.h" />
+    <ClInclude Include="samples\sample3-inl.h" />
+    <ClInclude Include="samples\sample4.h" />
+    <ClInclude Include="src\gtest-internal-inl.h" />
+    <ClInclude Include="test\gtest-param-test_test.h" />
+    <ClInclude Include="test\gtest-typed-test_test.h" />
+    <ClInclude Include="test\production.h" />
+    <ClInclude Include="xcode\Samples\FrameworkSample\widget.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
