@@ -1575,6 +1575,12 @@
     <ClInclude Include="src\tests\unit\archetypes\settable_socket_option.hpp">
       <Filter>Header files\src\tests\unit\archetypes</Filter>
     </ClInclude>
+    <ClInclude Include="gcc_Debug.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Release.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\asio\impl\src.cpp">
@@ -2219,5 +2225,25 @@
     <ClCompile Include="src\tests\unit\windows\stream_handle_service.cpp">
       <Filter>Source files\src\tests\unit\windows</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="configure.ac" />
+    <None Include="COPYING" />
+    <None Include="Makefile.am" />
+    <None Include="README" />
+    <None Include="test-driver" />
+    <None Include="aclocal.m4" />
+    <None Include="compile" />
+    <None Include="config.guess" />
+    <None Include="config.sub" />
+    <None Include="configure" />
+    <None Include="depcomp" />
+    <None Include="INSTALL" />
+    <None Include="install-sh" />
+    <None Include="Makefile.in" />
+    <None Include="missing" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="LICENSE_1_0.txt" />
   </ItemGroup>
 </Project>

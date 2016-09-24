@@ -45,8 +45,8 @@
         <Transport>SSH</Transport>
         <UserName>gbarrett</UserName>
       </RemoteHost>
-      <Command>echo</Command>
-      <Arguments>"Copy Only"</Arguments>
+      <Command>configure</Command>
+      <Arguments />
       <WorkingDirectory>$(BuildDir)</WorkingDirectory>
       <Environment>
         <Records>
