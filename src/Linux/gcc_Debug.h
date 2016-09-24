@@ -725,9 +725,9 @@
 ///usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed
 ///usr/include/x86_64-linux-gnu
 ///usr/include
-//include/
-//../../lib/DLMS-COSEM/include/
-//../../lib/asio-1.10.6/include/
+//${CMAKE_SOURCE_DIR}/include/
+//${CMAKE_SOURCE_DIR}/../../lib/DLMS-COSEM/include/
+//${CMAKE_SOURCE_DIR}/../../lib/asio-1.10.6/include/
 // --- Include directories end --- //
 
 

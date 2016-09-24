@@ -8,4 +8,4 @@ add_executable(Linux Linux.cpp LinuxBaseLibrary.cpp LinuxCore.cpp LinuxMemory.cp
 target_link_libraries(Linux -L${CMAKE_SOURCE_DIR}/../../lib/DLMS-COSEM/Debug -lDLMS-COSEM "${LIBRARIES_FROM_REFERENCES}")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++11")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++11")
-include_directories(include/ ../../lib/DLMS-COSEM/include/ ../../lib/asio-1.10.6/include/)
+include_directories(${CMAKE_SOURCE_DIR}/include/ ${CMAKE_SOURCE_DIR}/../../lib/DLMS-COSEM/include/ ${CMAKE_SOURCE_DIR}/../../lib/asio-1.10.6/include/)
