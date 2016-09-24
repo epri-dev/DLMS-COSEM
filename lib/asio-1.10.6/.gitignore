@@ -1,0 +1,33 @@
+# stuff "git status" should ignore
+
+# build output
+.libs
+.deps
+.dirstamp
+*.o
+*.obj
+*.pp
+*.o.??????
+*.a
+*.lo
+*.la
+*.in
+*.iso
+Debug
+Release
+*.opensdf
+*.sdf
+*.suo
+*.old
+VisualGDBCache
+CodeDB
+
+# editor files
+*.swp
+
+# coexist with quilt
+patches
+*.patch
+
+# ctags tag files
+tags
