@@ -13,10 +13,17 @@
 *.la
 *.in
 *.iso
+Debug
+Release
+*.opensdf
+*.sdf
+*.suo
+*.old
+VisualGDBCache
+CodeDB
 
 # editor files
 *.swp
-*.opensdf
 
 # configure/autotools output
 aclocal.m4
