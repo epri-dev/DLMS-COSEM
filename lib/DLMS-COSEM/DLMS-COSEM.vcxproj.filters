@@ -22,9 +22,45 @@
     <ClCompile Include="DLMS-COSEM.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="BaseComponent.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseLibrary.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DLMS-COSEM.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\DLMS-COSEM\BaseComponent.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\DLMS-COSEM\BaseLibrary.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\DLMS-COSEM\Core.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\DLMS-COSEM\ERROR_TYPE.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\DLMS-COSEM\IBaseComponent.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\DLMS-COSEM\IBaseLibrary.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\DLMS-COSEM\ICore.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\DLMS-COSEM\IMemory.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\DLMS-COSEM\ISerial.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

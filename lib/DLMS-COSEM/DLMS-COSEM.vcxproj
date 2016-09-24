@@ -37,9 +37,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\c++\4.8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\x86_64-linux-gnu\c++\4.8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\c++\4.8\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0001\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0002\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\c++\4.8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\x86_64-linux-gnu\c++\4.8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\c++\4.8\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0001\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0002\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include;include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
-    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Debug;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
     <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
@@ -47,6 +46,7 @@
     <IncludePath />
     <ReferencePath />
     <LibraryPath />
+    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Debug;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\c++\4.8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\x86_64-linux-gnu\c++\4.8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\c++\4.8\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0001\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0002\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
@@ -63,9 +63,21 @@
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BaseComponent.cpp" />
+    <ClCompile Include="BaseLibrary.cpp" />
+    <ClCompile Include="Core.cpp" />
     <ClCompile Include="DLMS-COSEM.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\DLMS-COSEM\BaseComponent.h" />
+    <ClInclude Include="..\..\include\DLMS-COSEM\BaseLibrary.h" />
+    <ClInclude Include="..\..\include\DLMS-COSEM\Core.h" />
+    <ClInclude Include="..\..\include\DLMS-COSEM\ERROR_TYPE.h" />
+    <ClInclude Include="..\..\include\DLMS-COSEM\IBaseComponent.h" />
+    <ClInclude Include="..\..\include\DLMS-COSEM\IBaseLibrary.h" />
+    <ClInclude Include="..\..\include\DLMS-COSEM\ICore.h" />
+    <ClInclude Include="..\..\include\DLMS-COSEM\IMemory.h" />
+    <ClInclude Include="..\..\include\DLMS-COSEM\ISerial.h" />
     <ClInclude Include="DLMS-COSEM.h" />
   </ItemGroup>
   <ItemGroup>

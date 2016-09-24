@@ -369,6 +369,9 @@
 #ifndef __UINT64_MAX__
 #define __UINT64_MAX__ 18446744073709551615UL
 #endif
+#ifndef DEBUG
+#define DEBUG 1
+#endif
 #ifndef __INT8_TYPE__
 #define __INT8_TYPE__ signed char
 #endif
@@ -714,9 +717,6 @@
 #ifndef __ATOMIC_RELEASE
 #define __ATOMIC_RELEASE 3
 #endif
-#ifndef DEBUG
-#define DEBUG 1
-#endif
 #endif
 
 // --- Include directories begin --- //
@@ -728,6 +728,7 @@
 ///usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed
 ///usr/include/x86_64-linux-gnu
 ///usr/include
+//include
 // --- Include directories end --- //
 
 
