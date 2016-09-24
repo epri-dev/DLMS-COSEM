@@ -46,6 +46,10 @@ stamp-vti
 INSTALL
 NOTES
 
+#Asio actually WANTS to be pre-configured...
+#
+!lib/asio-1.10.6
+
 # coexist with quilt
 patches
 *.patch

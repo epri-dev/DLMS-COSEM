@@ -63,7 +63,6 @@
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include=".gitignore" />
     <None Include="aclocal.m4" />
     <None Include="compile" />
     <None Include="config.guess" />
