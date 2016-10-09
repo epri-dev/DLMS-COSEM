@@ -3,10 +3,11 @@
 
 cmake_minimum_required(VERSION 2.7)
 project(DLMS-COSEM-TEST)
-set(LIBRARIES_FROM_REFERENCES ${CMAKE_SOURCE_DIR}/../../lib/googletest-release-1.7.0/Debug/ ${CMAKE_SOURCE_DIR}/../../lib/DLMS-COSEM/Debug/)
-add_executable(DLMS-COSEM-TEST DLMS-COSEM-TEST.cpp UnitTest-HDLC-Address.cpp UnitTest-HDLC-Client.cpp UnitTest-HDLC-LLC.cpp UnitTest-HDLC-MAC.cpp UnitTest-HDLC-Packet.cpp UnitTest-HDLC-Server.cpp UnitTest-LinuxMemory.cpp UnitTest-StateMachine.cpp)
-target_link_libraries(DLMS-COSEM-TEST -L${CMAKE_SOURCE_DIR}/../../lib/googletest-release-1.7.0/Debug/ -lgtest -lpthread "${LIBRARIES_FROM_REFERENCES}")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++11 -DUNITTEST")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++11")
+set(CMAKE_CXX_STANDARD 11)
 include_directories(../../lib/DLMS-COSEM/include/ ../../lib/googletest-release-1.7.0/include/)
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DUNITTEST")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -D_DEBUG -DASIO_STANDALONE -DASIO_HAS_STD_CHRONO -DUNITTEST")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_DEBUG -DASIO_STANDALONE -DASIO_HAS_STD_CHRONO -DUNITTEST")
+
+add_executable(DLMS-COSEM-TEST DLMS-COSEM-TEST.cpp UnitTest-HDLC-Address.cpp UnitTest-HDLC-Client.cpp UnitTest-HDLC-LLC.cpp UnitTest-HDLC-MAC.cpp UnitTest-HDLC-Packet.cpp UnitTest-HDLC-Server.cpp UnitTest-LinuxMemory.cpp UnitTest-StateMachine.cpp)
+target_link_libraries(DLMS-COSEM-TEST DLMS-COSEM gtest pthread)
