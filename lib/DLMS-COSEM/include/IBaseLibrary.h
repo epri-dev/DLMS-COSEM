@@ -16,6 +16,9 @@ namespace EPRI
 	{
 
 	public:
+		virtual ~IBaseLibrary()
+		{
+		}
 		virtual IMemory * GetMemory() = 0;
 		virtual ICore * GetCore() = 0;
 		virtual IScheduler * GetScheduler() = 0;

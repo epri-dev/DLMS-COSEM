@@ -1,0 +1,32 @@
+#pragma once
+
+#include <cstdint>
+
+#include "ERROR_TYPE.h"
+
+namespace EPRI
+{
+	enum HDLCErrorCode : uint16_t
+	{
+		SUCCESS         = 0,
+		NOT_POSSIBLE,
+		NOT_AVAILABLE, 
+		TX_FAILURE,		
+		RX_FAILURE,	
+    	NO_PACKETS,
+		TIMEOUT_FAILURE,
+		RX_NOT_COMPLETE,	
+    	HEADER_CRC_FAILURE,
+    	PACKET_CRC_FAILURE,
+		PASSWD_FAILURE,		
+		FAIL,
+		TOO_LONG,
+		BUFFER_EMPTY,
+		BUFFER_FULL,
+		NEED_MORE,
+		RC_OVERFLOW,
+		UNIVERSAL_I,
+		ACK_EVENTS_DBG
+	};
+
+}

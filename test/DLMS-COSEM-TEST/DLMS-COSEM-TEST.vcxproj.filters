@@ -21,10 +21,36 @@
     <ClCompile Include="UnitTest-LinuxMemory.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="UnitTest-HDLC-Packet.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnitTest-HDLC-Address.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnitTest-HDLC-MAC.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnitTest-HDLC-Client.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnitTest-HDLC-LLC.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnitTest-HDLC-Server.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnitTest-StateMachine.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt">
       <Filter>Source files</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DummySerial.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

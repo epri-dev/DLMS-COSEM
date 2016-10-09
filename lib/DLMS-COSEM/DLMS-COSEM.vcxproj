@@ -63,22 +63,40 @@
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BaseComponent.cpp" />
-    <ClCompile Include="BaseLibrary.cpp" />
-    <ClCompile Include="Core.cpp" />
     <ClCompile Include="DLMS-COSEM.cpp" />
+    <ClCompile Include="hdlc\HDLCClient.cpp" />
+    <ClCompile Include="hdlc\HDLCHelpers.cpp" />
+    <ClCompile Include="hdlc\HDLCLLC.cpp" />
+    <ClCompile Include="hdlc\HDLCServer.cpp" />
+    <ClCompile Include="hdlc\HDLCStatistics.cpp" />
+    <ClCompile Include="hdlc\modcnt.cpp" />
+    <ClCompile Include="hdlc\packet.cpp" />
+    <ClCompile Include="hdlc\HDLCMAC.cpp" />
+    <ClCompile Include="StateMachine.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DLMS-COSEM.h" />
-    <ClInclude Include="include\BaseComponent.h" />
-    <ClInclude Include="include\BaseLibrary.h" />
-    <ClInclude Include="include\Core.h" />
+    <ClInclude Include="include\Callback.h" />
+    <ClInclude Include="include\hdlc\HDLCAddress.h" />
+    <ClInclude Include="include\hdlc\appdefs.h" />
+    <ClInclude Include="include\hdlc\comdefs.h" />
+    <ClInclude Include="include\DLMS-COSEM.h" />
+    <ClInclude Include="include\hdlc\HDLCControl.h" />
+    <ClInclude Include="include\hdlc\HDLCErrors.h" />
+    <ClInclude Include="include\hdlc\HDLCHelpers.h" />
     <ClInclude Include="include\ERROR_TYPE.h" />
-    <ClInclude Include="include\IBaseComponent.h" />
+    <ClInclude Include="include\HDLCLLC.h" />
+    <ClInclude Include="include\hdlc\HDLCOptions.h" />
+    <ClInclude Include="include\hdlc\HDLCStatistics.h" />
+    <ClInclude Include="include\hdlc\linkdefs.h" />
+    <ClInclude Include="include\hdlc\modcnt.h" />
+    <ClInclude Include="include\hdlc\packet.h" />
+    <ClInclude Include="include\hdlc\HDLCMAC.h" />
     <ClInclude Include="include\IBaseLibrary.h" />
     <ClInclude Include="include\ICore.h" />
     <ClInclude Include="include\IMemory.h" />
     <ClInclude Include="include\ISerial.h" />
+    <ClInclude Include="include\ISimpleTimer.h" />
+    <ClInclude Include="include\StateMachine.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="debug.mak" />

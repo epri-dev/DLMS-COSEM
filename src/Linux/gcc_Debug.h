@@ -26,6 +26,9 @@
 #ifndef __UINT8_MAX__
 #define __UINT8_MAX__ 255
 #endif
+#ifndef ASIO_HAS_STD_CHRONO
+#define ASIO_HAS_STD_CHRONO 1
+#endif
 #ifndef __WINT_MAX__
 #define __WINT_MAX__ 4294967295U
 #endif
@@ -593,6 +596,9 @@
 #endif
 #ifndef __INT_FAST8_TYPE__
 #define __INT_FAST8_TYPE__ signed char
+#endif
+#ifndef _DEBUG
+#define _DEBUG 1
 #endif
 #ifndef __GNUC_STDC_INLINE__
 #define __GNUC_STDC_INLINE__ 1

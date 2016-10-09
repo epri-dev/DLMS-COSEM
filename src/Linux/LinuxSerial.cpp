@@ -1,10 +1,12 @@
+#include <termios.h>
+#include <chrono>
+#include "optional.h"
 #include "LinuxSerial.h"
 
 namespace EPRI
 {
-	LinuxSerial::LinuxSerial(IBaseLibrary * pLibrary) : 
-		BaseComponent(pLibrary),
-		m_pPort(NULL)
+	LinuxSerial::LinuxSerial()
+		: m_Port(m_IO)
 	{
 	}
 	
@@ -12,19 +14,122 @@ namespace EPRI
 	{
 	}
 
-	ERROR_TYPE LinuxSerial::Open(ISerial::SerialPort Port, ISerial::BaudRate Baud)
+	ERROR_TYPE LinuxSerial::Open(ISerial::SerialPort Port)
 	{
-		m_pPort = new asio::serial_port(m_IO, "/tmp/ttyS10");
+		const char * szPort;
+		switch (Port)
+		{
+		case ISerial::SERIAL_PORT_1:
+			szPort = "/tmp/ttyS10";
+			break;
+		case ISerial::SERIAL_PORT_2:
+			szPort = "/tmp/ttyS11";
+			break;
+		}
+		m_Port.open(szPort);
+		return SetOptions(Options());
 	}
-	
+
+	ISerial::Options LinuxSerial::GetOptions()
+	{
+	}
+
+	ERROR_TYPE LinuxSerial::SetOptions(const ISerial::Options& Opt)
+	{
+		const uint32_t BAUDS[] = 
+		{
+			300,
+			600,
+			1200,
+			1800,
+			2400,
+			4800,
+			9600,
+			19200,
+			38400,
+			57600,
+			115200,
+			230400,
+			460800,
+			500000,
+			576000,
+			921600,
+			1152000,
+			1500000,
+			2000000,
+			2500000,
+			3000000,
+			3500000,
+			4000000
+		};
+		asio::serial_port_base::parity::type PARITIES[] =
+		{ 
+			asio::serial_port_base::parity::type::none,
+			asio::serial_port_base::parity::type::even,
+			asio::serial_port_base::parity::type::odd
+		};
+		asio::serial_port_base::stop_bits::type STOPBITS[] =
+		{ 
+			asio::serial_port_base::stop_bits::type::one,
+			asio::serial_port_base::stop_bits::type::onepointfive,
+			asio::serial_port_base::stop_bits::type::two
+		};
+
+		m_Port.set_option(asio::serial_port_base::baud_rate(BAUDS[Opt.m_BaudRate]));
+		m_Port.set_option(asio::serial_port_base::character_size(Opt.m_CharacterSize));
+		m_Port.set_option(asio::serial_port_base::parity(PARITIES[Opt.m_Parity]));
+		m_Port.set_option(asio::serial_port_base::stop_bits(STOPBITS[Opt.m_StopBits]));
+	}
+
 	ERROR_TYPE LinuxSerial::Write(const uint8_t * pBuffer, size_t BufferSize)
 	{
-		asio::write(*m_pPort, asio::buffer(pBuffer, BufferSize));
+		asio::write(m_Port, asio::buffer(pBuffer, BufferSize));
+		return 0; //TODO
+	}
+
+	ERROR_TYPE LinuxSerial::Read(uint8_t * pBuffer, size_t MaxBytes, uint32_t TimeOutInMS /* = 0*/, size_t * pActualBytes /*= nullptr*/)
+	{
+		std::experimental::optional<asio::error_code> timer_result;
+		asio::steady_timer timer(m_IO);
+		timer.expires_from_now(std::chrono::milliseconds(TimeOutInMS));
+		timer.async_wait([&timer_result](const asio::error_code& error) { timer_result.emplace(error); });
+
+		std::experimental::optional<asio::error_code> read_result;
+		asio::async_read(m_Port, asio::buffer(pBuffer, MaxBytes), 
+			[&read_result, &pActualBytes](const asio::error_code& error, size_t s) 
+			{ 
+				read_result.emplace(error); 
+				if (pActualBytes)
+				{
+					*pActualBytes = s; 
+				}
+			});
+
+		m_IO.reset();
+		while (m_IO.run_one())
+		{ 
+			if (read_result)
+				timer.cancel();
+			else if (timer_result)
+				m_Port.cancel();
+		}
+		return 0; //TODO
 	}
 	
+	ERROR_TYPE LinuxSerial::Flush(FlushDirection Direction)
+	{
+		const int FLUSHES[] = { TCIFLUSH, TCOFLUSH, TCIOFLUSH };
+		::tcflush(m_Port.lowest_layer().native_handle(), FLUSHES[Direction]);
+	}
+	
+	bool LinuxSerial::IsConnected()
+	{
+		return m_Port.is_open();
+	}
+
 	ERROR_TYPE LinuxSerial::Close()
 	{
-		delete m_pPort;
+		m_Port.close();
 	}
 
 }

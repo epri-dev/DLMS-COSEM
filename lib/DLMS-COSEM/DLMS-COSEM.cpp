@@ -1,17 +1,24 @@
 #include "DLMS-COSEM.h"
+#include "IBaseLibrary.h"
 
-/*
-	To test the library, include "DLMS-COSEM.h" from an application project
-	and call DLMS-COSEMTest().
-	
-	Do not forget to add the library to Project Dependencies in Visual Studio.
-*/
-
-static int s_Test = 0;
-
-extern "C" int DLMS_COSEMTest();
-
-int DLMS_COSEMTest()
+namespace EPRI
 {
-	return ++s_Test;
+
+	static IBaseLibrary * g_pBaseLibrary;
+
+	IBaseLibrary * Base()
+	{
+		return g_pBaseLibrary;
+	}
+	
+	void SetBase(IBaseLibrary * pBase)
+	{
+		// Only allow setting once
+		//
+		if (!g_pBaseLibrary)
+		{
+			g_pBaseLibrary = pBase;
+		}
+	}
+	
 }

@@ -22,33 +22,36 @@
     <ClCompile Include="DLMS-COSEM.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="BaseComponent.cpp">
+    <ClCompile Include="hdlc\HDLCStatistics.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="BaseLibrary.cpp">
+    <ClCompile Include="hdlc\modcnt.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="Core.cpp">
+    <ClCompile Include="hdlc\packet.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="hdlc\HDLCHelpers.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="hdlc\HDLCMAC.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="hdlc\HDLCClient.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="hdlc\HDLCServer.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StateMachine.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="hdlc\HDLCLLC.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DLMS-COSEM.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BaseComponent.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\BaseLibrary.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Core.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="include\ERROR_TYPE.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IBaseComponent.h">
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="include\IBaseLibrary.h">
@@ -61,6 +64,57 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="include\ISerial.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DLMS-COSEM.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hdlc\comdefs.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hdlc\HDLCStatistics.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hdlc\modcnt.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hdlc\packet.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ISimpleTimer.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hdlc\HDLCErrors.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hdlc\appdefs.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hdlc\linkdefs.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hdlc\HDLCControl.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hdlc\HDLCAddress.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hdlc\HDLCHelpers.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hdlc\HDLCMAC.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\HDLCLLC.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hdlc\HDLCOptions.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\StateMachine.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Callback.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

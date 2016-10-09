@@ -15,16 +15,19 @@ namespace EPRI
 	
 	enum ErrorSource : uint8_t
 	{
+		SRC_DONT_CARE = 0,
 		SRC_BASE,
 		SRC_MEMORY,
 		SRC_CORE,
 		SRC_SCHEDULER,
 		SRC_SYNCHRONIZATION,
-		SRC_DEBUG
+		SRC_DEBUG,
+		SRC_HDLC
 	};
 
 	enum ErrorLevel : uint8_t
 	{
+		LVL_DONT_CARE = 0,
 		LVL_EMERGENCY,		// System is unusable
 		LVL_ALERT,			// Action must be taken immediately
 		LVL_CRITICAL,		// Critical conditions
@@ -34,6 +37,7 @@ namespace EPRI
 		LVL_INFORMATIONAL,	// Informational messages
 		LVL_DEBUG			// Level messages
 	};
+
 	
 	inline ERROR_TYPE MakeError(ErrorSource Source, ErrorLevel Level, uint16_t Code)
 	{
@@ -47,5 +51,12 @@ namespace EPRI
 	{
 		return (ErrorLevel)((Err & 0x00FF0000) >> 16);
 	}
+	template <class T>
+		inline T GetErrorCode(ERROR_TYPE Err)
+		{
+			return (T)(Err & 0x0000FFFF);
+		}
+	
+	const ERROR_TYPE SUCCESSFUL = 0L;
 
 }

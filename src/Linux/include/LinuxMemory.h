@@ -1,18 +1,16 @@
 #pragma once
 
 #include "IMemory.h"
-#include "BaseComponent.h"
 
 namespace EPRI
 {
-	class LinuxMemory : public IMemory, public BaseComponent
+	class LinuxMemory : public IMemory
 	{
 	public:
-		LinuxMemory() = delete;
-		LinuxMemory(IBaseLibrary * pLibrary);
+		LinuxMemory();
 		virtual ~LinuxMemory();
 		
-		virtual ERROR_TYPE Alloc(size_t Size, size_t * pActualSize, void** ppOut);
+		virtual void * Alloc(size_t Size);
 		virtual ERROR_TYPE Free(void* p);
 		
 	};

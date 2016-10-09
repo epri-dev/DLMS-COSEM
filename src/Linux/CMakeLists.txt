@@ -3,8 +3,9 @@
 
 cmake_minimum_required(VERSION 2.7)
 project(Linux)
-add_executable(Linux Linux.cpp LinuxBaseLibrary.cpp LinuxCore.cpp LinuxMemory.cpp LinuxSerial.cpp)
+add_executable(Linux Linux.cpp LinuxBaseLibrary.cpp LinuxCore.cpp LinuxMemory.cpp LinuxSerial.cpp LinuxSimpleTimer.cpp)
 target_link_libraries(Linux -L${CMAKE_SOURCE_DIR}/../../lib/DLMS-COSEM/Debug -lDLMS-COSEM "${LIBRARIES_FROM_REFERENCES}")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++11 -DASIO_STANDALONE")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++11 -D_DEBUG -DASIO_STANDALONE -DASIO_HAS_STD_CHRONO")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++11 -DASIO_STANDALONE")
 include_directories(${CMAKE_SOURCE_DIR}/include/ ${CMAKE_SOURCE_DIR}/../../lib/DLMS-COSEM/include/ ${CMAKE_SOURCE_DIR}/../../lib/asio-1.10.6/include/)
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D_DEBUG -DASIO_STANDALONE -DASIO_HAS_STD_CHRONO")

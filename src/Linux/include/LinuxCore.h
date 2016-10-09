@@ -1,20 +1,23 @@
 #pragma once
 
-#include "Core.h"
-#include "BaseComponent.h"
+#include "ICore.h"
 #include "LinuxSerial.h"
 
 namespace EPRI
 {
-	class LinuxCore : public Core, public BaseComponent
+	class LinuxCore : public ICore
 	{
 	public:
-		LinuxCore() = delete;
-		LinuxCore(IBaseLibrary * pLibrary);
+		LinuxCore();
 		virtual ~LinuxCore();
+		//
+		// ICore
+		//
+		ISerial * GetSerial();
+		std::shared_ptr<ISimpleTimer> CreateSimpleTimer(bool bUseHeap = true);
 
 	private:
-		LinuxSerial * m_pLinuxSerial;
+		LinuxSerial			m_Serial;
 		
 	};
 	

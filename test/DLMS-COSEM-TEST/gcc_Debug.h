@@ -453,6 +453,9 @@
 #ifndef __INT_LEAST64_TYPE__
 #define __INT_LEAST64_TYPE__ long int
 #endif
+#ifndef UNITTEST
+#define UNITTEST 1
+#endif
 #ifndef __INT16_TYPE__
 #define __INT16_TYPE__ short int
 #endif

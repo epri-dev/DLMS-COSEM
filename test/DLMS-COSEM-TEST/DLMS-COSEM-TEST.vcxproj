@@ -64,10 +64,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DLMS-COSEM-TEST.cpp" />
+    <ClCompile Include="UnitTest-HDLC-Address.cpp" />
+    <ClCompile Include="UnitTest-HDLC-Client.cpp" />
+    <ClCompile Include="UnitTest-HDLC-LLC.cpp" />
+    <ClCompile Include="UnitTest-HDLC-MAC.cpp" />
+    <ClCompile Include="UnitTest-HDLC-Packet.cpp" />
+    <ClCompile Include="UnitTest-HDLC-Server.cpp" />
     <ClCompile Include="UnitTest-LinuxMemory.cpp" />
+    <ClCompile Include="UnitTest-StateMachine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DummySerial.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

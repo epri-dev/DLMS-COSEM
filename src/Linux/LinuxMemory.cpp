@@ -1,9 +1,9 @@
+#include <memory>
 #include "LinuxMemory.h"
 
 namespace EPRI
 {
-	LinuxMemory::LinuxMemory(IBaseLibrary * pLibrary)
-		: BaseComponent(pLibrary)
+	LinuxMemory::LinuxMemory()
 	{
 	}
 	
@@ -11,13 +11,16 @@ namespace EPRI
 	{
 	}
 
-	ERROR_TYPE LinuxMemory::Alloc(size_t Size, size_t * pActualSize, void** ppOut)
+	void * LinuxMemory::Alloc(size_t Size)
 	{
-		return MakeError(SRC_MEMORY, LVL_EMERGENCY, IMemory::E_SUCCESS);
+		return std::calloc(Size, 1);
 	}
 
 	ERROR_TYPE LinuxMemory::Free(void* p)
 	{
-		return MakeError(SRC_MEMORY, LVL_EMERGENCY, IMemory::E_SUCCESS);
+		if (p)
+		{
+			std::free(p);
+		}
 	}
 }

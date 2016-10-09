@@ -1,25 +1,29 @@
 #pragma once
 
 #include <asio.hpp>
-#include "BaseComponent.h"
+#include <memory>
 #include "ISerial.h"
 
 namespace EPRI
 {
-	class LinuxSerial : public ISerial, public BaseComponent
+	class LinuxSerial : public ISerial
 	{
 	public:
-		LinuxSerial() = delete;
-		LinuxSerial(IBaseLibrary * pLibrary);
+		LinuxSerial();
 		virtual ~LinuxSerial();
 
-		virtual ERROR_TYPE Open(SerialPort Port, BaudRate Baud);
+		virtual ERROR_TYPE Open(SerialPort Port);
+		virtual Options GetOptions();
+		virtual ERROR_TYPE SetOptions(const Options& Opt);
 		virtual ERROR_TYPE Write(const uint8_t * pBuffer, size_t Bytes);
+		virtual ERROR_TYPE Read(uint8_t * pBuffer, size_t MaxBytes, uint32_t TimeOutInMS = 0, size_t * pActualBytes = nullptr);
 		virtual ERROR_TYPE Close();
+		virtual ERROR_TYPE Flush(FlushDirection Direction);
+		virtual bool IsConnected();
 		
 	private:
-		asio::io_service m_IO;
-		asio::serial_port * m_pPort;
+		asio::io_service  m_IO;
+		asio::serial_port m_Port;
 		
 	};
 	

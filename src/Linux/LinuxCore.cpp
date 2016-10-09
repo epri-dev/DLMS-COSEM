@@ -1,16 +1,26 @@
 #include "LinuxCore.h"
+#include "LinuxSimpleTimer.h"
 
 namespace EPRI
 {
-	LinuxCore::LinuxCore(IBaseLibrary * pLibrary) :
-		m_pLinuxSerial(new LinuxSerial(pLibrary)),
-		BaseComponent(pLibrary)
+	LinuxCore::LinuxCore()
 	{
-		SetSerial(m_pLinuxSerial);
 	}
 	
 	LinuxCore::~LinuxCore()
 	{
+	}
+
+	ISerial * LinuxCore::GetSerial()
+	{
+		return &m_Serial;
+	}
+	
+	std::shared_ptr<ISimpleTimer> LinuxCore::CreateSimpleTimer(bool bUseHeap /* = true*/)
+	{
+		// TODO - Embedded memory management
+		
+		return std::shared_ptr<ISimpleTimer>(new LinuxSimpleTimer);
 	}
 
 }

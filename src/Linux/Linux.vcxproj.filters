@@ -30,6 +30,9 @@
     <ClCompile Include="LinuxSerial.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="LinuxSimpleTimer.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt">
@@ -47,6 +50,12 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="include\LinuxSerial.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\optional.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="LinuxSimpleTimer.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
