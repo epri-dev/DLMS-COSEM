@@ -88,6 +88,18 @@ namespace EPRI
         HDLCMAC(MyAddress, pSerial, Opt, MaxPreallocatedPacketBuffers),
         StateMachine(ST_MAX_STATES)
     {
+        //
+        // State Machine
+        //
+        BEGIN_STATE_MAP
+            STATE_MAP_ENTRY(ST_DISCONNECTED, HDLCServer::ST_Disconnected_Handler)
+            STATE_MAP_ENTRY(ST_CONNECTING, HDLCServer::ST_Connecting_Handler)
+            STATE_MAP_ENTRY(ST_CONNECTING_RESPONSE, HDLCServer::ST_Connecting_Response_Handler)
+            STATE_MAP_ENTRY(ST_CONNECTED, HDLCServer::ST_Connected_Handler)
+            STATE_MAP_ENTRY(ST_CONNECTED_SEND, HDLCServer::ST_Connected_Send_Handler)
+            STATE_MAP_ENTRY(ST_CONNECTED_RECEIVE, HDLCServer::ST_Connected_Receive_Handler)
+        END_STATE_MAP
+        //    
         m_PacketCallback.RegisterCallback(HDLCControl::SNRM, 
             std::bind(&HDLCServer::SNRM_Handler, this, std::placeholders::_1));
         m_PacketCallback.RegisterCallback(HDLCControl::INFO, 
@@ -173,10 +185,9 @@ namespace EPRI
         {
             bool RetVal = false;
             DLConnectRequestOrIndication Params(pPacketData->Data.GetSourceAddress());
-            
-            FireCallback(DLConnectRequestOrIndication::ID, 
+            RetVal = FireCallback(DLConnectRequestOrIndication::ID, 
                 Params,
-                &RetVal);
+                &RetVal) && RetVal;
             if (!RetVal)
             {
                 Packet *      pDM = GetWorkingTXPacket();

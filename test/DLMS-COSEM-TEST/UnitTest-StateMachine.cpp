@@ -28,6 +28,12 @@ TEST(StateMachine, Basics)
             : StateMachine(ST_MAX_STATES),
             m_pCounter(pCounter)
         {
+            BEGIN_STATE_MAP
+                STATE_MAP_ENTRY(ST_STATE_1, MyMachine::ST_State1)
+                STATE_MAP_ENTRY(ST_STATE_2, MyMachine::ST_State2)
+                STATE_MAP_ENTRY(ST_STATE_3, MyMachine::ST_State3)
+            END_STATE_MAP
+
             ST_State1();
         }
         
@@ -71,11 +77,6 @@ TEST(StateMachine, Basics)
             (*m_pCounter) += pMyData->m_Data;
         }
         
-        BEGIN_STATE_MAP
-            STATE_MAP_ENTRY(ST_STATE_1, MyMachine::ST_State1)
-            STATE_MAP_ENTRY(ST_STATE_2, MyMachine::ST_State2)
-            STATE_MAP_ENTRY(ST_STATE_3, MyMachine::ST_State3)
-        END_STATE_MAP
             
         enum States : uint8_t
         {

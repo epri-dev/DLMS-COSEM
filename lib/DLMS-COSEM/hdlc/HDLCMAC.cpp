@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <iostream>
+#include <memory>
 
 #include "ISerial.h"
 #include "hdlc/HDLCMAC.h"
@@ -15,7 +17,7 @@ namespace EPRI
     {
         while (MaxPreallocatedPacketBuffers--)
         {
-            m_Packets.push(Packet());
+            m_Packets.push(std::unique_ptr<Packet>(new Packet));
         }
     }
     
@@ -55,12 +57,12 @@ namespace EPRI
         {
             if (m_Packets.size())
             {
-                m_pRXPacket = &m_Packets.front();
+                m_pRXPacket = std::move(m_Packets.front());
                 m_Packets.pop();
             }
         }
         UnlockPackets();
-        return m_pRXPacket;
+        return m_pRXPacket.get();
     }
     
     void HDLCMAC::ReleaseWorkingRXPacket()
@@ -69,8 +71,7 @@ namespace EPRI
         if (m_pRXPacket)
         {
             m_pRXPacket->Clear();
-            m_Packets.push(*m_pRXPacket);
-            m_pRXPacket = nullptr;
+            m_Packets.push(std::move(m_pRXPacket));
         }
         UnlockPackets();
     }
@@ -80,8 +81,7 @@ namespace EPRI
         LockPackets();
         if (m_pRXPacket)
         {
-            m_RXPackets.push(*m_pRXPacket);
-            m_pRXPacket = nullptr;
+            m_RXPackets.push(std::move(m_pRXPacket));
         }
         UnlockPackets();
     }
@@ -127,12 +127,12 @@ namespace EPRI
         {
             if (m_Packets.size())
             {
-                m_pTXPacket = &m_Packets.front();
+                m_pTXPacket = std::move(m_Packets.front());
                 m_Packets.pop();
             }
         }
         UnlockPackets();
-        return m_pTXPacket;
+        return m_pTXPacket.get();
     }
     
     void HDLCMAC::ReleaseWorkingTXPacket()
@@ -141,8 +141,7 @@ namespace EPRI
         if (m_pTXPacket)
         {
             m_pTXPacket->Clear();
-            m_Packets.push(*m_pTXPacket);
-            m_pTXPacket = nullptr;
+            m_Packets.push(std::move(m_pTXPacket));
         }
         UnlockPackets();
     }
@@ -152,8 +151,7 @@ namespace EPRI
         LockPackets();
         if (m_pTXPacket)
         {
-            m_TXPackets.push(*m_pTXPacket);
-            m_pTXPacket = nullptr;
+            m_TXPackets.push(std::move(m_pTXPacket));
         }
         UnlockPackets();
     }
@@ -164,7 +162,7 @@ namespace EPRI
         LockPackets();
         if (m_TXPackets.size())
         {
-            pRetVal = &m_TXPackets.front();
+            pRetVal = m_TXPackets.front().get();
         }
         UnlockPackets();
         return pRetVal;
@@ -175,9 +173,8 @@ namespace EPRI
         LockPackets();
         if (m_TXPackets.size())
         {
-            Packet * pTXPacket = &m_TXPackets.front();
+            m_Packets.push(std::move(m_TXPackets.front()));
             m_TXPackets.pop();
-            m_Packets.push(*pTXPacket);
         }
         UnlockPackets();
     }
@@ -206,7 +203,7 @@ namespace EPRI
         LockPackets();
         if (m_RXPackets.size())
         {
-            pRetVal = &m_RXPackets.front();
+            pRetVal = m_RXPackets.front().get();
         }
         UnlockPackets();
         return pRetVal;
@@ -217,9 +214,8 @@ namespace EPRI
         LockPackets();
         if (m_RXPackets.size())
         {
-            Packet * pRXPacket = &m_RXPackets.front();
+            m_Packets.push(std::move(m_RXPackets.front()));
             m_RXPackets.pop();
-            m_Packets.push(*pRXPacket);
         }
         UnlockPackets();
     }

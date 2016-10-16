@@ -10,7 +10,12 @@ namespace EPRI
         m_pEventData(nullptr)
     {
     }    
- 
+    
+    void StateMachine::AddStateToMachine(uint8_t State, StateFunc Func)
+    {
+        m_States[State] = Func;
+    }
+
     bool StateMachine::ExternalEvent(uint8_t NewState, 
         EventData * pData)
     {
@@ -50,9 +55,10 @@ namespace EPRI
             m_pEventData = nullptr; 
             m_EventGenerated = false;
  
-            // TODO - Check state...
-            
-            GetStateMap()[m_CurrentState].m_StateFunc(pDataTemp);
+            if (m_States.find(m_CurrentState) != m_States.end())
+            {
+                m_States[m_CurrentState](pDataTemp);
+            }
  
             if (pDataTemp) 
             {

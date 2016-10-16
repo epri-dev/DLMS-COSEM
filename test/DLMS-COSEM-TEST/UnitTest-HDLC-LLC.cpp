@@ -7,7 +7,6 @@
 namespace EPRI
 {
 
-    static HDLCStatistics Stats;
     static DummySerial    TestSerial;
 
     class HDLCLLCFixture : public HDLCClientLLC, public ::testing::Test

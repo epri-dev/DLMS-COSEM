@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <map>
 
 namespace EPRI
 {
@@ -18,7 +19,7 @@ namespace EPRI
 
     };
 
-    struct StateStruct;
+    typedef std::function<void(EventData *)> StateFunc;
  
     class StateMachine 
     {
@@ -29,7 +30,7 @@ namespace EPRI
         }
 
     protected:
-        enum 
+        enum : uint8_t
         { 
             EVENT_IGNORED = 0xFE, 
             CANNOT_HAPPEN 
@@ -37,46 +38,37 @@ namespace EPRI
 
         bool ExternalEvent(uint8_t State, EventData * pEventData = nullptr);
         void InternalEvent(uint8_t State, EventData * pEventData = nullptr);
-        virtual const StateStruct * GetStateMap() = 0;
+        virtual void AddStateToMachine(uint8_t State, StateFunc Func);
 
         uint8_t m_CurrentState;
         
     private:
         void StateEngine(void);
 
-        const int   m_MaxStates;
-        bool        m_EventGenerated;
-        EventData * m_pEventData;
-
+        const int                    m_MaxStates;
+        bool                         m_EventGenerated;
+        EventData *                  m_pEventData;
+        std::map<uint8_t, StateFunc> m_States;
     };
  
-    typedef std::function<void(EventData *)> StateFunc;
-    struct StateStruct 
-    {
-        StateFunc m_StateFunc;    
-    };
+#define BEGIN_STATE_MAP \
+        { 
  
-     #define BEGIN_STATE_MAP \
-     public:\
-     const StateStruct * GetStateMap() {\
-         static const StateStruct m_StateMap[] = { 
+#define STATE_MAP_ENTRY(State, Entry)\
+            AddStateToMachine(State, std::bind(&Entry, this, std::placeholders::_1));
  
-    #define STATE_MAP_ENTRY(State, Entry)\
-        { std::bind(&Entry, this, std::placeholders::_1) },
+#define END_STATE_MAP \
+        }
  
-    #define END_STATE_MAP \
-        { nullptr }\
-        }; \
-        return &m_StateMap[0]; }
- 
-    #define BEGIN_TRANSITION_MAP \
+#define BEGIN_TRANSITION_MAP \
         static const uint8_t TRANSITIONS[] = {\
  
-    #define TRANSITION_MAP_ENTRY(State, Entry)\
+#define TRANSITION_MAP_ENTRY(State, Entry)\
         Entry,
  
-    #define END_TRANSITION_MAP(RetVal, Data) \
+#define END_TRANSITION_MAP(RetVal, Data) \
         0 };\
         RetVal = ExternalEvent(TRANSITIONS[m_CurrentState], Data);
+
     
 }

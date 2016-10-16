@@ -91,6 +91,18 @@ namespace EPRI
         HDLCMAC(MyAddress, pSerial, Opt, MaxPreallocatedPacketBuffers),
         StateMachine(ST_MAX_STATES)
     {
+        //
+        // State Machine
+        //
+        BEGIN_STATE_MAP
+            STATE_MAP_ENTRY(ST_DISCONNECTED, HDLCClient::ST_Disconnected_Handler)
+            STATE_MAP_ENTRY(ST_CONNECTING, HDLCClient::ST_Connecting_Handler)
+            STATE_MAP_ENTRY(ST_CONNECTING_WAIT, HDLCClient::ST_Connecting_Wait_Handler)
+            STATE_MAP_ENTRY(ST_CONNECTED, HDLCClient::ST_Connected_Handler)
+            STATE_MAP_ENTRY(ST_CONNECTED_SEND, HDLCClient::ST_Connected_Send_Handler)
+            STATE_MAP_ENTRY(ST_CONNECTED_RECEIVE, HDLCClient::ST_Connected_Receive_Handler)
+        END_STATE_MAP
+        //
         m_PacketCallback.RegisterCallback(HDLCControl::UI, 
             std::bind(&HDLCClient::UI_Handler, this, std::placeholders::_1));
         m_PacketCallback.RegisterCallback(HDLCControl::UA, 

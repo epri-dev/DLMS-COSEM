@@ -76,14 +76,6 @@ namespace EPRI
         //
         // State Machine
         //
-        BEGIN_STATE_MAP
-            STATE_MAP_ENTRY(ST_INACTIVE, COSEM::ST_Inactive_Handler)
-            STATE_MAP_ENTRY(ST_IDLE, COSEM::ST_Idle_Handler)
-            STATE_MAP_ENTRY(ST_ASSOCIATION_PENDING, COSEM::ST_Association_Pending_Handler)
-            STATE_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, COSEM::ST_Association_Release_Pending_Handler)
-            STATE_MAP_ENTRY(ST_ASSOCIATED, COSEM::ST_Associated_Handler)
-        END_STATE_MAP
-            
         enum States : uint8_t
         {
             ST_INACTIVE = 0,

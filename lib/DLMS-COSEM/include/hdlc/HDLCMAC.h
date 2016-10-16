@@ -46,6 +46,8 @@ namespace EPRI
     	void ClearStatistics();
     	
 	protected:
+    	using PacketPtr = std::unique_ptr<Packet>;
+
     	virtual HDLCErrorCode ProcessSerialReception();
     	Packet * GetWorkingRXPacket();
     	void ReleaseWorkingRXPacket();
@@ -61,15 +63,16 @@ namespace EPRI
     	virtual HDLCErrorCode ProcessPacketReception();
     	Packet * GetIncomingPacket();
     	void ReleaseIncomingPacket();
+    	
        	
     	HDLCAddress							m_MyAddress;
     	ISerial *                           m_pSerial;
     	HDLCOptions                         m_CurrentOptions;
 		std::shared_ptr<EPRI::ISimpleTimer>	m_pTimer;
 		HDLCStatistics					    m_Statistics;
-    	std::queue<Packet>                  m_Packets;
-    	std::queue<Packet>                  m_RXPackets;
-    	std::queue<Packet>                  m_TXPackets;
+    	std::queue<PacketPtr>               m_Packets;
+    	std::queue<PacketPtr>               m_RXPackets;
+    	std::queue<PacketPtr>               m_TXPackets;
     	PacketCallback                      m_PacketCallback;
     	
 	private:
@@ -77,8 +80,8 @@ namespace EPRI
     	void UnlockPackets();
     	
     	std::atomic_flag                    m_PacketLock = ATOMIC_FLAG_INIT;
-    	Packet *                            m_pRXPacket = nullptr;
-    	Packet *                            m_pTXPacket = nullptr;
+    	PacketPtr                           m_pRXPacket = nullptr;
+    	PacketPtr                           m_pTXPacket = nullptr;
 	};
     //
     // Base Callback Parameters
@@ -175,20 +178,11 @@ namespace EPRI
         bool DataRequest(const DLDataRequestParameter& Parameters);
 
         HDLCRunResult Process();
-        
+  
     private:
         //
         // State Machine
         //
-        BEGIN_STATE_MAP
-            STATE_MAP_ENTRY(ST_DISCONNECTED, HDLCClient::ST_Disconnected_Handler)
-            STATE_MAP_ENTRY(ST_CONNECTING, HDLCClient::ST_Connecting_Handler)
-            STATE_MAP_ENTRY(ST_CONNECTING_WAIT, HDLCClient::ST_Connecting_Wait_Handler)
-            STATE_MAP_ENTRY(ST_CONNECTED, HDLCClient::ST_Connected_Handler)
-            STATE_MAP_ENTRY(ST_CONNECTED_SEND, HDLCClient::ST_Connected_Send_Handler)
-            STATE_MAP_ENTRY(ST_CONNECTED_RECEIVE, HDLCClient::ST_Connected_Receive_Handler)
-        END_STATE_MAP
-            
         enum States : uint8_t
         {
             ST_DISCONNECTED = 0,
@@ -238,15 +232,6 @@ namespace EPRI
         //
         // State Machine
         //
-        BEGIN_STATE_MAP
-            STATE_MAP_ENTRY(ST_DISCONNECTED, HDLCServer::ST_Disconnected_Handler)
-            STATE_MAP_ENTRY(ST_CONNECTING, HDLCServer::ST_Connecting_Handler)
-            STATE_MAP_ENTRY(ST_CONNECTING_RESPONSE, HDLCServer::ST_Connecting_Response_Handler)
-            STATE_MAP_ENTRY(ST_CONNECTED, HDLCServer::ST_Connected_Handler)
-            STATE_MAP_ENTRY(ST_CONNECTED_SEND, HDLCServer::ST_Connected_Send_Handler)
-            STATE_MAP_ENTRY(ST_CONNECTED_RECEIVE, HDLCServer::ST_Connected_Receive_Handler)
-        END_STATE_MAP
-            
         enum States : uint8_t
         {
             ST_DISCONNECTED = 0,
