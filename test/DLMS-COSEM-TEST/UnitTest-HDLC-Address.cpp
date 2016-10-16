@@ -24,3 +24,4 @@ TEST(HDLCAddress, ConstructorsAndComparisons)
     EXPECT_TRUE(hdlc1 == hdlc2);
 
 }
+

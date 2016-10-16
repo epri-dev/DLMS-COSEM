@@ -49,6 +49,12 @@
     <ClCompile Include="hdlc\HDLCLLC.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="COSEM.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="COSEMServer.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ERROR_TYPE.h">
@@ -117,6 +123,33 @@
     <ClInclude Include="include\Callback.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="include\interfaces\IData.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interfaces\IDLMSInterface.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interfaces\IClock.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interfaces\DLMSAttribute.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interfaces\DLMSMethod.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interfaces\DLMSDataTypes.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interfaces\DLMSData.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\COSEM.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Transport.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Makefile" />
@@ -126,5 +159,6 @@
     <None Include="release.mak">
       <Filter>Make files</Filter>
     </None>
+    <None Include="COSEMClient.cpp" />
   </ItemGroup>
 </Project>

@@ -72,10 +72,14 @@
     <ClCompile Include="hdlc\modcnt.cpp" />
     <ClCompile Include="hdlc\packet.cpp" />
     <ClCompile Include="hdlc\HDLCMAC.cpp" />
+    <ClCompile Include="COSEM.cpp" />
+    <ClCompile Include="COSEMServer.cpp" />
     <ClCompile Include="StateMachine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Callback.h" />
+    <ClInclude Include="include\COSEM.h" />
+    <ClInclude Include="include\interfaces\DLMSData.h" />
     <ClInclude Include="include\hdlc\HDLCAddress.h" />
     <ClInclude Include="include\hdlc\appdefs.h" />
     <ClInclude Include="include\hdlc\comdefs.h" />
@@ -94,12 +98,20 @@
     <ClInclude Include="include\IBaseLibrary.h" />
     <ClInclude Include="include\ICore.h" />
     <ClInclude Include="include\IMemory.h" />
+    <ClInclude Include="include\interfaces\DLMSAttribute.h" />
+    <ClInclude Include="include\interfaces\DLMSDataTypes.h" />
+    <ClInclude Include="include\interfaces\DLMSMethod.h" />
+    <ClInclude Include="include\interfaces\IClock.h" />
+    <ClInclude Include="include\interfaces\IData.h" />
+    <ClInclude Include="include\interfaces\IDLMSInterface.h" />
     <ClInclude Include="include\ISerial.h" />
     <ClInclude Include="include\ISimpleTimer.h" />
     <ClInclude Include="include\StateMachine.h" />
+    <ClInclude Include="include\Transport.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="debug.mak" />
+    <None Include="COSEMClient.cpp" />
     <None Include="Makefile" />
     <None Include="release.mak" />
   </ItemGroup>

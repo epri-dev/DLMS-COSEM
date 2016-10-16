@@ -35,7 +35,7 @@ error:
 	$(error Invalid configuration, please check your inputs)
 endif
 
-SOURCEFILES := DLMS-COSEM.cpp hdlc/HDLCClient.cpp hdlc/HDLCHelpers.cpp hdlc/HDLCLLC.cpp hdlc/HDLCServer.cpp hdlc/HDLCStatistics.cpp hdlc/modcnt.cpp hdlc/packet.cpp hdlc/HDLCMAC.cpp StateMachine.cpp
+SOURCEFILES := DLMS-COSEM.cpp hdlc/HDLCClient.cpp hdlc/HDLCHelpers.cpp hdlc/HDLCLLC.cpp hdlc/HDLCServer.cpp hdlc/HDLCStatistics.cpp hdlc/modcnt.cpp hdlc/packet.cpp hdlc/HDLCMAC.cpp COSEM.cpp COSEMServer.cpp StateMachine.cpp COSEMClient.cpp
 EXTERNAL_LIBS := 
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 

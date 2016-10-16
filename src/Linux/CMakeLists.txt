@@ -9,5 +9,7 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/include/ ${CMAKE_CURRENT_LIST_DIR}
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -D_DEBUG -DASIO_STANDALONE -DASIO_HAS_STD_CHRONO")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_DEBUG -DASIO_STANDALONE -DASIO_HAS_STD_CHRONO")
 
+link_directories(${CMAKE_CURRENT_LIST_DIR}/../../lib/DLMS-COSEM/Debug/)
+
 add_executable(Linux Linux.cpp LinuxBaseLibrary.cpp LinuxCore.cpp LinuxMemory.cpp LinuxSerial.cpp LinuxSimpleTimer.cpp)
 target_link_libraries(Linux DLMS-COSEM)

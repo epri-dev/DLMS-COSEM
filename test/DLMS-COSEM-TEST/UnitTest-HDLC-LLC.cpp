@@ -32,28 +32,28 @@ namespace EPRI
     {
         bool          bConfirmation = false;
         bool          bIndication = false;
-        HDLCLLCFixture::CallbackFunction ConnectConfirm = [&](const BaseCallbackParameter& _) -> HDLCErrorCode
+        HDLCLLCFixture::CallbackFunction ConnectConfirm = [&](const BaseCallbackParameter& _) -> bool
         {
             bConfirmation = true;
-            return SUCCESS;
+            return true;
         };
-        HDLCLLCFixture::CallbackFunction ConnectIndication = [&](const BaseCallbackParameter& _) -> HDLCErrorCode
+        HDLCLLCFixture::CallbackFunction ConnectIndication = [&](const BaseCallbackParameter& _) -> bool
         {
             bIndication = true;
-            return SUCCESS;
+            return true;
         };
         //
         // Attempt to connect to our dummy server...
         //
         RegisterConnectConfirm(ConnectConfirm);
         m_MyServer.RegisterConnectIndication(ConnectIndication);
-        EXPECT_EQ(RUN_WAIT, ConnectRequest(ConnectRequestOrIndication(HDLCAddress(0x01))));
+        EXPECT_EQ(RUN_WAIT, ConnectRequest(DLConnectRequestOrIndication(HDLCAddress(0x01))));
         //
         // Run the server...
         //
         EXPECT_EQ(RUN_WAIT, m_MyServer.Process());
         EXPECT_EQ(true, bIndication);
-        m_MyServer.ConnectResponse(ConnectConfirmOrResponse(HDLCAddress(0x02)));
+        m_MyServer.ConnectResponse(DLConnectConfirmOrResponse(HDLCAddress(0x02)));
         //
         // Run the client...
         //
@@ -65,7 +65,7 @@ namespace EPRI
         const uint8_t SAMPLE_DATA[] = "COME HERE WATSON, I NEED YOU!";
         std::vector<uint8_t> DATA(SAMPLE_DATA,
             SAMPLE_DATA + sizeof(SAMPLE_DATA));
-        EXPECT_EQ(RUN_WAIT, DataRequest(DataRequestParameter(HDLCAddress(0x01), HDLCControl::INFO, DATA)));
+        EXPECT_EQ(RUN_WAIT, DataRequest(DLDataRequestParameter(HDLCAddress(0x01), HDLCControl::INFO, DATA)));
         //
         // Run the server...
         //

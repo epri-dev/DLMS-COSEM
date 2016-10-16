@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     	Client.RegisterConnectConfirm(ConnectConfirm);
 
     	printf("CLIENT: Connecting...\n");
-    	Client.ConnectRequest(ConnectRequestOrIndication(HDLCAddress(0x01)));
+    	Client.ConnectRequest(DLConnectRequestOrIndication(HDLCAddress(0x01)));
     	while (Client.Process() == RUN_WAIT)
     	{
         	if (bConfirmation)
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
             	const uint8_t SAMPLE_DATA[] = "COME HERE WATSON, I NEED YOU!";
             	std::vector<uint8_t> DATA(SAMPLE_DATA,
                 	SAMPLE_DATA + sizeof(SAMPLE_DATA));
-            	Client.DataRequest(DataRequestParameter(HDLCAddress(0x01), HDLCControl::INFO, DATA));
+            	Client.DataRequest(DLDataRequestParameter(HDLCAddress(0x01), HDLCControl::INFO, DATA));
             	bConfirmation = false;
             }
     	}
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     	};
     	HDLCServerLLC::CallbackFunction DataIndication = [&](const BaseCallbackParameter& Param) -> HDLCErrorCode
     	{
-        	const DataRequestParameter& Data = dynamic_cast<const DataRequestParameter&>(Param);
+        	const DLDataRequestParameter& Data = dynamic_cast<const DLDataRequestParameter&>(Param);
         	printf("SERVER: Data indication...\n");
         	std::for_each(Data.Data.begin(),
             	Data.Data.end(), 
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
         	if (bIndication)
         	{
             	printf("SERVER: Approving connect...\n");
-            	Server.ConnectResponse(ConnectConfirmOrResponse(HDLCAddress(0x02)));
+            	Server.ConnectResponse(DLConnectConfirmOrResponse(HDLCAddress(0x02)));
             	bIndication = false;
         	}
     	}

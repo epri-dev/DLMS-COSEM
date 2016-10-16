@@ -31,22 +31,26 @@ TEST(StateMachine, Basics)
             ST_State1();
         }
         
-        void MyExternalEvent1()
+        bool MyExternalEvent1()
         {
+            bool bAllowed = false;
             BEGIN_TRANSITION_MAP
                 TRANSITION_MAP_ENTRY(ST_STATE_1, ST_STATE_2)
                 TRANSITION_MAP_ENTRY(ST_STATE_2, EVENT_IGNORED)
                 TRANSITION_MAP_ENTRY(ST_STATE_3, EVENT_IGNORED)
-            END_TRANSITION_MAP(nullptr);
+            END_TRANSITION_MAP(bAllowed, nullptr);
+            return bAllowed;
         }
         
-        void MyExternalEvent2(MyMachineData * pData)
+        bool MyExternalEvent2(MyMachineData * pData)
         {
-            BEGIN_TRANSITION_MAP
+            bool bAllowed = false;
+             BEGIN_TRANSITION_MAP
                 TRANSITION_MAP_ENTRY(ST_STATE_1, CANNOT_HAPPEN)
                 TRANSITION_MAP_ENTRY(ST_STATE_2, ST_STATE_3)
                 TRANSITION_MAP_ENTRY(ST_STATE_3, EVENT_IGNORED)
-            END_TRANSITION_MAP(pData);
+            END_TRANSITION_MAP(bAllowed, pData);
+            return bAllowed;
         }
  
     private:

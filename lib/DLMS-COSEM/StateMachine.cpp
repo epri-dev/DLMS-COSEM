@@ -11,7 +11,7 @@ namespace EPRI
     {
     }    
  
-    void StateMachine::ExternalEvent(uint8_t NewState, 
+    bool StateMachine::ExternalEvent(uint8_t NewState, 
         EventData * pData)
     {
         if (NewState == EVENT_IGNORED) 
@@ -20,12 +20,14 @@ namespace EPRI
             {
                 pData->Release();
             }
+            return false;
         }
         else 
         {
             InternalEvent(NewState, pData); 
             StateEngine();                  
         }
+        return true;
     }
  
     void StateMachine::InternalEvent(uint8_t NewState, 

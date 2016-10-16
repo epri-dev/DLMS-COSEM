@@ -35,7 +35,7 @@ namespace EPRI
             CANNOT_HAPPEN 
         };
 
-        void ExternalEvent(uint8_t State, EventData * pEventData = nullptr);
+        bool ExternalEvent(uint8_t State, EventData * pEventData = nullptr);
         void InternalEvent(uint8_t State, EventData * pEventData = nullptr);
         virtual const StateStruct * GetStateMap() = 0;
 
@@ -75,8 +75,8 @@ namespace EPRI
     #define TRANSITION_MAP_ENTRY(State, Entry)\
         Entry,
  
-    #define END_TRANSITION_MAP(Data) \
+    #define END_TRANSITION_MAP(RetVal, Data) \
         0 };\
-        ExternalEvent(TRANSITIONS[m_CurrentState], Data);
+        RetVal = ExternalEvent(TRANSITIONS[m_CurrentState], Data);
     
 }

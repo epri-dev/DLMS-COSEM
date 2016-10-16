@@ -233,7 +233,15 @@ namespace EPRI
             HDLCControl::Control PacketType = pRXPacket->GetControl().PacketType();
             if (pRXPacket->GetDestinationAddress() == m_MyAddress)
             {
-                m_PacketCallback.FireCallback(PacketType, *pRXPacket, &ReturnValue);
+                bool CallbackRetVal = false;
+                if (m_PacketCallback.FireCallback(PacketType, *pRXPacket, &CallbackRetVal) && !CallbackRetVal)
+                {
+                    ReturnValue = FAIL;
+                }
+                else
+                {
+                    ReturnValue = SUCCESS;
+                }
             }
             ReleaseIncomingPacket();
         }

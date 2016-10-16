@@ -26,57 +26,55 @@ namespace EPRI
     //
     // DA-CONNECT Service Implementation
     //
-    HDLCRunResult HDLCClientLLC::ConnectRequest(const ConnectRequestOrIndication& Parameters)
+    HDLCRunResult HDLCClientLLC::ConnectRequest(const DLConnectRequestOrIndication& Parameters)
     {
-        HDLCErrorCode RetVal;
-        switch ((RetVal = m_MAC.ConnectRequest(Parameters)))
+        if (m_MAC.ConnectRequest(Parameters))
         {
-        default:
-            break;
+            return m_MAC.Process();
         }
-        return m_MAC.Process();
+        return NOTHING_TO_DO;
     }
     
     void HDLCClientLLC::RegisterConnectConfirm(CallbackFunction Callback)
     {
-        m_MAC.RegisterCallback(ConnectConfirmOrResponse::ID,
+        m_MAC.RegisterCallback(DLConnectConfirmOrResponse::ID,
             std::bind(&HDLCClientLLC::MACConnectConfirm, this, std::placeholders::_1));
-        RegisterCallback(ConnectConfirmOrResponse::ID, Callback);
+        RegisterCallback(DLConnectConfirmOrResponse::ID, Callback);
     }
 
-    HDLCErrorCode HDLCClientLLC::MACConnectConfirm(const BaseCallbackParameter& Parameters)
+    bool HDLCClientLLC::MACConnectConfirm(const BaseCallbackParameter& Parameters)
     {
-        HDLCErrorCode RetVal = FAIL;
-        FireCallback(ConnectConfirmOrResponse::ID, Parameters, &RetVal);
+        bool RetVal = false;
+        if (FireCallback(DLConnectConfirmOrResponse::ID, Parameters, &RetVal) && RetVal)
+        {
+            FireTransportEvent(Transport::TRANSPORT_CONNECTED);
+        }
         return RetVal;
     }
     //
     // DA-DATA Service Implementation
     //
-    HDLCRunResult HDLCClientLLC::DataRequest(const DataRequestParameter& Parameters)
+    HDLCRunResult HDLCClientLLC::DataRequest(const DLDataRequestParameter& Parameters)
     {
-        HDLCErrorCode RetVal;
-        switch ((RetVal = m_MAC.DataRequest(Parameters)))
+        if (m_MAC.DataRequest(Parameters))
         {
-        default:
-            break;
+            return m_MAC.Process();
         }
-        return m_MAC.Process();
+        return NOTHING_TO_DO;
     }
     
     void HDLCClientLLC::RegisterDataIndication(CallbackFunction Callback)
     {
-        m_MAC.RegisterCallback(DataRequestParameter::ID,
+        m_MAC.RegisterCallback(DLDataRequestParameter::ID,
             std::bind(&HDLCClientLLC::MACDataIndication, this, std::placeholders::_1));
-        RegisterCallback(DataRequestParameter::ID, Callback);
+        RegisterCallback(DLDataRequestParameter::ID, Callback);
 
     }
     
-    HDLCErrorCode HDLCClientLLC::MACDataIndication(const BaseCallbackParameter& Parameters)
+    bool HDLCClientLLC::MACDataIndication(const BaseCallbackParameter& Parameters)
     {
-        HDLCErrorCode RetVal = FAIL;
-        FireCallback(DataRequestParameter::ID, Parameters, &RetVal);
-        return RetVal;
+        bool RetVal = false;
+        return FireCallback(DLDataRequestParameter::ID, Parameters, &RetVal) && RetVal;
     }
 
     //
@@ -105,8 +103,9 @@ namespace EPRI
     //
     // DA-CONNECT Service Implementation
     //
-    HDLCErrorCode HDLCClient::ConnectRequest(const ConnectRequestOrIndication& Parameters)
+    bool HDLCClient::ConnectRequest(const DLConnectRequestOrIndication& Parameters)
     {
+        bool bAllowed = false;
         BEGIN_TRANSITION_MAP
             TRANSITION_MAP_ENTRY(ST_DISCONNECTED, ST_CONNECTING)
             TRANSITION_MAP_ENTRY(ST_CONNECTING, EVENT_IGNORED)
@@ -114,14 +113,15 @@ namespace EPRI
             TRANSITION_MAP_ENTRY(ST_CONNECTED, EVENT_IGNORED)
             TRANSITION_MAP_ENTRY(ST_CONNECTED_SEND, EVENT_IGNORED)
             TRANSITION_MAP_ENTRY(ST_CONNECTED_RECEIVE, EVENT_IGNORED)
-        END_TRANSITION_MAP(new ConnectEventData(Parameters));
-        return SUCCESS;
+        END_TRANSITION_MAP(bAllowed, new ConnectEventData(Parameters));
+        return bAllowed;
     }
     //
     // DA-DATA Service Implementation
     //
-    HDLCErrorCode HDLCClient::DataRequest(const DataRequestParameter& Parameters)
+    bool HDLCClient::DataRequest(const DLDataRequestParameter& Parameters)
     {
+        bool bAllowed = false;
         BEGIN_TRANSITION_MAP
             TRANSITION_MAP_ENTRY(ST_DISCONNECTED, EVENT_IGNORED)
             TRANSITION_MAP_ENTRY(ST_CONNECTING, EVENT_IGNORED)
@@ -129,8 +129,8 @@ namespace EPRI
             TRANSITION_MAP_ENTRY(ST_CONNECTED, ST_CONNECTED_SEND)
             TRANSITION_MAP_ENTRY(ST_CONNECTED_SEND, EVENT_IGNORED)
             TRANSITION_MAP_ENTRY(ST_CONNECTED_RECEIVE, EVENT_IGNORED)
-        END_TRANSITION_MAP(new DataEventData(Parameters));
-        return SUCCESS;
+        END_TRANSITION_MAP(bAllowed, new DataEventData(Parameters));
+        return bAllowed;
     }
         
     HDLCRunResult HDLCClient::Process()
@@ -182,9 +182,9 @@ namespace EPRI
         PacketEventData * pPacketData = dynamic_cast<PacketEventData *>(pData);
         if (nullptr != pData)
         {
-            HDLCErrorCode RetVal = SUCCESS;
-            FireCallback(ConnectConfirmOrResponse::ID, 
-                ConnectConfirmOrResponse(pPacketData->Data.GetDestinationAddress()),
+            bool RetVal = false;
+            FireCallback(DLConnectConfirmOrResponse::ID, 
+                DLConnectConfirmOrResponse(pPacketData->Data.GetDestinationAddress()),
                 &RetVal);
         }
     }
@@ -225,13 +225,14 @@ namespace EPRI
     //
     // Packet Reception Handlers
     //
-    HDLCErrorCode HDLCClient::UI_Handler(const Packet& RXPacket)
+    bool HDLCClient::UI_Handler(const Packet& RXPacket)
     {
-        return SUCCESS;
+        return true;
     }
     
-    HDLCErrorCode HDLCClient::UA_Handler(const Packet& RXPacket)
+    bool HDLCClient::UA_Handler(const Packet& RXPacket)
     {
+        bool bAllowed = false;
         BEGIN_TRANSITION_MAP
             TRANSITION_MAP_ENTRY(ST_DISCONNECTED, EVENT_IGNORED)
             TRANSITION_MAP_ENTRY(ST_CONNECTING, EVENT_IGNORED)
@@ -239,8 +240,8 @@ namespace EPRI
             TRANSITION_MAP_ENTRY(ST_CONNECTED, EVENT_IGNORED)
             TRANSITION_MAP_ENTRY(ST_CONNECTED_SEND, EVENT_IGNORED)
             TRANSITION_MAP_ENTRY(ST_CONNECTED_RECEIVE, EVENT_IGNORED)
-        END_TRANSITION_MAP(new PacketEventData(RXPacket));
-        return SUCCESS;
+        END_TRANSITION_MAP(bAllowed, new PacketEventData(RXPacket));
+        return bAllowed;
     }
 
 }

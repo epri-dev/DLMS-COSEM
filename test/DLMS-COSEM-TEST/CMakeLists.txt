@@ -9,5 +9,7 @@ include_directories(../../lib/DLMS-COSEM/include/ ../../lib/googletest-release-1
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -D_DEBUG -DASIO_STANDALONE -DASIO_HAS_STD_CHRONO -DUNITTEST")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_DEBUG -DASIO_STANDALONE -DASIO_HAS_STD_CHRONO -DUNITTEST")
 
-add_executable(DLMS-COSEM-TEST DLMS-COSEM-TEST.cpp UnitTest-HDLC-Address.cpp UnitTest-HDLC-Client.cpp UnitTest-HDLC-LLC.cpp UnitTest-HDLC-MAC.cpp UnitTest-HDLC-Packet.cpp UnitTest-HDLC-Server.cpp UnitTest-LinuxMemory.cpp UnitTest-StateMachine.cpp)
+link_directories(${CMAKE_CURRENT_LIST_DIR}/../../lib/DLMS-COSEM/Debug/ ${CMAKE_CURRENT_LIST_DIR}/../../lib/googletest-release-1.7.0/Debug/)
+
+add_executable(DLMS-COSEM-TEST DLMS-COSEM-TEST.cpp UnitTest-COSEM-Client.cpp UnitTest-HDLC-Address.cpp UnitTest-HDLC-Client.cpp UnitTest-HDLC-LLC.cpp UnitTest-HDLC-MAC.cpp UnitTest-HDLC-Packet.cpp UnitTest-HDLC-Server.cpp UnitTest-IDLMSInterface.cpp UnitTest-LinuxMemory.cpp UnitTest-StateMachine.cpp)
 target_link_libraries(DLMS-COSEM-TEST DLMS-COSEM gtest pthread)

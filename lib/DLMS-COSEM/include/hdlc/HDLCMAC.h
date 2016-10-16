@@ -23,12 +23,13 @@ namespace EPRI
 {
     enum HDLCRunResult : uint16_t
     {
-        RUN_WAIT
+        RUN_WAIT,
+        NOTHING_TO_DO
     };
 
-    class HDLCMAC : public Callback<HDLCErrorCode, uint16_t>
+    class HDLCMAC : public Callback<bool, uint16_t>
 	{
-    	using PacketCallback = Callback<HDLCErrorCode, HDLCControl::Control, Packet>;
+    	using PacketCallback = Callback<bool, HDLCControl::Control, Packet>;
     	
 	public:
     	HDLCMAC() = delete;
@@ -93,10 +94,11 @@ namespace EPRI
     //
     // CONNECT
     //
-    struct ConnectConfirmOrResponse : public HDLCCallbackParameter
+    struct DLConnectConfirmOrResponse : public HDLCCallbackParameter
     {
         static const uint16_t ID = __COUNTER__;
-        ConnectConfirmOrResponse(const HDLCAddress& DA) :
+        DLConnectConfirmOrResponse(const HDLCAddress& DA)
+            :
             HDLCCallbackParameter(DA)
         {
         }
@@ -104,10 +106,11 @@ namespace EPRI
         // User_Information
     };
     
-    struct ConnectRequestOrIndication : public HDLCCallbackParameter
+    struct DLConnectRequestOrIndication : public HDLCCallbackParameter
     {
         static const uint16_t ID = __COUNTER__;
-        ConnectRequestOrIndication(const HDLCAddress& DA) :
+        DLConnectRequestOrIndication(const HDLCAddress& DA)
+            :
             HDLCCallbackParameter(DA)
         {
         }
@@ -116,10 +119,11 @@ namespace EPRI
     //
     // DATA
     //
-    struct DataRequestParameter : public HDLCCallbackParameter
+    struct DLDataRequestParameter : public HDLCCallbackParameter
     {
         static const uint16_t ID = __COUNTER__;
-        DataRequestParameter(const HDLCAddress& DA, HDLCControl::Control FT, const std::vector<uint8_t>& D)  :
+        DLDataRequestParameter(const HDLCAddress& DA, HDLCControl::Control FT, const std::vector<uint8_t>& D)
+            :
             HDLCCallbackParameter(DA),
             FrameType(FT),
             Data(D)
@@ -147,10 +151,10 @@ namespace EPRI
         
     };
     
-    using ConnectEventData = MACEventData<ConnectRequestOrIndication>;
-    using ConnectResponseData = MACEventData<ConnectConfirmOrResponse>;
+    using ConnectEventData = MACEventData<DLConnectRequestOrIndication>;
+    using ConnectResponseData = MACEventData<DLConnectConfirmOrResponse>;
     using PacketEventData = MACEventData<Packet>;
-    using DataEventData = MACEventData<DataRequestParameter>;
+    using DataEventData = MACEventData<DLDataRequestParameter>;
     
     class HDLCClient : public HDLCMAC, public StateMachine
     {
@@ -164,11 +168,11 @@ namespace EPRI
         //
         // MA-CONNECT Service
         //
-        HDLCErrorCode ConnectRequest(const ConnectRequestOrIndication& Parameters);
+        bool ConnectRequest(const DLConnectRequestOrIndication& Parameters);
         //
         // MA-CONNECT Service
         //
-        HDLCErrorCode DataRequest(const DataRequestParameter& Parameters);
+        bool DataRequest(const DLDataRequestParameter& Parameters);
 
         HDLCRunResult Process();
         
@@ -205,8 +209,8 @@ namespace EPRI
         //
         // Packet Handlers
         //
-        HDLCErrorCode UI_Handler(const Packet& RXPacket);
-        HDLCErrorCode UA_Handler(const Packet& RXPacket);
+        bool UI_Handler(const Packet& RXPacket);
+        bool UA_Handler(const Packet& RXPacket);
        
     };
     
@@ -222,11 +226,11 @@ namespace EPRI
         //
         // MA-CONNECT Service
         //
-        HDLCErrorCode ConnectResponse(const ConnectConfirmOrResponse& Parameters);
+        bool ConnectResponse(const DLConnectConfirmOrResponse& Parameters);
         //
         // MA-CONNECT Service
         //
-        HDLCErrorCode DataRequest(const DataRequestParameter& Parameters);
+        bool DataRequest(const DLDataRequestParameter& Parameters);
 
         HDLCRunResult Process();
         
@@ -263,8 +267,8 @@ namespace EPRI
         //
         // Packet Handlers
         //
-        HDLCErrorCode SNRM_Handler(const Packet& Packet);
-        HDLCErrorCode I_Handler(const Packet& RXPacket);
+        bool SNRM_Handler(const Packet& Packet);
+        bool I_Handler(const Packet& RXPacket);
         
     };
 

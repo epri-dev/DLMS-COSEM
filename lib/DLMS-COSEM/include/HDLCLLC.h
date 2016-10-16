@@ -2,14 +2,14 @@
 
 #include <functional>
 #include "ISerial.h"
-#include "ISimpleTimer.h"
 #include "hdlc/HDLCMAC.h"
 #include "hdlc/HDLCOptions.h"
 #include "Callback.h"
+#include "Transport.h"
 
 namespace EPRI
 {
-    class HDLCLLC : public Callback<HDLCErrorCode, uint16_t>
+    class HDLCLLC : public Callback<bool, uint16_t>, public Transport
 	{
 	public:
     	HDLCLLC() = delete;
@@ -24,7 +24,7 @@ namespace EPRI
     	//
         // DL-DATA Service
         //
-    	virtual HDLCRunResult DataRequest(const DataRequestParameter& Parameters) = 0;
+    	virtual HDLCRunResult DataRequest(const DLDataRequestParameter& Parameters) = 0;
     	virtual void RegisterDataIndication(CallbackFunction Callback) = 0;
     	
 	private:
@@ -43,17 +43,17 @@ namespace EPRI
         //
         // DL-CONNECT Service
         //
-        HDLCRunResult ConnectRequest(const ConnectRequestOrIndication& Parameters);
+        HDLCRunResult ConnectRequest(const DLConnectRequestOrIndication& Parameters);
         void RegisterConnectConfirm(CallbackFunction Callback);
         //
         // DL-DATA Service
         //
-        HDLCRunResult DataRequest(const DataRequestParameter& Parameters);
+        HDLCRunResult DataRequest(const DLDataRequestParameter& Parameters);
         void RegisterDataIndication(CallbackFunction Callback);
 
     protected:
-        HDLCErrorCode MACConnectConfirm(const BaseCallbackParameter& Paramters);
-        HDLCErrorCode MACDataIndication(const BaseCallbackParameter& Parameters);
+        bool MACConnectConfirm(const BaseCallbackParameter& Paramters);
+        bool MACDataIndication(const BaseCallbackParameter& Parameters);
         
     private:
         HDLCClient              m_MAC;
@@ -72,16 +72,16 @@ namespace EPRI
         // DL-CONNECT Service
         //
         void RegisterConnectIndication(CallbackFunction Callback);
-        HDLCRunResult ConnectResponse(const ConnectConfirmOrResponse& Parameters);
+        HDLCRunResult ConnectResponse(const DLConnectConfirmOrResponse& Parameters);
         //
         // DL-DATA Service
         //
-        HDLCRunResult DataRequest(const DataRequestParameter& Parameters);
+        HDLCRunResult DataRequest(const DLDataRequestParameter& Parameters);
         void RegisterDataIndication(CallbackFunction Callback);
         
     protected:
-        HDLCErrorCode MACConnectIndication(const BaseCallbackParameter& Parameters);
-        HDLCErrorCode MACDataIndication(const BaseCallbackParameter& Parameters);
+        bool MACConnectIndication(const BaseCallbackParameter& Parameters);
+        bool MACDataIndication(const BaseCallbackParameter& Parameters);
         
     private:
         HDLCServer              m_MAC;

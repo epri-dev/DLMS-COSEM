@@ -13,7 +13,7 @@ class HDLCClientFixture : public HDLCClient, public testing::Test
 {
 public:
     HDLCClientFixture()
-        : HDLCClient(HDLCAddress(0x02), &TestSerial, HDLCOptions({ 3 }), 10)
+        : HDLCClient(HDLCAddress(uint8_t(0x67), uint8_t(0x7f)), &TestSerial, HDLCOptions({ 3 }), 10)
     {
     }
 };
