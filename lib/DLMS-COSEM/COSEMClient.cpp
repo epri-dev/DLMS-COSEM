@@ -39,6 +39,16 @@ namespace EPRI
     
     void COSEMClient::ST_Idle_Handler(EventData * pData)
     {
+        TransportEventData * pTransport;
+        if ((pTransport = dynamic_cast<TransportEventData *>(pData)) != nullptr)
+        {
+            // If we have disconnected, then we need to go back to the Inactive state.
+            //
+            if (pTransport->Data == Transport::TRANSPORT_DISCONNECTED)
+            {
+                InternalEvent(ST_INACTIVE);
+            }
+        }
     }
     
     void COSEMClient::ST_Association_Pending_Handler(EventData * pData)

@@ -55,6 +55,12 @@
     <ClCompile Include="COSEMServer.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="APDU\AARQ.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="APDU\ASNType.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ERROR_TYPE.h">
@@ -148,6 +154,30 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="include\Transport.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\APDU\APDU.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\APDU\AARQ.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\APDU\APDUComponent.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\APDU\ASNType.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mapbox\optional.hpp">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mapbox\recursive_wrapper.hpp">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mapbox\variant.hpp">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mapbox\variant_io.hpp">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

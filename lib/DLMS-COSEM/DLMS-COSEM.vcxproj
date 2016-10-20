@@ -63,6 +63,8 @@
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="APDU\AARQ.cpp" />
+    <ClCompile Include="APDU\ASNType.cpp" />
     <ClCompile Include="DLMS-COSEM.cpp" />
     <ClCompile Include="hdlc\HDLCClient.cpp" />
     <ClCompile Include="hdlc\HDLCHelpers.cpp" />
@@ -77,6 +79,10 @@
     <ClCompile Include="StateMachine.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\APDU\AARQ.h" />
+    <ClInclude Include="include\APDU\APDU.h" />
+    <ClInclude Include="include\APDU\APDUComponent.h" />
+    <ClInclude Include="include\APDU\ASNType.h" />
     <ClInclude Include="include\Callback.h" />
     <ClInclude Include="include\COSEM.h" />
     <ClInclude Include="include\interfaces\DLMSData.h" />
@@ -106,6 +112,10 @@
     <ClInclude Include="include\interfaces\IDLMSInterface.h" />
     <ClInclude Include="include\ISerial.h" />
     <ClInclude Include="include\ISimpleTimer.h" />
+    <ClInclude Include="include\mapbox\optional.hpp" />
+    <ClInclude Include="include\mapbox\recursive_wrapper.hpp" />
+    <ClInclude Include="include\mapbox\variant.hpp" />
+    <ClInclude Include="include\mapbox\variant_io.hpp" />
     <ClInclude Include="include\StateMachine.h" />
     <ClInclude Include="include\Transport.h" />
   </ItemGroup>

@@ -16,7 +16,7 @@ namespace EPRI
     //
     struct APPConnectConfirmOrResponse
     {
-        static const uint16_t ID = __COUNTER__;
+        static const uint16_t ID = 0x2001;
         APPConnectConfirmOrResponse(bool LogicalNameReferencing = true, bool WithCiphering = false) :
             m_LogicalNameReferencing(LogicalNameReferencing),
             m_WithCiphering(WithCiphering)
@@ -30,7 +30,7 @@ namespace EPRI
     
     struct APPConnectRequestOrIndication
     {
-        static const uint16_t ID = __COUNTER__;
+        static const uint16_t ID = 0x2002;
         APPConnectRequestOrIndication(bool LogicalNameReferencing = true, bool WithCiphering = false)
             : m_LogicalNameReferencing(LogicalNameReferencing)
             , m_WithCiphering(WithCiphering)

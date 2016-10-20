@@ -24,11 +24,17 @@ namespace EPRI
         std::placeholders::_3))
     
         
-    template <int8_t Attr, SchemaType Schema, uint8_t ShortNameOffset>
+    template <AttributeIDType Attr, SchemaType Schema, ShortNameOffsetType SNO>
         class DLMSAttribute
         {
         public:
+            const AttributeIDType     AttributeID = Attr;
+            const ShortNameOffsetType ShortNameOffset = SNO;
+
             DLMSAttribute() 
+            {
+            }
+            virtual ~DLMSAttribute()
             {
             }
             
@@ -36,7 +42,7 @@ namespace EPRI
             {
                 if (m_PopulateHandler)
                 {
-                    return m_PopulateHandler(m_Attribute, pSelectiveAccess);
+                    return m_PopulateHandler(AttributeID, pSelectiveAccess);
                 }
                 return true;
             }
@@ -46,7 +52,7 @@ namespace EPRI
             {
                 if (m_SetHandler)
                 {
-                    return m_SetHandler(m_Attribute, Data, pSelectiveAccess);
+                    return m_SetHandler(AttributeID, Data, pSelectiveAccess);
                 }
                 m_AttributeData = Data;
                 return true;
@@ -68,6 +74,7 @@ namespace EPRI
                     m_AttributeData.insert(m_AttributeData.end(), std::begin(Data), std::end(Data));
                     return true;
                 }
+                return false;
             }
             
             PopulateHandler AssignPopulateHandler(PopulateHandler NewHandler)
@@ -102,9 +109,7 @@ namespace EPRI
             }
             
         protected:
-            const int8_t            m_Attribute = Attr;
             SchemaType              m_pSchema = Schema;
-            const uint8_t           m_ShortNameOffet = ShortNameOffset;
            
             PopulateHandler         m_PopulateHandler = nullptr;
             SetHandler              m_SetHandler = nullptr;

@@ -99,7 +99,7 @@ namespace EPRI
     //
     struct DLConnectConfirmOrResponse : public HDLCCallbackParameter
     {
-        static const uint16_t ID = __COUNTER__;
+        static const uint16_t ID = 0x1001;
         DLConnectConfirmOrResponse(const HDLCAddress& DA)
             :
             HDLCCallbackParameter(DA)
@@ -111,7 +111,7 @@ namespace EPRI
     
     struct DLConnectRequestOrIndication : public HDLCCallbackParameter
     {
-        static const uint16_t ID = __COUNTER__;
+        static const uint16_t ID = 0x1002;
         DLConnectRequestOrIndication(const HDLCAddress& DA)
             :
             HDLCCallbackParameter(DA)
@@ -124,7 +124,7 @@ namespace EPRI
     //
     struct DLDataRequestParameter : public HDLCCallbackParameter
     {
-        static const uint16_t ID = __COUNTER__;
+        static const uint16_t ID = 0x1004;
         DLDataRequestParameter(const HDLCAddress& DA, HDLCControl::Control FT, const std::vector<uint8_t>& D)
             :
             HDLCCallbackParameter(DA),

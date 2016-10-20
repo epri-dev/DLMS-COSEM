@@ -3,8 +3,6 @@
 #include <cstdint>
 #include <vector>
 
-#include "DLMSDataTypes.h"
-
 namespace EPRI
 {
     enum DLMSDataType : uint8_t

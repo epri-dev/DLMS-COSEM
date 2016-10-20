@@ -8,5 +8,6 @@
 namespace EPRI
 {
     typedef int8_t AttributeIDType;
+    typedef uint8_t ShortNameOffsetType;
     typedef const int16_t * SchemaType;
 }

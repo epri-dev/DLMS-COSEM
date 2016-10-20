@@ -64,6 +64,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DLMS-COSEM-TEST.cpp" />
+    <ClCompile Include="UnitTest-APDU-AARQ.cpp" />
     <ClCompile Include="UnitTest-COSEM-Client.cpp" />
     <ClCompile Include="UnitTest-HDLC-Address.cpp" />
     <ClCompile Include="UnitTest-HDLC-Client.cpp" />

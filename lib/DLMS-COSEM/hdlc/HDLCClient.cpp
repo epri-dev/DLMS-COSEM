@@ -198,6 +198,8 @@ namespace EPRI
             FireCallback(DLConnectConfirmOrResponse::ID, 
                 DLConnectConfirmOrResponse(pPacketData->Data.GetDestinationAddress()),
                 &RetVal);
+            
+            printf("CLIENT CONNECTED\n");
         }
     }
     

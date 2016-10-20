@@ -14,11 +14,13 @@ namespace EPRI
             TRANSPORT_CONNECTED    = 1,
             TRANSPORT_DISCONNECTED
         };
+        
         typedef Callback<bool, uint16_t, TransportEvent> CallBacker;
 
         virtual ~Transport()
         {
         }
+        
         void RegisterTransportEventHandler(CallBacker::CallbackFunction Callback)
         {
             m_Callbacker.RegisterCallback(ID,
@@ -33,7 +35,7 @@ namespace EPRI
         }
         
     protected:
-        static const uint16_t ID = __COUNTER__;
+        static const uint16_t ID = 0x1742;
         CallBacker            m_Callbacker;
 
     };
