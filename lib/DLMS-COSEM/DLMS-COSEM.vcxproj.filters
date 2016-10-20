@@ -191,4 +191,7 @@
     </None>
     <None Include="COSEMClient.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt" />
+  </ItemGroup>
 </Project>
