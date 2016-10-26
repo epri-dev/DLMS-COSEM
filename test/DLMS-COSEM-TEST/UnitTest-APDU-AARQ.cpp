@@ -44,7 +44,7 @@ TEST(AARQ, GeneralUsage)
     ASSERT_TRUE(a1.user_information.Append(
         ASNType(ASN::OCTET_STRING, 
         std::vector<uint8_t>({0x01, 0x00, 0x00, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00, 0x00, 0x7E, 0x1F, 0x00, 0x00}))));
-    std::vector<uint8_t> AARQ_VEC = a1.Get();
+    std::vector<uint8_t> AARQ_VEC = a1.GetBytes();
     ASSERT_TRUE(AARQ_VEC == FINAL);
     
 }

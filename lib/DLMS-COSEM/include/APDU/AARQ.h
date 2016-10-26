@@ -18,7 +18,7 @@ namespace EPRI
         virtual ~AARQ();
         
         APDUComponent<0, protocol_version_Schema, 
-            ASN::DEFAULT | ASN::IMPLICIT, protocol_version_default> 
+            ASN::IMPLICIT | ASN::OPTIONAL, protocol_version_default> 
                                          protocol_version;
         APDU_application_context_name<1> application_context_name;
         APDU_AP_title<2>                 called_AP_title;
@@ -32,7 +32,8 @@ namespace EPRI
         APDUComponent<10, sender_acse_requirements_Schema, ASN::OPTIONAL | ASN::IMPLICIT>
                                          sender_acse_requirements;
         APDU_Mechanism_name<11>          mechanism_name;
-        APDUComponent<12, calling_authentication_value_Schema, ASN::EXPLICIT | ASN::OPTIONAL>
+        APDUComponent<12, calling_authentication_value_Schema, 
+            ASN::CONSTRUCTED | ASN::EXPLICIT | ASN::OPTIONAL>
                                          calling_authentication_value;
         APDU_Implementation_data<29>     implementation_information;
         APDU_Association_information<30> user_information;

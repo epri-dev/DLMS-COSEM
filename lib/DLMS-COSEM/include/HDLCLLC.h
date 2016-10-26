@@ -26,10 +26,12 @@ namespace EPRI
         //
     	virtual HDLCRunResult DataRequest(const DLDataRequestParameter& Parameters) = 0;
     	virtual void RegisterDataIndication(CallbackFunction Callback) = 0;
+	
+	protected:
+    	DLDataRequestParameter& AddLLCHeader(DLDataRequestParameter * pParameters);
     	
 	private:
-    	static constexpr uint8_t LLC_HEADER[] = { 0xE6, 0xE6, 0x00 };
-    	HDLCMAC *				 m_pMAC;
+      	HDLCMAC *				 m_pMAC;
 	};
     
     class HDLCClientLLC : public HDLCLLC
@@ -40,6 +42,9 @@ namespace EPRI
             const HDLCOptions& Options,
             uint8_t MaxPreallocatedPacketBuffers = 10);
         virtual ~HDLCClientLLC();
+        
+        bool IsConnected() const;
+        HDLCAddress ConnectedAddress() const;
         //
         // DL-CONNECT Service
         //
@@ -50,6 +55,10 @@ namespace EPRI
         //
         HDLCRunResult DataRequest(const DLDataRequestParameter& Parameters);
         void RegisterDataIndication(CallbackFunction Callback);
+        //
+        // Transport
+        //
+        bool DataRequest(const DataRequestParameter& Parameters);
 
     protected:
         bool MACConnectConfirm(const BaseCallbackParameter& Paramters);
@@ -57,6 +66,7 @@ namespace EPRI
         
     private:
         HDLCClient              m_MAC;
+        HDLCAddress             m_ConnectedAddress;
         
     };
     

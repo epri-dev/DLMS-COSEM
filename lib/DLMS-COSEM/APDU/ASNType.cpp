@@ -10,16 +10,16 @@ namespace EPRI
         ASN_BEGIN_SCHEMA(EmptySchema)
         ASN_END_SCHEMA
         ASN_BEGIN_SCHEMA(OctetStringSchema)
-            ASN_OCTET_STRING_TYPE
+            ASN_OCTET_STRING_TYPE(ASN::NO_OPTIONS)
         ASN_END_SCHEMA
         ASN_BEGIN_SCHEMA(ObjectIdentifierSchema)
-            ASN_OBJECT_IDENTIFIER_TYPE
+            ASN_OBJECT_IDENTIFIER_TYPE(ASN::NO_OPTIONS)
         ASN_END_SCHEMA
         ASN_BEGIN_SCHEMA(IntegerSchema)
-            ASN_INTEGER_TYPE
+            ASN_INTEGER_TYPE(ASN::NO_OPTIONS)
         ASN_END_SCHEMA
         ASN_BEGIN_SCHEMA(GraphicStringSchema)
-            ASN_GraphicString_TYPE
+            ASN_GraphicString_TYPE(ASN::NO_OPTIONS)
         ASN_END_SCHEMA
         
     }
@@ -56,19 +56,19 @@ namespace EPRI
         std::vector<uint8_t>           RetVal;
         ASNRawDataType::iterator       it = m_Data.begin();
         size_t                         Length = m_Data.size();
-        
+        //
         // If this is optional or default and not data, then
         // we have nothing to give
         //
-        if ((Options & (ASN::OPTIONAL | ASN::DEFAULT)) && 
+        if ((Options & ASN::OPTIONAL) && 
             (0 == Length))
         {
             return RetVal;
         }
         // Outer tag
-        RetVal.push_back(Tag | (Options & ASN::EXPLICIT));
+        RetVal.push_back(Tag | (Options & ASN::CONSTRUCTED ? 0b00100000 : 0x00));
         // Length   
-        if (Options & ASN::IMPLICIT)
+        if (!(Options & ASN::CONSTRUCTED))
         {
             if (ASN::OBJECT_IDENTIFIER == *m_pSchema)
             {
@@ -103,7 +103,7 @@ namespace EPRI
     void ASNType::Rewind()
     {
         m_pCurrentSchema = m_pSchema;
-        m_AppendState = SIMPLE;
+        m_AppendState = ST_SIMPLE;
     }
 
     bool ASNType::Get(ASNVariant * pValue)
@@ -183,11 +183,11 @@ namespace EPRI
         {
             switch (m_AppendState)
             {
-            case SIMPLE:
+            case ST_SIMPLE:
                 if (ASN::BEGIN_CHOICE_T == 
                     ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
                 {
-                    m_AppendState = CHOICE;
+                    m_AppendState = ST_CHOICE;
                     break;
                 }
                 switch (ASN_SCHEMA_DATA_TYPE(SchemaEntry))
@@ -225,13 +225,15 @@ namespace EPRI
                     break;
                 }
                 break;
-            case CHOICE:
+            case ST_CHOICE:
                 if (ASN::END_CHOICE_T == 
                     ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
                 {
                     ChoiceIndex = 0;
-                    m_AppendState = SIMPLE;  
+                    m_AppendState = ST_SIMPLE;  
                 }
+                break;
+            case ST_SEQUENCE:
                 break;
             }
         }
@@ -248,11 +250,11 @@ namespace EPRI
         {
             switch (m_AppendState)
             {
-            case SIMPLE:
+            case ST_SIMPLE:
                 if (ASN::BEGIN_CHOICE_T == 
                     ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
                 {
-                    m_AppendState = CHOICE;
+                    m_AppendState = ST_CHOICE;
                     break;
                 }
                 else if (ASN_SCHEMA_DATA_TYPE(SchemaEntry) ==
@@ -262,12 +264,12 @@ namespace EPRI
                     return true;
                 }
                 return false;
-            case CHOICE:
+            case ST_CHOICE:
                 if (ASN::END_CHOICE_T == 
                     ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
                 {
                     ChoiceIndex = 0;
-                    m_AppendState = SIMPLE;  
+                    m_AppendState = ST_SIMPLE;  
                     if (!Appended)
                     {
                         return false;

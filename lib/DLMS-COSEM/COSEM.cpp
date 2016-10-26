@@ -26,10 +26,23 @@ namespace EPRI
         return COSEM_RUN_WAIT;
     }
      
-    void COSEM::RegisterTransport(Transport& XPort)
+    COSEM::TRANSPORT_HANDLE COSEM::RegisterTransport(Transport * pXPort)
     {
-        XPort.RegisterTransportEventHandler(
+        static TRANSPORT_HANDLE HANDLE_COUNTER = 0;
+        if (m_Transports.size() == MaxTransports())
+        {
+            return -1;
+        }
+        ++HANDLE_COUNTER;
+        m_Transports[HANDLE_COUNTER] = pXPort;
+        pXPort->RegisterTransportEventHandler(
             std::bind(&COSEM::TransportEventHandler, this, std::placeholders::_1));
+        return HANDLE_COUNTER;
+    }
+    
+    size_t COSEM::MaxTransports()
+    {
+        return 1;
     }
     
     bool COSEM::TransportEventHandler(const Transport::TransportEvent& Event)

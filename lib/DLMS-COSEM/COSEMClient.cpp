@@ -1,4 +1,5 @@
 #include "COSEM.h"
+#include "APDU/AARQ.h"
 
 namespace EPRI
 {
@@ -16,7 +17,6 @@ namespace EPRI
     bool COSEMClient::ConnectRequest(const APPConnectRequestOrIndication& Parameters)
     {
         bool bAllowed = false;
-        
         BEGIN_TRANSITION_MAP
             TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
             TRANSITION_MAP_ENTRY(ST_IDLE, ST_ASSOCIATION_PENDING)
@@ -53,6 +53,22 @@ namespace EPRI
     
     void COSEMClient::ST_Association_Pending_Handler(EventData * pData)
     {
+        AARQ Request;
+        
+        Request.application_context_name.Append(ASNObjectIdentifier({ 2, 16, 756, 5, 8, 1, 1 }));
+        Request.sender_acse_requirements.Append(
+            ASNBitString(Request.sender_acse_requirements.GetCurrentSchemaTypeMaxLength(), 1));
+        Request.mechanism_name.Append(ASNObjectIdentifier({ 2, 16, 756, 5, 8, 2, 1 }));
+        Request.calling_authentication_value.Append(ASNType(ASN::GraphicString, std::string("33333333")));
+        Request.user_information.Append(
+            ASNType(ASN::OCTET_STRING, 
+            std::vector<uint8_t>({ 0x01, 0x00, 0x00, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00, 0x00, 0x7E, 0x1F, 0x00, 0x00 })));
+        Transport * pTransport = GetTransport();
+        if (nullptr != pTransport)
+        {
+            pTransport->DataRequest(Transport::DataRequestParameter(Request.GetBytes()));
+        }
+        
     }
     
     void COSEMClient::ST_Association_Release_Pending_Handler(EventData * pData)
@@ -63,4 +79,13 @@ namespace EPRI
     {
     }
     
+    Transport * COSEMClient::GetTransport() const
+    {
+        if (m_Transports.empty())
+        {
+            return nullptr;
+        }
+        return m_Transports.begin()->second;
+    }
+
 }

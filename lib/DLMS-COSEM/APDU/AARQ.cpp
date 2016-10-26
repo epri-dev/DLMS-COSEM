@@ -5,14 +5,14 @@ namespace EPRI
     const ASNType AARQ::protocol_version_default = ASNBitString(1, 0x00);
     
     ASN_BEGIN_SCHEMA(AARQ::protocol_version_Schema)
-        ASN_BIT_STRING_TYPE_AND_SIZE(1)
+        ASN_BIT_STRING_TYPE(ASN::IMPLICIT, 1)
     ASN_END_SCHEMA
     ASN_BEGIN_SCHEMA(AARQ::sender_acse_requirements_Schema)
-        ASN_BIT_STRING_TYPE_AND_SIZE(1)
+        ASN_BIT_STRING_TYPE(ASN::NO_OPTIONS, 1)
     ASN_END_SCHEMA
     ASN_BEGIN_SCHEMA(AARQ::calling_authentication_value_Schema)
         ASN_BEGIN_CHOICE
-            ASN_GraphicString_TYPE
+            ASN_GraphicString_TYPE(ASN::IMPLICIT)
         ASN_END_CHOICE
     ASN_END_SCHEMA
 

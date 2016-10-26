@@ -14,18 +14,6 @@ namespace EPRI
 			E_SUCCESS
 		};
 		
-		enum SerialPort : uint8_t
-		{
-			SERIAL_PORT_1,
-			SERIAL_PORT_2,
-			SERIAL_PORT_3,
-			SERIAL_PORT_4,
-			SERIAL_PORT_5,
-			SERIAL_PORT_6,
-			SERIAL_PORT_7,
-			SERIAL_PORT_8
-		};
-		
 		typedef struct _Options
 		{
 			enum BaudRate : uint8_t
@@ -89,7 +77,7 @@ namespace EPRI
 		virtual ~ISerial()
 		{
 		}
-		virtual ERROR_TYPE Open(SerialPort Port) = 0;
+		virtual ERROR_TYPE Open(const char * PortName) = 0;
 		virtual Options GetOptions() = 0;
 		virtual ERROR_TYPE SetOptions(const Options& Opt) = 0;
 		virtual ERROR_TYPE Write(const uint8_t * pBuffer, size_t Bytes) = 0;

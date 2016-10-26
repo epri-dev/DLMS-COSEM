@@ -33,7 +33,7 @@ namespace EPRI
     };
 
     template <ASN::TagIDType TAGID, ASN::SchemaType DT, 
-        ASN::ComponentOptionType OPT = ASN::EXPLICIT, const ASNType& DEFAULT = ASNMissing>    
+        ASN::ComponentOptionType OPT = ASN::NO_OPTIONS, const ASNType& DEFAULT = ASNMissing>    
     class APDUComponent : public IAPDUComponent, public ASNType
     {
     public:
@@ -117,21 +117,21 @@ namespace EPRI
         
     };
     
-    template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::EXPLICIT>
+    template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::CONSTRUCTED>
         using APDU_application_context_name = APDUComponent<TAGID, ASN::ObjectIdentifierSchema, OPT>;
-    template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::OPTIONAL>
+    template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::CONSTRUCTED | ASN::OPTIONAL>
         using APDU_AP_title = APDUComponent<TAGID, ASN::OctetStringSchema, OPT>;
-    template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::OPTIONAL>
+    template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::CONSTRUCTED | ASN::OPTIONAL>
         using APDU_AE_qualifier = APDUComponent<TAGID, ASN::OctetStringSchema, OPT>;
-    template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::OPTIONAL>
+    template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::CONSTRUCTED | ASN::OPTIONAL>
         using APDU_AP_invocation_identifier = APDUComponent<TAGID, ASN::IntegerSchema, OPT>;
-    template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::OPTIONAL>
+    template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::CONSTRUCTED | ASN::OPTIONAL>
         using APDU_AE_invocation_identifier = APDUComponent<TAGID, ASN::IntegerSchema, OPT>;
     template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::OPTIONAL | ASN::IMPLICIT>
         using APDU_Mechanism_name = APDUComponent<TAGID, ASN::ObjectIdentifierSchema, OPT>;
     template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::OPTIONAL | ASN::IMPLICIT>
         using APDU_Implementation_data = APDUComponent<TAGID, ASN::GraphicStringSchema, OPT>;
-    template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::OPTIONAL | ASN::EXPLICIT>
+    template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::CONSTRUCTED | ASN::OPTIONAL | ASN::EXPLICIT>
         using APDU_Association_information = APDUComponent<TAGID, ASN::OctetStringSchema, OPT>;
 
 }

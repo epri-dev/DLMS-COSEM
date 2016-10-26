@@ -24,7 +24,8 @@ namespace EPRI
     enum HDLCRunResult : uint16_t
     {
         RUN_WAIT,
-        NOTHING_TO_DO
+        NOTHING_TO_DO,
+        NOT_CONNECTED
     };
 
     class HDLCMAC : public Callback<bool, uint16_t>

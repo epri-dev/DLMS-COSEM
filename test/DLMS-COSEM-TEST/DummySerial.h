@@ -16,7 +16,7 @@ public:
     //
     // ISerial
     //
-    EPRI::ERROR_TYPE Open(SerialPort Port)
+    EPRI::ERROR_TYPE Open(const char * PortName)
     {
         return EPRI::SUCCESSFUL;
     }

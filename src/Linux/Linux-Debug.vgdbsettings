@@ -155,7 +155,7 @@
     <LaunchGDBSettings xsi:type="GDBLaunchParametersNewInstance">
       <DebuggedProgram>$(TargetPath)</DebuggedProgram>
       <GDBServerPort>2000</GDBServerPort>
-      <ProgramArguments />
+      <ProgramArguments>-s 1 -d 1 -p /dev/ttyUSB0 -W</ProgramArguments>
     </LaunchGDBSettings>
     <GenerateCtrlBreakInsteadOfCtrlC>false</GenerateCtrlBreakInsteadOfCtrlC>
     <DeploymentTargetPath />

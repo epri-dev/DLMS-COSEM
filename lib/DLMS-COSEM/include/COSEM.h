@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <map>
 #include "Callback.h"
 #include "Transport.h"
 #include "StateMachine.h"
@@ -66,11 +67,13 @@ namespace EPRI
     class COSEM : public Callback<bool, uint16_t>, public StateMachine
     {
     public:
+        typedef int TRANSPORT_HANDLE;
+        
         COSEM();
         virtual ~COSEM();
     	
         virtual COSEMRunResult Process();
-        virtual void RegisterTransport(Transport& Transport);
+        virtual TRANSPORT_HANDLE RegisterTransport(Transport * pTransport);
 
     protected:
         //
@@ -93,6 +96,9 @@ namespace EPRI
         virtual void ST_Association_Pending_Handler(EventData * pData) = 0;
         virtual void ST_Association_Release_Pending_Handler(EventData * pData) = 0;
         virtual void ST_Associated_Handler(EventData * pData) = 0;
+        virtual size_t MaxTransports();
+        
+        std::map<TRANSPORT_HANDLE, Transport *> m_Transports;
         
     };
     
@@ -116,6 +122,10 @@ namespace EPRI
         void ST_Association_Pending_Handler(EventData * pData);
         void ST_Association_Release_Pending_Handler(EventData * pData);
         void ST_Associated_Handler(EventData * pData);
+        //
+        // Helpers
+        //
+        Transport * GetTransport() const;
 
     };
     

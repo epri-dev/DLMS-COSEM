@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <vector>
 
 #include "Callback.h"
 
@@ -15,6 +16,16 @@ namespace EPRI
             TRANSPORT_DISCONNECTED
         };
         
+        struct DataRequestParameter
+        {
+            static const uint16_t ID = 0x7000;
+            DataRequestParameter(const std::vector<uint8_t>& D) :
+                Data(D)
+            {
+            }
+            std::vector<uint8_t> Data;
+        };
+        
         typedef Callback<bool, uint16_t, TransportEvent> CallBacker;
 
         virtual ~Transport()
@@ -26,6 +37,8 @@ namespace EPRI
             m_Callbacker.RegisterCallback(ID,
                 Callback);
         }
+
+        virtual bool DataRequest(const DataRequestParameter& Parameters) = 0;
         
         bool FireTransportEvent(TransportEvent Event)
         {

@@ -66,6 +66,7 @@
     <ClCompile Include="APDU\AARQ.cpp" />
     <ClCompile Include="APDU\ASNType.cpp" />
     <ClCompile Include="DLMS-COSEM.cpp" />
+    <ClCompile Include="hdlc\HDLCAddress.cpp" />
     <ClCompile Include="hdlc\HDLCClient.cpp" />
     <ClCompile Include="hdlc\HDLCHelpers.cpp" />
     <ClCompile Include="hdlc\HDLCLLC.cpp" />
@@ -76,6 +77,7 @@
     <ClCompile Include="hdlc\HDLCMAC.cpp" />
     <ClCompile Include="COSEM.cpp" />
     <ClCompile Include="COSEMServer.cpp" />
+    <ClCompile Include="serialwrapper\SerialWrapper.cpp" />
     <ClCompile Include="StateMachine.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -116,6 +118,7 @@
     <ClInclude Include="include\mapbox\recursive_wrapper.hpp" />
     <ClInclude Include="include\mapbox\variant.hpp" />
     <ClInclude Include="include\mapbox\variant_io.hpp" />
+    <ClInclude Include="include\SerialWrapper.h" />
     <ClInclude Include="include\StateMachine.h" />
     <ClInclude Include="include\Transport.h" />
   </ItemGroup>

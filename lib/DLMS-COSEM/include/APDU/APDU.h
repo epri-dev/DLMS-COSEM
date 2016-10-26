@@ -24,7 +24,7 @@ namespace EPRI
             m_Components.push_back(pComponent);
         }
         
-        virtual std::vector<uint8_t> Get()
+        virtual std::vector<uint8_t> GetBytes()
         {
             std::vector<uint8_t> RetVal;
             std::vector<uint8_t> ComponentData;

@@ -91,8 +91,10 @@ namespace EPRI
         uint8_t		   Byte;
         HDLCErrorCode  ReturnValue = NEED_MORE;
         Packet *       pPacket = nullptr;
+        ERROR_TYPE     ReadRet;
+        uint32_t       CharacterTimeout = 0;
 
-        while (m_pSerial->Read(&Byte, sizeof(Byte)) == SUCCESSFUL)
+        while (m_pSerial->Read(&Byte, sizeof(Byte), CharacterTimeout) == SUCCESSFUL)
         {
             if (!pPacket)
             {
@@ -101,6 +103,10 @@ namespace EPRI
                 {
                     return NO_PACKETS;
                 }
+                //
+                // We've locked on, now we need to wait for the ICT.
+                //
+                CharacterTimeout = m_CurrentOptions.InterOctetTimeoutInMs;
             }
             ReturnValue = pPacket->MakeByByte(Byte);
             if (ReturnValue != NEED_MORE)

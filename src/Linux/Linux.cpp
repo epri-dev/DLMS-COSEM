@@ -1,10 +1,15 @@
 #include <iostream>
 #include <cstdio>
 #include <time.h>
+#include <ctype.h>
+#include <unistd.h>
+#include <iomanip>
 
 #include "LinuxBaseLibrary.h"
 
 #include "HDLCLLC.h"
+#include "COSEM.h"
+#include "SerialWrapper.h"
 
 using namespace std;
 using namespace EPRI;
@@ -13,7 +18,112 @@ int main(int argc, char *argv[])
 {
 	LinuxBaseLibrary bl;
 	ISerial *		 pSerial = bl.GetCore()->GetSerial();
+    int              opt;
+    bool             StartWithIEC = false;
+    bool             Server = false;
+    bool             IsSerialWrapper = false;
+    char *           pPortName = nullptr;
+    char *           pSourceAddress = nullptr;
+    char *           pDestinationAddress = nullptr;
+    
+    while ((opt =::getopt(argc, argv, "Sp:s:d:IW")) != -1)
+    {
+        switch (opt)
+        {
+        case 'I':
+            StartWithIEC = true;
+            break;
+        case 'W':
+            IsSerialWrapper = true;
+            break;
+        case 'S':
+            Server = true;
+            break;
+        case 's':
+            pSourceAddress = optarg;
+            break;
+        case 'd':
+            pDestinationAddress = optarg;
+            break;
+        case 'p':
+            pPortName = optarg;
+            break;
+        default:
+            std::cerr << "Internal error!\n";
+            return -1;
+        }
+    }
+    
+    if (Server)
+    {
+        std::cerr << "NOT IMPLEMENTED!\n";
+        exit(-1);
+    }
+    else if (nullptr != pPortName &&
+             nullptr != pSourceAddress &&
+             nullptr != pDestinationAddress)
+    {
+        uint8_t                     SourceAddress = uint8_t(strtol(pSourceAddress, nullptr, 16));
+        uint8_t                     DestinationAddress = uint8_t(strtol(pDestinationAddress, nullptr, 16));
+        ISerial::Options::BaudRate  BR = LinuxSerial::Options::BAUD_9600;
+        COSEMClient                 APClient;
+        HDLCClientLLC               DLClient(HDLCAddress(SourceAddress), 
+                                        pSerial, HDLCOptions({ StartWithIEC, 3, 500 }));
+        SerialWrapper               DLWrapper(pSerial, SerialWrapper::WrapperPorts(SourceAddress, DestinationAddress));
+        
+        std::cout << "Operating as a Client (0x" << hex << uint16_t(SourceAddress) << ")... Opening " << pPortName << "\n";
+        if (pSerial->Open(pPortName) != SUCCESS ||
+            pSerial->SetOptions(LinuxSerial::Options(BR)) != SUCCESS)
+        {
+            std::cerr << "Error opening port " << pPortName << "\n";
+            exit(-1);
+        }
 
+        std::cout << "Connecting to Server (0x" << std::hex << uint16_t(DestinationAddress) << ")\n";
+        if (IsSerialWrapper)
+        {
+            bool bProcessed = false;
+            
+            APClient.RegisterTransport(&DLWrapper);
+            while (DLWrapper.Process())
+            {
+                if (!bProcessed)
+                {
+                    APClient.ConnectRequest(APPConnectRequestOrIndication());
+                    bProcessed = true;                   
+                }
+            }    
+        }
+        else
+        {
+            bool                        bConfirmation = false;
+            HDLCClientLLC::CallbackFunction 
+                                        ConnectConfirm = [&](const BaseCallbackParameter& _) -> bool
+                                        {
+                                            std::cout << "Datalink connection established!\n";
+                                            bConfirmation = true;
+                                            return true;
+                                        };
+            
+            DLClient.RegisterConnectConfirm(ConnectConfirm);
+            APClient.RegisterTransport(&DLClient);
+
+            DLClient.ConnectRequest(DLConnectRequestOrIndication(HDLCAddress(DestinationAddress)));
+            while (DLClient.Process() == RUN_WAIT)
+            {
+                if (bConfirmation)
+                {
+                    bConfirmation = false;
+                    //
+                    // Now we can COSEM connect!
+                    //
+                    APClient.ConnectRequest(APPConnectRequestOrIndication());
+                }
+            }    
+        }
+    }
+    
+#if 0
 	if (argc == 1)
 	{
     	bool bConfirmation = false;
@@ -24,7 +134,7 @@ int main(int argc, char *argv[])
         	return SUCCESS;
     	};
 
-		pSerial->Open(LinuxSerial::SERIAL_PORT_1);
+    	pSerial->Open("/tmp/ttyS10");
 		pSerial->SetOptions(LinuxSerial::Options(LinuxSerial::Options::BAUD_9600));
     	
     	HDLCClientLLC Client(HDLCAddress(0x02), pSerial, HDLCOptions({ 3 }));
@@ -69,7 +179,7 @@ int main(int argc, char *argv[])
     	};
 
 
-    	pSerial->Open(LinuxSerial::SERIAL_PORT_2);
+    	pSerial->Open("/tmp/ttyS11");
     	pSerial->SetOptions(LinuxSerial::Options(LinuxSerial::Options::BAUD_9600));
    
     	HDLCServerLLC Server(HDLCAddress(0x01), pSerial, HDLCOptions({ 3 }));
@@ -86,5 +196,6 @@ int main(int argc, char *argv[])
         	}
     	}
 	}
+#endif
 
 }

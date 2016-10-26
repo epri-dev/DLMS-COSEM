@@ -31,33 +31,41 @@ namespace EPRI
             VOID              = 0xFF
         };
         
-        enum ComponentOptions : uint8_t
+        enum ComponentOptions : uint32_t
         {
-            EXPLICIT = 0b00100000,
-            DEFAULT  = 0b00000001,
-            IMPLICIT = 0b00000010,
-            OPTIONAL = 0b00000100,
+            NO_OPTIONS  = 0x00000000,
+            EXPLICIT    = 0x01000000,
+            CONSTRUCTED = 0x02000000,
+            IMPLICIT    = 0x04000000,
+            OPTIONAL    = 0x08000000,
         };
 
         enum InternalDataType : uint32_t
         {
-            NORMAL_T       = 0x00000000,
-            BEGIN_CHOICE_T = 0x10000000,
-            END_CHOICE_T   = 0x20000000,
-            END_SCHEMA_T   = 0xFFFF0000
+            NORMAL_T         = 0x00000000,
+            BEGIN_CHOICE_T   = 0x10000000,
+            END_CHOICE_T     = 0x20000000,
+            BEGIN_SEQUENCE_T = 0x30000000,
+            END_SEQUENCE_T   = 0x40000000,
+            END_SCHEMA_T     = 0xF0000000
         };
         
-        typedef uint8_t                ComponentOptionType;
+        typedef uint32_t               ComponentOptionType;
         typedef uint32_t               SchemaBaseType;
         typedef const SchemaBaseType * SchemaType;
         typedef uint8_t                TagIDType;
         
 #define ASN_SCHEMA_INTERNAL_DATA_TYPE(SCH)\
         (SCH & 0xF0000000)
+            
+#define ASN_SCHEMA_OPTIONS(SCH)\
+        (SCH & 0x0F000000)
+            
 #define ASN_SCHEMA_DATA_TYPE(SCH)\
         ASN::DataTypes(SCH & 0x0000FFFF)
+            
 #define ASN_SCHEMA_DATA_TYPE_MAX_LENGTH(SCH)\
-        size_t((SCH & 0x0FFF0000) >> 16)
+        size_t((SCH & 0x00FF0000) >> 16)
             
 #define ASN_DEFINE_SCHEMA(SDEF)\
         static const ASN::SchemaBaseType SDEF[];
@@ -69,25 +77,29 @@ namespace EPRI
             EPRI::ASN::InternalDataType::BEGIN_CHOICE_T,
 #define ASN_END_CHOICE\
             EPRI::ASN::InternalDataType::END_CHOICE_T,
+#define ASN_BEGIN_SEQUENCE(OPTIONS)\
+            EPRI::ASN::InternalDataType::BEGIN_SEQUENCE_T | (OPTIONS),
+#define ASN_END_SEQUENCE\
+            EPRI::ASN::InternalDataType::END_SEQUENCE_T,
 #define ASN_NULL_TYPE\
             EPRI::ASN::DataTypes::NULL,
-#define ASN_OCTET_STRING_TYPE\
-            EPRI::ASN::DataTypes::OCTET_STRING,
-#define ASN_BIT_STRING_TYPE_AND_SIZE(MAXSIZE)\
-            EPRI::ASN::InternalDataType::NORMAL_T | (EPRI::ASN::SchemaBaseType(MAXSIZE) << 16) | \
+#define ASN_OCTET_STRING_TYPE(OPTIONS)\
+            EPRI::ASN::DataTypes::OCTET_STRING | (OPTIONS),
+#define ASN_BIT_STRING_TYPE(OPTIONS, MAXSIZE)\
+            (OPTIONS) | (EPRI::ASN::SchemaBaseType(MAXSIZE) << 16) | \
                 EPRI::ASN::DataTypes::BIT_STRING,
-#define ASN_OBJECT_IDENTIFIER_TYPE\
-            EPRI::ASN::DataTypes::OBJECT_IDENTIFIER,
-#define ASN_INTEGER_TYPE\
-            EPRI::ASN::DataTypes::INTEGER,
-#define ASN_BOOLEAN_TYPE\
-            EPRI::ASN::DataTypes::BOOLEAN,
-#define ASN_ENUM_TYPE\
-            EPRI::ASN::DataTypes::ENUM,
-#define ASN_REAL_TYPE\
-            EPRI::ASN::DataTypes::REAL,
-#define ASN_GraphicString_TYPE\
-            EPRI::ASN::DataTypes::GraphicString,
+#define ASN_OBJECT_IDENTIFIER_TYPE(OPTIONS)\
+            EPRI::ASN::DataTypes::OBJECT_IDENTIFIER | (OPTIONS),
+#define ASN_INTEGER_TYPE(OPTIONS)\
+            EPRI::ASN::DataTypes::INTEGER | (OPTIONS),
+#define ASN_BOOLEAN_TYPE(OPTIONS)\
+            EPRI::ASN::DataTypes::BOOLEAN | (OPTIONS),
+#define ASN_ENUM_TYPE(OPTIONS)\
+            EPRI::ASN::DataTypes::ENUM | (OPTIONS),
+#define ASN_REAL_TYPE(OPTIONS)\
+            EPRI::ASN::DataTypes::REAL | (OPTIONS),
+#define ASN_GraphicString_TYPE(OPTIONS)\
+            EPRI::ASN::DataTypes::GraphicString | (OPTIONS),
 #define ASN_END_SCHEMA\
             EPRI::ASN::InternalDataType::END_SCHEMA_T\
         };
@@ -173,13 +185,14 @@ namespace EPRI
        
         enum AppendStates
         {
-            SIMPLE,
-            CHOICE
-        }                       m_AppendState = SIMPLE;
-        ASN::SchemaBaseType     m_SingleDataType[2] = { ASN::VOID, ASN::END_SCHEMA_T};
-        ASN::SchemaType         m_pSchema = nullptr;
-        ASN::SchemaType         m_pCurrentSchema = nullptr;
-        ASNRawDataType          m_Data;
+            ST_SIMPLE,
+            ST_CHOICE,
+            ST_SEQUENCE
+        }                              m_AppendState = ST_SIMPLE;
+        ASN::SchemaBaseType            m_SingleDataType[2] = { ASN::VOID, ASN::END_SCHEMA_T};
+        ASN::SchemaType                m_pSchema = nullptr;
+        ASN::SchemaType                m_pCurrentSchema = nullptr;
+        ASNRawDataType                 m_Data;
     };
     
     

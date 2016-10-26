@@ -61,6 +61,12 @@
     <ClCompile Include="APDU\ASNType.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="hdlc\HDLCAddress.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="serialwrapper\SerialWrapper.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ERROR_TYPE.h">
@@ -178,6 +184,9 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="include\mapbox\variant_io.hpp">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SerialWrapper.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

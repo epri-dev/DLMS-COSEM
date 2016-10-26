@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include "hdlc/HDLCMAC.h"
 #include "HDLCLLC.h"
 
@@ -9,7 +11,6 @@ namespace EPRI
     //
     ///////////////////////////////////////////////////////////////////////////
     //
-    
     HDLCClientLLC::HDLCClientLLC(const HDLCAddress& MyAddress, 
         ISerial * pSerial, 
         const HDLCOptions& Options,
@@ -21,6 +22,16 @@ namespace EPRI
     
     HDLCClientLLC::~HDLCClientLLC()
     {
+    }
+
+    bool HDLCClientLLC::IsConnected() const
+    {
+        return !m_ConnectedAddress.IsEmpty();
+    }
+    
+    HDLCAddress HDLCClientLLC::ConnectedAddress() const
+    {
+        return m_ConnectedAddress;
     }
 
     //
@@ -48,6 +59,7 @@ namespace EPRI
         if (FireCallback(DLConnectConfirmOrResponse::ID, Parameters, &RetVal) && RetVal)
         {
             FireTransportEvent(Transport::TRANSPORT_CONNECTED);
+            m_ConnectedAddress = dynamic_cast<const DLConnectConfirmOrResponse&>(Parameters).DestinationAddress;
         }
         return RetVal;
     }
@@ -56,11 +68,16 @@ namespace EPRI
     //
     HDLCRunResult HDLCClientLLC::DataRequest(const DLDataRequestParameter& Parameters)
     {
-        if (m_MAC.DataRequest(Parameters))
+        if (IsConnected())
         {
-            return m_MAC.Process();
+            DLDataRequestParameter LLCParameter = Parameters;
+            if (m_MAC.DataRequest(AddLLCHeader(&LLCParameter)))
+            {
+                return m_MAC.Process();
+            }
+            return NOTHING_TO_DO;
         }
-        return NOTHING_TO_DO;
+        return NOT_CONNECTED;
     }
     
     void HDLCClientLLC::RegisterDataIndication(CallbackFunction Callback)
@@ -69,6 +86,14 @@ namespace EPRI
             std::bind(&HDLCClientLLC::MACDataIndication, this, std::placeholders::_1));
         RegisterCallback(DLDataRequestParameter::ID, Callback);
 
+    }
+    //
+    // Transport
+    //
+    bool HDLCClientLLC::DataRequest(const Transport::DataRequestParameter& Parameters)
+    {
+        DLDataRequestParameter LLCParams(m_ConnectedAddress, HDLCControl::UI, Parameters.Data);
+        return DataRequest(LLCParams);
     }
     
     bool HDLCClientLLC::MACDataIndication(const BaseCallbackParameter& Parameters)
@@ -164,6 +189,66 @@ namespace EPRI
     void HDLCClient::ST_Connecting_Handler(EventData * pData)
     {
         ConnectEventData * pConnectData = dynamic_cast <ConnectEventData *>(pData);
+        if (m_CurrentOptions.StartWithIEC)
+        {
+            ISerial::Options    IECOptions(ISerial::Options::BAUD_300, 7, ISerial::Options::PARITY_EVEN);
+            if (m_pSerial->SetOptions(IECOptions) == SUCCESS &&
+                m_pSerial->Write((const uint8_t *)("/?!\r\n"), 5) == SUCCESS)
+            {
+                // TODO - BETTER!
+                uint8_t   Buffer[80] = { };
+                uint8_t * pBuffer = Buffer;
+                const uint8_t MODE_E_9600[] = { 0x06, 0x32, 0x35, 0x32, 0x0D, 0x0A };
+
+                enum IECState
+                {
+                    STATE_ID,
+                    STATE_BAUD,
+                    STATE_HDLC
+                }          CurrentState = STATE_ID;
+                while (STATE_HDLC != CurrentState)
+                {
+                    switch (CurrentState)
+                    {
+                    case STATE_ID:
+                        {
+                            ERROR_TYPE Result = m_pSerial->Read(pBuffer, 1, 2000);
+                            if (SUCCESSFUL != Result)
+                            {
+                                CurrentState = STATE_BAUD;
+                            }
+                            else
+                            {
+                                if (pBuffer != Buffer && 
+                                    *pBuffer == '\n' && (*(pBuffer - 1)) == '\r')
+                                {
+                                    CurrentState = STATE_BAUD;
+                                    break;
+                                }
+                                ++pBuffer;
+                            }
+                        }
+                        break;
+                    case STATE_BAUD:
+                        printf("CONNECT - %s\n",
+                            Buffer);
+                        m_pSerial->Write(MODE_E_9600,
+                            sizeof(MODE_E_9600));
+                        ::sleep(1);
+                        m_pSerial->SetOptions(
+                            ISerial::Options(ISerial::Options::BAUD_9600, 8, 
+                                ISerial::Options::PARITY_NONE, ISerial::Options::STOPBITS_ONE));
+                        m_pSerial->Flush(ISerial::FlushDirection::BOTH);
+                        CurrentState = STATE_HDLC;
+                        break;
+                        
+                    default:
+                        break;
+                    }
+                }
+            }
+        }
+        
         Packet *           pSNRM = GetWorkingTXPacket();
         if (pSNRM)
         {
@@ -196,7 +281,7 @@ namespace EPRI
         {
             bool RetVal = false;
             FireCallback(DLConnectConfirmOrResponse::ID, 
-                DLConnectConfirmOrResponse(pPacketData->Data.GetDestinationAddress()),
+                DLConnectConfirmOrResponse(pPacketData->Data.GetSourceAddress()),
                 &RetVal);
             
             printf("CLIENT CONNECTED\n");
