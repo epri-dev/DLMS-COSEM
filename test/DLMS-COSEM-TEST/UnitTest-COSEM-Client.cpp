@@ -13,8 +13,8 @@ namespace EPRI
     public:
         COSEMClientFixture()
             : 
-            m_MyClient(HDLCAddress(0x02), &TestSerial, HDLCOptions({ 3 })),
-            m_MyServer(HDLCAddress(0x03), &TestSerial, HDLCOptions({ 3 }))
+            m_MyClient(HDLCAddress(0x02), &TestSerial, HDLCOptions({ false, 3, 500 })),
+            m_MyServer(HDLCAddress(0x03), &TestSerial, HDLCOptions({ false, 3, 500 }))
         {
         }
         
@@ -24,7 +24,7 @@ namespace EPRI
             //
             // Register the transport with COSEM...
             //
-            RegisterTransport(m_MyClient);
+            RegisterTransport(&m_MyClient);
         }
         
         HDLCClientLLC m_MyClient;

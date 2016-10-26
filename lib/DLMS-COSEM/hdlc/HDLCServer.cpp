@@ -67,6 +67,13 @@ namespace EPRI
             std::bind(&HDLCServerLLC::MACDataIndication, this, std::placeholders::_1));
         RegisterCallback(DLDataRequestParameter::ID, Callback);
     }
+    //
+    // Transport
+    //
+    bool HDLCServerLLC::DataRequest(const Transport::DataRequestParameter& Parameters)
+    {
+        return false;
+    }
     
     bool HDLCServerLLC::MACDataIndication(const BaseCallbackParameter& Parameters)
     {

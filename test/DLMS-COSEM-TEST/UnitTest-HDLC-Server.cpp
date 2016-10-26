@@ -12,7 +12,7 @@ class HDLCServerFixture : public HDLCServer, public testing::Test
 {
 public:
     HDLCServerFixture()
-        : HDLCServer(HDLCAddress(0x01), &TestSerial, HDLCOptions({ 3 }), 10)
+        : HDLCServer(HDLCAddress(0x01), &TestSerial, HDLCOptions({ false, 3, 500 }), 10)
     {
     }
 };

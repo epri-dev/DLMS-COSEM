@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "ASNType.h"
+#include "APDUConstants.h"
 
 namespace EPRI
 {
@@ -133,5 +134,12 @@ namespace EPRI
         using APDU_Implementation_data = APDUComponent<TAGID, ASN::GraphicStringSchema, OPT>;
     template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::CONSTRUCTED | ASN::OPTIONAL | ASN::EXPLICIT>
         using APDU_Association_information = APDUComponent<TAGID, ASN::OctetStringSchema, OPT>;
+    template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::IMPLICIT | ASN::OPTIONAL>
+        using APDU_Protocol_Version = APDUComponent<TAGID, APDUConstants::protocol_version_Schema, OPT, 
+                                                    APDUConstants::protocol_version_default>;
+    template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::OPTIONAL | ASN::IMPLICIT>
+        using APDU_ACSE_Requirements = APDUComponent<TAGID, APDUConstants::acse_requirements_Schema, OPT>;
+    template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::CONSTRUCTED | ASN::EXPLICIT | ASN::OPTIONAL>
+        using APDU_Authentication_Value = APDUComponent<TAGID, APDUConstants::authentication_value_Schema, OPT>;
 
 }

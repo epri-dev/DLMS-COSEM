@@ -13,8 +13,8 @@ namespace EPRI
     {
     public:
         HDLCLLCFixture()
-            : HDLCClientLLC(HDLCAddress(0x02), &TestSerial, HDLCOptions({ 3 }))
-            , m_MyServer(HDLCAddress(0x01), &TestSerial, HDLCOptions({ 3 }), 10)
+            : HDLCClientLLC(HDLCAddress(0x02), &TestSerial, HDLCOptions({ false, 3, 500 }))
+            , m_MyServer(HDLCAddress(0x01), &TestSerial, HDLCOptions({ false, 3, 500 }), 10)
         {
         }
         virtual void SetUp()

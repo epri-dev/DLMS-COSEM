@@ -88,6 +88,10 @@ namespace EPRI
         //
         HDLCRunResult DataRequest(const DLDataRequestParameter& Parameters);
         void RegisterDataIndication(CallbackFunction Callback);
+        //
+        // Transport
+        //
+        bool DataRequest(const DataRequestParameter& Parameters);
         
     protected:
         bool MACConnectIndication(const BaseCallbackParameter& Parameters);
