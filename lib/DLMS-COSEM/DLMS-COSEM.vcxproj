@@ -79,6 +79,7 @@
     <ClCompile Include="hdlc\HDLCMAC.cpp" />
     <ClCompile Include="COSEM.cpp" />
     <ClCompile Include="COSEMServer.cpp" />
+    <ClCompile Include="DLMSVector.cpp" />
     <ClCompile Include="serialwrapper\SerialWrapper.cpp" />
     <ClCompile Include="StateMachine.cpp" />
   </ItemGroup>
@@ -91,6 +92,7 @@
     <ClInclude Include="include\APDU\ASNType.h" />
     <ClInclude Include="include\Callback.h" />
     <ClInclude Include="include\COSEM.h" />
+    <ClInclude Include="include\DLMSVector.h" />
     <ClInclude Include="include\interfaces\DLMSData.h" />
     <ClInclude Include="include\hdlc\HDLCAddress.h" />
     <ClInclude Include="include\hdlc\appdefs.h" />

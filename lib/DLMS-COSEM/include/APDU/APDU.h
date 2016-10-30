@@ -26,10 +26,10 @@ namespace EPRI
         
         virtual std::vector<uint8_t> GetBytes()
         {
-            std::vector<uint8_t> RetVal;
-            std::vector<uint8_t> ComponentData;
+            DLMSVector RetVal;
+            DLMSVector ComponentData;
             
-            RetVal.push_back(Tag);
+            RetVal.AppendUInt8(Tag);
             for (int Index = 0; Index < m_Components.size(); ++Index)
             {
                 if (!m_Components[Index]->Append(&ComponentData))
@@ -37,11 +37,10 @@ namespace EPRI
                     return std::vector<uint8_t>();
                 }
             }
-            ASNType::AppendLength(ComponentData.size(), &RetVal);
-            RetVal.reserve(RetVal.size() + ComponentData.size());
-            RetVal.insert(RetVal.end(), ComponentData.begin(), ComponentData.end());
+            ASNType::AppendLength(ComponentData.Size(), &RetVal);
+            RetVal.Append(ComponentData);
 
-            return RetVal;            
+            return RetVal.GetBytes();            
         }
         
         virtual bool IsValid() const

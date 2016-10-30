@@ -30,6 +30,31 @@ namespace EPRI
         APDU_Authentication_Value<10>    responding_authentication_value;
         APDU_Implementation_data<29>     implementation_information;
         APDU_Association_information<30> user_information;
+        
+        enum AssociationResult : int32_t
+        {
+            accepted = 0,
+            rejected_permanent = 1,
+            rejected_transient = 2
+        };
+        
+        enum AssociateDiagnosticUser : int32_t
+        {
+            user_null = 0,
+            user_no_reason_given = 1,
+            application_context_name_not_supported = 2,
+            authentication_mechanism_name_not_recognized = 11,
+            authentication_mechanism_name_required = 12,
+            authentication_failure = 13,
+            authentication_required = 14
+        };
+        
+        enum AssociateDiagnosticProvider : int32_t
+        {
+            provider_null = 0,
+            provider_no_reason_given = 1,
+            no_common_acse_version = 2
+        };
     };
 
 }

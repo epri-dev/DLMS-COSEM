@@ -30,7 +30,7 @@ namespace EPRI
         virtual bool IsValid() const = 0;
         
     protected:
-        virtual bool Append(std::vector<uint8_t> * pVector) = 0;
+        virtual bool Append(DLMSVector * pVector) = 0;
     };
 
     template <ASN::TagIDType TAGID, ASN::SchemaType DT, 
@@ -92,13 +92,11 @@ namespace EPRI
         //
         // IAPDUComponent
         //
-        virtual bool Append(std::vector<uint8_t> * pVector)
+        virtual bool Append(DLMSVector * pVector)
         {
             try
             {
-                std::vector<uint8_t> Current = GetBytes();
-                pVector->reserve(pVector->size() + Current.size());
-                pVector->insert(pVector->end(), Current.begin(), Current.end());
+                pVector->Append(GetBytes());
             }
             catch (...)
             {

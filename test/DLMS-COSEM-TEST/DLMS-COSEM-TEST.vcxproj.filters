@@ -54,6 +54,9 @@
     <ClCompile Include="UnitTest-APDU-AARE.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="UnitTest-DLMSVector.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt">

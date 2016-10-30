@@ -8,6 +8,7 @@
 #include <bitset>
 
 #include "mapbox/variant.hpp"
+#include "DLMSVector.h"
 
 namespace EPRI
 {
@@ -42,102 +43,101 @@ namespace EPRI
 
         enum InternalDataType : uint32_t
         {
-            NORMAL_T         = 0x00000000,
-            BEGIN_CHOICE_T   = 0x10000000,
-            END_CHOICE_T     = 0x20000000,
-            BEGIN_SEQUENCE_T = 0x30000000,
-            END_SEQUENCE_T   = 0x40000000,
-            END_SCHEMA_T     = 0xF0000000
+            NORMAL_T                = 0x00000000,
+            BEGIN_CHOICE_T          = 0x10000000,
+            END_CHOICE_T            = 0x20000000,
+            BEGIN_CHOICE_ENTRY_T    = 0x30000000,
+            END_CHOICE_ENTRY_T      = 0x40000000,
+            BEGIN_SEQUENCE_T        = 0x50000000,
+            END_SEQUENCE_T          = 0x60000000,
+            INTEGER_LIST_T          = 0x70000000,
+            END_SCHEMA_T            = 0xF0000000
         };
         
         typedef uint32_t               ComponentOptionType;
         typedef uint32_t               SchemaBaseType;
-        typedef const SchemaBaseType * SchemaType;
+        struct SchemaEntry
+        {
+            SchemaBaseType  m_SchemaType;
+            DLMSVariant     m_Extra;
+        };
+        typedef const SchemaEntry *    SchemaEntryPtr;
+        typedef SchemaEntryPtr         SchemaType;
         typedef uint8_t                TagIDType;
         
 #define ASN_SCHEMA_INTERNAL_DATA_TYPE(SCH)\
-        (SCH & 0xF0000000)
+        ((SCH)->m_SchemaType & 0xF0000000)
             
 #define ASN_SCHEMA_OPTIONS(SCH)\
-        (SCH & 0x0F000000)
+        ((SCH)->m_SchemaType & 0x0F000000)
             
 #define ASN_SCHEMA_DATA_TYPE(SCH)\
-        ASN::DataTypes(SCH & 0x0000FFFF)
+        ASN::DataTypes((SCH)->m_SchemaType & 0x0000FFFF)
             
-#define ASN_SCHEMA_DATA_TYPE_MAX_LENGTH(SCH)\
-        size_t((SCH & 0x00FF0000) >> 16)
+#define ASN_SCHEMA_DATA_TYPE_SIZE(SCH)\
+        size_t(((SCH)->m_SchemaType & 0x00FF0000) >> 16)
             
 #define ASN_DEFINE_SCHEMA(SDEF)\
-        static const ASN::SchemaBaseType SDEF[];
+        static const ASN::SchemaEntry SDEF[];
         
 #define ASN_BEGIN_SCHEMA(SDEF) \
-        const ASN::SchemaBaseType SDEF[] =\
+        const ASN::SchemaEntry SDEF[] =\
         { 
 #define ASN_BEGIN_CHOICE\
-            EPRI::ASN::InternalDataType::BEGIN_CHOICE_T,
+            { EPRI::ASN::InternalDataType::BEGIN_CHOICE_T },
 #define ASN_END_CHOICE\
-            EPRI::ASN::InternalDataType::END_CHOICE_T,
+            { EPRI::ASN::InternalDataType::END_CHOICE_T },
+#define ASN_BEGIN_CHOICE_ENTRY(E)\
+            { ((E << 16) | \
+               EPRI::ASN::InternalDataType::BEGIN_CHOICE_ENTRY_T) },
+#define ASN_END_CHOICE_ENTRY\
+            { EPRI::ASN::InternalDataType::END_CHOICE_ENTRY_T },
 #define ASN_BEGIN_SEQUENCE(OPTIONS)\
-            EPRI::ASN::InternalDataType::BEGIN_SEQUENCE_T | (OPTIONS),
+            { (EPRI::ASN::InternalDataType::BEGIN_SEQUENCE_T | (OPTIONS)) },
 #define ASN_END_SEQUENCE\
-            EPRI::ASN::InternalDataType::END_SEQUENCE_T,
+            { EPRI::ASN::InternalDataType::END_SEQUENCE_T },
 #define ASN_NULL_TYPE\
-            EPRI::ASN::DataTypes::NULL,
+            { EPRI::ASN::DataTypes::NULL },
 #define ASN_OCTET_STRING_TYPE(OPTIONS)\
-            EPRI::ASN::DataTypes::OCTET_STRING | (OPTIONS),
+            { (EPRI::ASN::DataTypes::OCTET_STRING | (OPTIONS)) },
 #define ASN_BIT_STRING_TYPE(OPTIONS, MAXSIZE)\
-            (OPTIONS) | (EPRI::ASN::SchemaBaseType(MAXSIZE) << 16) | \
-                EPRI::ASN::DataTypes::BIT_STRING,
+            { ((OPTIONS) | (EPRI::ASN::SchemaBaseType(MAXSIZE) << 16) | \
+                EPRI::ASN::DataTypes::BIT_STRING) },
 #define ASN_OBJECT_IDENTIFIER_TYPE(OPTIONS)\
-            EPRI::ASN::DataTypes::OBJECT_IDENTIFIER | (OPTIONS),
+            { (EPRI::ASN::DataTypes::OBJECT_IDENTIFIER | (OPTIONS)) },
 #define ASN_INTEGER_TYPE(OPTIONS)\
-            EPRI::ASN::DataTypes::INTEGER | (OPTIONS),
+            { (EPRI::ASN::DataTypes::INTEGER | (OPTIONS)) },
+#define ASN_INTEGER_LIST_TYPE(OPTIONS, ...)\
+            { (EPRI::ASN::InternalDataType::INTEGER_LIST_T | (OPTIONS)), \
+                    DLMSVariant(std::initializer_list<uint32_t>(__VA_ARGS__)) },
 #define ASN_BOOLEAN_TYPE(OPTIONS)\
-            EPRI::ASN::DataTypes::BOOLEAN | (OPTIONS),
+            { (EPRI::ASN::DataTypes::BOOLEAN | (OPTIONS)) },
 #define ASN_ENUM_TYPE(OPTIONS)\
-            EPRI::ASN::DataTypes::ENUM | (OPTIONS),
+            { (EPRI::ASN::DataTypes::ENUM | (OPTIONS)) },
 #define ASN_REAL_TYPE(OPTIONS)\
-            EPRI::ASN::DataTypes::REAL | (OPTIONS),
+            { (EPRI::ASN::DataTypes::REAL | (OPTIONS)) },
 #define ASN_GraphicString_TYPE(OPTIONS)\
-            EPRI::ASN::DataTypes::GraphicString | (OPTIONS),
+            { (EPRI::ASN::DataTypes::GraphicString | (OPTIONS)) },
 #define ASN_END_SCHEMA\
-            EPRI::ASN::InternalDataType::END_SCHEMA_T\
+            { EPRI::ASN::InternalDataType::END_SCHEMA_T }\
         };
         //
         // Standard Schema Definitions
         //
-        extern const SchemaBaseType EmptySchema[];
-        extern const SchemaBaseType OctetStringSchema[];
-        extern const SchemaBaseType ObjectIdentifierSchema[];
-        extern const SchemaBaseType IntegerSchema[];
-        extern const SchemaBaseType GraphicStringSchema[];
+        extern const SchemaEntry EmptySchema[];
+        extern const SchemaEntry OctetStringSchema[];
+        extern const SchemaEntry ObjectIdentifierSchema[];
+        extern const SchemaEntry IntegerSchema[];
+        extern const SchemaEntry GraphicStringSchema[];
 
     }
     
-    using namespace mapbox::util;
-    
-    struct blank
-        {};
-    
-    using ASNVariant = variant<blank, bool, int32_t, uint32_t, std::string, double, std::vector<uint8_t>, std::initializer_list<uint32_t>>;
-    enum ASNVariantIndex
-    {
-        VAR_BLANK     = 0,
-        VAR_BOOL      = 1,
-        VAR_INT32     = 2,
-        VAR_UINT32    = 3,
-        VAR_STRING    = 4,
-        VAR_DOUBLE    = 5,
-        VAR_VECTOR    = 6,
-        VAR_INIT_LIST = 7
-    };
-
     class ASNType
     {
     public:
         ASNType() = delete;
-        ASNType(ASN::SchemaType Schema);
-        ASNType(ASN::DataTypes DT, const ASNVariant& Value);
+        ASNType(ASN::SchemaEntryPtr Schema);
+        ASNType(ASN::DataTypes DT, const DLMSVariant& Value);
         virtual ~ASNType();
         
         virtual std::vector<uint8_t> GetBytes() const;
@@ -146,17 +146,17 @@ namespace EPRI
         virtual bool IsEmpty() const;
         virtual void Clear();
         virtual void Rewind();
-        virtual bool Append(const ASNVariant& Value);
+        virtual bool Append(const DLMSVariant& Value);
         virtual bool Append(const ASNType& Value);
-        virtual bool Get(ASNVariant * pValue);
+        virtual bool GetCurrentSchemaValue(DLMSVariant * pVariant) const;
         
         inline ASN::DataTypes GetCurrentSchemaType() const
         {
             return ASN_SCHEMA_DATA_TYPE(GetCurrentSchemaEntry());
         }
-        inline size_t GetCurrentSchemaTypeMaxLength() const
+        inline uint32_t GetCurrentSchemaTypeSize() const
         {
-            return ASN_SCHEMA_DATA_TYPE_MAX_LENGTH(GetCurrentSchemaEntry());
+            return ASN_SCHEMA_DATA_TYPE_SIZE(GetCurrentSchemaEntry());
         }
         //
         // Operators
@@ -165,23 +165,21 @@ namespace EPRI
         //
         // Helpers
         //
-        static bool AppendLength(size_t Length, std::vector<uint8_t> * pData);
+        static bool AppendLength(size_t Length, DLMSVector * pData);
         static uint8_t CalculateLengthBytes(size_t Length);
 
     protected:
-        using ASNRawDataType = std::vector<uint8_t>;
-
         ASNType(ASN::DataTypes DT);
         
-        inline ASN::SchemaBaseType GetCurrentSchemaEntry() const
+        inline ASN::SchemaEntryPtr GetCurrentSchemaEntry() const
         {
-            return *m_pCurrentSchema;
+            return m_pCurrentSchema;
         }
         
-        bool GetNextSchemaEntry(ASN::SchemaBaseType * pSchemaEntry);
-        bool InternalAppend(const ASNVariant& Value);
+        bool GetNextSchemaEntry(ASN::SchemaEntryPtr * ppSchemaEntry);
+        bool InternalAppend(const DLMSVariant& Value);
         bool InternalAppend(const ASNType& Value);
-        bool InternalAppend(const ASNRawDataType& Value);
+        bool InternalAppend(const DLMSVector& Value);
        
         enum AppendStates
         {
@@ -189,13 +187,11 @@ namespace EPRI
             ST_CHOICE,
             ST_SEQUENCE
         }                              m_AppendState = ST_SIMPLE;
-        ASN::SchemaBaseType            m_SingleDataType[2] = { ASN::VOID, ASN::END_SCHEMA_T};
-        ASN::SchemaType                m_pSchema = nullptr;
-        ASN::SchemaType                m_pCurrentSchema = nullptr;
-        ASNRawDataType                 m_Data;
+        ASN::SchemaEntry               m_SingleDataType[2] = { { ASN::VOID }, { ASN::END_SCHEMA_T } };
+        ASN::SchemaEntryPtr            m_pSchema = nullptr;
+        ASN::SchemaEntryPtr            m_pCurrentSchema = nullptr;
+        DLMSVector                     m_Data;
     };
-    
-    
     
     class ASNObjectIdentifier : public ASNType
     {

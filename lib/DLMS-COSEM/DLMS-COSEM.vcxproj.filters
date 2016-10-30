@@ -73,6 +73,9 @@
     <ClCompile Include="APDU\AARE.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="DLMSVector.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ERROR_TYPE.h">
@@ -199,6 +202,9 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="include\APDU\APDUConstants.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DLMSVector.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

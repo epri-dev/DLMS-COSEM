@@ -57,12 +57,12 @@ namespace EPRI
         
         Request.application_context_name.Append(ASNObjectIdentifier({ 2, 16, 756, 5, 8, 1, 1 }));
         Request.sender_acse_requirements.Append(
-            ASNBitString(Request.sender_acse_requirements.GetCurrentSchemaTypeMaxLength(), 1));
+            ASNBitString(Request.sender_acse_requirements.GetCurrentSchemaTypeSize(), 1));
         Request.mechanism_name.Append(ASNObjectIdentifier({ 2, 16, 756, 5, 8, 2, 1 }));
         Request.calling_authentication_value.Append(ASNType(ASN::GraphicString, std::string("33333333")));
         Request.user_information.Append(
             ASNType(ASN::OCTET_STRING, 
-            std::vector<uint8_t>({ 0x01, 0x00, 0x00, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00, 0x00, 0x7E, 0x1F, 0x00, 0x00 })));
+            DLMSVector({ 0x01, 0x00, 0x00, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00, 0x00, 0x7E, 0x1F, 0x00, 0x00 })));
         Transport * pTransport = GetTransport();
         if (nullptr != pTransport)
         {
