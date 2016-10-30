@@ -32,5 +32,22 @@ To run unit tests.
 	cd [DLMS-COSEM Directory]/bin/test/DLMS-COSEM-TEST
 	./DLMS-COSEM-TEST
 
+For the STM32 Nucleo F207ZG development board:
+
+	Prerequisites:
+	
+		GCC for ARM (at least 4.8 or above) installed on a WINDOWS PC.
+		STM32 ST-LINK Utility from st.com installed on a WINDOWS PC.
+
+		Set the ARM_TOOLCHAIN_ROOT environment variable to the root of where GCC is installed.
+
+	cd [DLMS-COSEM Directory]/src/STM32-NUCLEO-F207ZG
+	make
+
+	The output will be located in [DLMS-COSEM Directory]/src/STM32-NUCLEO-F207ZG/Debug
+
+	You can program the development board using the ST-LINK software from STM.  Select the .bin file from 
+	the Debug folder.
+
 
 
