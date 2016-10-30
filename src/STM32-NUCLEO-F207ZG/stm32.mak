@@ -7,7 +7,7 @@
 BSP_ROOT ?= BSP
 EFP_BASE ?= $(LOCALAPPDATA)/VisualGDB/EmbeddedEFPs
 TESTFW_BASE ?= $(LOCALAPPDATA)/VisualGDB/TestFrameworks
-TOOLCHAIN_ROOT ?= C:/SysGCC/arm-eabi
+TOOLCHAIN_ROOT ?= $(ARM_TOOLCHAIN_ROOT)
 #Embedded toolchain
 CC := $(TOOLCHAIN_ROOT)/bin/arm-eabi-gcc.exe
 CXX := $(TOOLCHAIN_ROOT)/bin/arm-eabi-g++.exe
