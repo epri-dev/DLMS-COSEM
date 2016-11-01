@@ -71,7 +71,7 @@ namespace EPRI
             return std::vector<uint8_t>();
         }
         // Outer tag
-        RetVal.AppendUInt8(Tag | (Options & ASN::CONSTRUCTED ? 0b00100000 : 0x00));
+        RetVal.Append<uint8_t>(Tag | (Options & ASN::CONSTRUCTED ? 0b00100000 : 0x00));
         // Length   
         if (!(Options & ASN::CONSTRUCTED))
         {
@@ -132,22 +132,22 @@ namespace EPRI
                 // Validate our appropriate lengths for this data type.
                 //
                 const std::set<uint8_t> VALID_LENGTHS({ 1, 2, 4, 8 });
-                if (m_Data.Peek() == ASN::INTEGER &&
-                    VALID_LENGTHS.find(m_Data.Peek(1)) != VALID_LENGTHS.end())
+                if (m_Data.PeekByte() == ASN::INTEGER &&
+                    VALID_LENGTHS.find(m_Data.PeekByte(1)) != VALID_LENGTHS.end())
                 {
-                    switch (m_Data.Peek(1))
+                    switch (m_Data.PeekByte(1))
                     {
                     case 1:
-                        RetVal = m_Data.PeekInt8(pVariant);
+                        RetVal = m_Data.Peek<int8_t>(pVariant);
                         break;
                     case 2:
-                        RetVal = m_Data.PeekInt16(pVariant);
+                        RetVal = m_Data.Peek<int16_t>(pVariant);
                         break;
                     case 4:
-                        RetVal = m_Data.PeekInt32(pVariant);
+                        RetVal = m_Data.Peek<int32_t>(pVariant);
                         break;
                     case 8:
-                        RetVal = m_Data.PeekInt64(pVariant);
+                        RetVal = m_Data.Peek<int64_t>(pVariant);
                         break;
                     default:
                         RetVal = false;
@@ -188,13 +188,13 @@ namespace EPRI
                 Buffer[sizeof(Buffer) - WorkingLength] = (0xFF & Length);
                 Length = Length >> 8;
             }
-            pData->AppendUInt8(0x80 | WorkingLength);
-            pData->Append(Buffer + sizeof(Buffer) - WorkingLength, 
+            pData->Append<uint8_t>(0x80 | WorkingLength);
+            pData->AppendBuffer(Buffer + sizeof(Buffer) - WorkingLength, 
                 WorkingLength);
         }
         else
         {
-            pData->AppendUInt8(Length);
+            pData->Append<uint8_t>(Length);
         }
         return true;
     }
@@ -258,7 +258,7 @@ namespace EPRI
                     {
                         if (Value.which() == VAR_VECTOR)
                         {
-                            m_Data.AppendUInt8(ASN::OCTET_STRING);
+                            m_Data.Append<uint8_t>(ASN::OCTET_STRING);
                             AppendLength(Value.get<DLMSVector>().Size(), &m_Data);
                             m_Data.Append(Value.get<DLMSVector>());
                             return true;
@@ -268,8 +268,8 @@ namespace EPRI
                     break;
                 case ASN::INTEGER:
                     {
-                        m_Data.AppendUInt8(ASN::INTEGER);
-                        size_t LengthIndex = m_Data.AppendUInt8(0);
+                        m_Data.Append<uint8_t>(ASN::INTEGER);
+                        size_t LengthIndex = m_Data.Append<uint8_t>(0);
                         m_Data.Append(Value);
                         m_Data[LengthIndex] = m_Data.Size() - LengthIndex - 1;
                     }
@@ -345,7 +345,7 @@ namespace EPRI
                     (ASN_SCHEMA_DATA_TYPE(SchemaEntry) ==
                         Value.m_pSchema->m_SchemaType))
                 {
-                    m_Data.AppendUInt8(0x80 | ChoiceIndex);
+                    m_Data.Append<uint8_t>(0x80 | ChoiceIndex);
                     Appended = InternalAppend(Value.m_Data);
                 }
                 ++ChoiceIndex;
@@ -378,15 +378,15 @@ namespace EPRI
         //
         // Tag
         //
-        m_Data.AppendUInt8(OT);
+        m_Data.Append<uint8_t>(OT);
         //
         // Reserve for length (no long encoding needed for OID)
         //
-        m_Data.AppendUInt8(0);
+        m_Data.Append<uint8_t>(0);
         if (ABSOLUTE == OT && List.size() >= 2)
         {
             uintmax_t FirstArc = *it++;
-            m_Data.AppendUInt8((40 * FirstArc) + (*it++));
+            m_Data.Append<uint8_t>((40 * FirstArc) + (*it++));
         }
         for (;it != List.end(); ++it)
         {
@@ -421,7 +421,7 @@ namespace EPRI
                 {
                     Value |= 0x80;
                 }
-                m_Data.AppendUInt8(Value);
+                m_Data.Append<uint8_t>(Value);
             }
         }
         m_Data[1] = uint8_t(m_Data.Size() - 2);
@@ -457,7 +457,7 @@ namespace EPRI
         {
             ++ByteOffset;
         }
-        m_Data.AppendUInt8(8 - (BitsExpected % 8));
+        m_Data.Append<uint8_t>(8 - (BitsExpected % 8));
         for (uint8_t ByteIndex = 0; ByteIndex < ByteOffset; ++ByteIndex)
         {
             uint8_t CurrentByte = 0;
@@ -465,7 +465,7 @@ namespace EPRI
             {
                 CurrentByte |= (Value[ValueBitIndex++] << BitShift);
             }
-            m_Data.AppendUInt8(CurrentByte);
+            m_Data.Append<uint8_t>(CurrentByte);
         }
         
     }

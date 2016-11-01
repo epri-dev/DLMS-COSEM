@@ -29,7 +29,7 @@ namespace EPRI
             DLMSVector RetVal;
             DLMSVector ComponentData;
             
-            RetVal.AppendUInt8(Tag);
+            RetVal.Append<uint8_t>(Tag);
             for (int Index = 0; Index < m_Components.size(); ++Index)
             {
                 if (!m_Components[Index]->Append(&ComponentData))

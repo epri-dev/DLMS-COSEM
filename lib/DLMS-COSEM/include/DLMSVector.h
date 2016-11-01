@@ -54,174 +54,169 @@ namespace EPRI
         size_t GetReadPosition() const;
         bool SetReadPosition(size_t value);
         bool Zero(size_t Position = 0, size_t Count = 0);
-        size_t AppendUInt8(uint8_t Value);
-        size_t AppendUInt16(uint16_t Value, bool BigEndian = true);
-        size_t AppendUInt32(uint32_t Value, bool BigEndian = true);
-        size_t AppendUInt64(uint64_t Value, bool BigEndian = true);
-        size_t AppendInt8(int8_t Value);
-        size_t AppendInt16(int16_t Value, bool BigEndian = true);
-        size_t AppendInt32(int32_t Value, bool BigEndian = true);
-        size_t AppendInt64(int64_t Value, bool BigEndian = true);
+        
+        template <typename _VariantType, uint8_t BitsToAppend = 0>
+            size_t Append(_VariantType Value, bool BigEndian = true)
+            {
+                static_assert(BitsToAppend == 0 || BitsToAppend == 8 || BitsToAppend == 16 || 
+                              BitsToAppend == 32 || BitsToAppend == 64,
+                    "Bits must be 0, 8, 16, 32, or 64");
+                static_assert(std::is_integral<_VariantType>::value,
+                    "_VariantType must be an integral type");
+
+                typedef typename 
+                    std::conditional
+                    <
+                        BitsToAppend == 0, 
+                        _VariantType,
+                        typename std::conditional
+                        <
+                            BitsToAppend == 8, 
+                            uint8_t,
+                            typename std::conditional
+                            <
+                                BitsToAppend == 16, 
+                                uint16_t,
+                                typename std::conditional
+                                <
+                                    BitsToAppend == 32, 
+                                    uint32_t,
+                                    typename std::conditional
+                                    <
+                                        BitsToAppend == 64, 
+                                        uint64_t,
+                                        void
+                                    >::type
+                                >::type
+                            >::type
+                        >::type
+                    >::type AppendBaseType;
+                
+                static_assert(sizeof(_VariantType) >= sizeof(AppendBaseType),
+                    "Variant type is too small");
+
+                size_t RetVal = m_Data.size();
+                for (int Index = 0; Index < sizeof(AppendBaseType); ++Index)
+                {
+                    if (BigEndian)
+                    {
+                        m_Data.push_back(0xFF & (Value >> ((sizeof(AppendBaseType) - Index - 1) * 8)));
+                    }
+                    else
+                    {
+                        m_Data.push_back(0xFF & (Value >> (Index * 8)));
+                    }
+                }
+                return RetVal;
+            }
+        
         size_t AppendFloat(float Value);
         size_t AppendDouble(double Value);
-        size_t Append(uint8_t Value);
-        size_t Append(uint16_t Value, bool BigEndian = true);
-        size_t Append(uint32_t Value, bool BigEndian = true);
-        size_t Append(uint64_t Value, bool BigEndian = true);
-        size_t Append(int8_t Value);
-        size_t Append(int16_t Value, bool BigEndian = true);
-        size_t Append(int32_t Value, bool BigEndian = true);
-        size_t Append(int64_t Value, bool BigEndian = true);
-        size_t Append(float Value);
-        size_t Append(double Value);
-        size_t Append(const void * pValue, size_t Count);
+        size_t AppendBuffer(const void * pValue, size_t Count);
         ssize_t Append(const DLMSVector& Value, size_t Position = 0, size_t Count = 0);
         size_t Append(const std::string& Value);
         size_t Append(const std::vector<uint8_t>& Value);
         size_t Append(const DLMSVariant& Value, bool Trim = true);
         void Clear();
-        template <typename _VariantType>
-            bool Get8(DLMSVariant * pValue)
+        template <typename _VariantType, uint8_t BitsToGet = 0>
+            bool Get(DLMSVariant * pValue, bool BigEndian = true)
             {
-                bool RetVal = Peek8<_VariantType>(pValue);
+                size_t BytesPeeked = 0;
+                bool   RetVal = Peek<_VariantType, BitsToGet>(pValue, BigEndian, &BytesPeeked);
                 if (RetVal)
                 {
-                    m_ReadPosition += sizeof(uint8_t);
+                    m_ReadPosition += BytesPeeked;
                 }
                 return RetVal;
             }
-        template <typename _VariantType>
-            bool Get16(DLMSVariant * pValue)
-            {
-                bool RetVal = Peek16<_VariantType>(pValue);
-                if (RetVal)
-                {
-                    m_ReadPosition += sizeof(uint16_t);
-                }
-                return RetVal;
-            }
-        
-        bool GetUInt8(DLMSVariant * pValue);
-        bool GetUInt16(DLMSVariant * pValue, bool BigEndian = true);
-        bool GetUInt32(DLMSVariant * pValue, bool BigEndian = true);
-        bool GetUInt64(DLMSVariant * pValue, bool BigEndian = true);        
-        bool GetInt8(DLMSVariant * pValue);
-        bool GetInt16(DLMSVariant * pValue, bool BigEndian = true);
-        bool GetInt32(DLMSVariant * pValue, bool BigEndian = true);
-        bool GetInt64(DLMSVariant * pValue, bool BigEndian = true);
-        bool GetFloat(DLMSVariant * pValue);
-        bool GetDouble(DLMSVariant * pValue);
-        bool Get(uint8_t * pValue, size_t Count);
-        bool Get(std::vector<uint8_t> * pValue, size_t Count);
+//        bool GetFloat(DLMSVariant * pValue);
+//        bool GetDouble(DLMSVariant * pValue);
+        bool GetBuffer(uint8_t * pValue, size_t Count);
+        bool GetVector(std::vector<uint8_t> * pValue, size_t Count);
         std::vector<uint8_t> GetBytes() const;
         
-        int Peek(size_t OffsetFromGetPosition = 0) const;
-        
-        template <typename _VariantType>
-            bool Peek8(DLMSVariant * pValue) const
+        int PeekByte(size_t OffsetFromGetPosition = 0) const;
+        bool PeekBuffer(uint8_t * pValue, size_t Count) const;
+//        bool PeekFloat(DLMSVariant * pValue) const;
+//        bool PeekDouble(DLMSVariant * pValue)const ;
+       
+        template <typename _VariantType, uint8_t BitsToPeek = 0>
+            bool Peek(DLMSVariant * pValue, bool BigEndian = true, size_t * pBytesPeeked = nullptr) const
             {
-                if (m_ReadPosition + sizeof(uint8_t) <= m_Data.size())
-                {
-                    pValue->set<_VariantType>(m_Data[m_ReadPosition]);
-                    return true;
-                }
-                return false;
-            }
-        template <typename _VariantType>
-            bool Peek16(DLMSVariant * pValue, bool BigEndian = true) const
-            {
-                static_assert(std::is_integral<_VariantType>::value &&
-                              sizeof(_VariantType) >= sizeof(uint16_t),
+                static_assert(BitsToPeek == 0 || BitsToPeek == 8 || BitsToPeek == 16 || 
+                              BitsToPeek == 32 || BitsToPeek == 64,
+                    "Bits must be 0, 8, 16, 32, or 64");
+                static_assert(std::is_integral<_VariantType>::value ||
+                    std::is_same<_VariantType, float>::value ||
+                    std::is_same<_VariantType, double>::value,
+                    "_VariantType must be an integral type, float or double");
+
+                typedef typename 
+                    std::conditional
+                    <
+                        BitsToPeek == 0, 
+                        typename std::conditional
+                        <
+                            std::is_same<_VariantType, float>::value,
+                            uint32_t,
+                            typename std::conditional
+                            <   
+                                std::is_same<_VariantType, double>::value,
+                                uint64_t,
+                                _VariantType
+                            >::type
+                        >::type,
+                        typename std::conditional
+                        <
+                            BitsToPeek == 8, 
+                            uint8_t,
+                            typename std::conditional
+                            <
+                                BitsToPeek == 16, 
+                                uint16_t,
+                                typename std::conditional
+                                <
+                                    BitsToPeek == 32, 
+                                    uint32_t,
+                                    typename std::conditional
+                                    <
+                                        BitsToPeek == 64, 
+                                        uint64_t,
+                                        void
+                                    >::type
+                                >::type
+                            >::type
+                        >::type
+                    >::type PeekBaseType;
+                
+                static_assert(sizeof(_VariantType) >= sizeof(PeekBaseType),
                     "Variant type is too small");
                     
-                if (m_ReadPosition + sizeof(uint16_t) <= m_Data.size())
+                if (m_ReadPosition + sizeof(PeekBaseType) <= m_Data.size())
                 {
-                    if (BigEndian)
+                    PeekBaseType V = 0;
+                    for (int Index = 0; Index < sizeof(PeekBaseType); ++Index)
                     {
-                        pValue->set<_VariantType>(uint16_t(m_Data[m_ReadPosition] << 8) |
-                                                  uint16_t(m_Data[m_ReadPosition + 1]));
+                        if (BigEndian)
+                        {
+                            V |= (PeekBaseType(m_Data[m_ReadPosition + Index]) << ((sizeof(PeekBaseType) - Index - 1) * 8));
+                        }
+                        else
+                        {
+                            V |= (PeekBaseType(m_Data[m_ReadPosition + 
+                                    (sizeof(PeekBaseType) - Index) - 1]) << ((sizeof(PeekBaseType) - Index - 1) * 8));
+                        }
                     }
-                    else
+                    pValue->set<_VariantType>(*((_VariantType *)&V));
+                    if (nullptr != pBytesPeeked)
                     {
-                        pValue->set<_VariantType>(uint16_t(m_Data[m_ReadPosition + 1] << 8) |
-                                                  uint16_t(m_Data[m_ReadPosition]));
+                        *pBytesPeeked = sizeof(PeekBaseType);
                     }
                     return true;
                 }
                 return false;
             }
-        template <typename _VariantType>
-            bool Peek32(DLMSVariant * pValue, bool BigEndian = true) const
-            {
-                static_assert(std::is_integral<_VariantType>::value &&
-                              sizeof(_VariantType) >= sizeof(uint32_t),
-                    "Variant type is too small");
-                
-                if (m_ReadPosition + sizeof(uint32_t) <= m_Data.size())
-                {
-                    if (BigEndian)
-                    {
-                        pValue->set<_VariantType>(uint32_t(m_Data[m_ReadPosition]) << 24 |
-                                  uint32_t(m_Data[m_ReadPosition + 1]) << 16 |
-                                  uint32_t(m_Data[m_ReadPosition + 2]) << 8 |
-                                  uint32_t(m_Data[m_ReadPosition + 3]));    
-                    }
-                    else
-                    {
-                        pValue->set<_VariantType>(uint32_t(m_Data[m_ReadPosition + 3]) << 24 |
-                                  uint32_t(m_Data[m_ReadPosition + 2]) << 16 |
-                                  uint32_t(m_Data[m_ReadPosition + 1]) << 8 |
-                                  uint32_t(m_Data[m_ReadPosition]));
-                    }
-                    return true;
-                }
-                return false;
-            }
-        template <typename _VariantType>
-            bool Peek64(DLMSVariant * pValue, bool BigEndian = true) const
-            {
-                static_assert(std::is_integral<_VariantType>::value &&
-                              sizeof(_VariantType) >= sizeof(uint64_t),
-                    "Variant type is too small");
-                
-                if (m_ReadPosition + sizeof(uint64_t) <= m_Data.size())
-                {
-                    if (BigEndian)
-                    {
-                        pValue->set<_VariantType>(uint64_t(m_Data[m_ReadPosition]) << 56 |
-                                  uint64_t(m_Data[m_ReadPosition + 1]) << 48 |
-                                  uint64_t(m_Data[m_ReadPosition + 2]) << 40 |
-                                  uint64_t(m_Data[m_ReadPosition + 3]) << 32 |
-                                  uint64_t(m_Data[m_ReadPosition + 4]) << 24 |
-                                  uint64_t(m_Data[m_ReadPosition + 5]) << 16 |
-                                  uint64_t(m_Data[m_ReadPosition + 6]) << 8 |
-                                  uint64_t(m_Data[m_ReadPosition + 7]));    
-                    }
-                    else
-                    {
-                        pValue->set<_VariantType>(uint64_t(m_Data[m_ReadPosition + 7]) << 56 |
-                                  uint64_t(m_Data[m_ReadPosition + 6]) << 48 |
-                                  uint64_t(m_Data[m_ReadPosition + 5]) << 40 |
-                                  uint64_t(m_Data[m_ReadPosition + 4]) << 32 |
-                                  uint64_t(m_Data[m_ReadPosition + 3]) << 24 |
-                                  uint64_t(m_Data[m_ReadPosition + 2]) << 16 |
-                                  uint64_t(m_Data[m_ReadPosition + 1]) << 8 |
-                                  uint64_t(m_Data[m_ReadPosition]));
-                    }
-                    return true;
-                }
-                return false;
-            }
-
-//        bool PeekUInt8(DLMSVariant * pValue) const;
-//        bool PeekUInt16(DLMSVariant * pValue, bool BigEndian = true) const;
-//        bool PeekUInt32(DLMSVariant * pValue, bool BigEndian = true) const;
-//        bool PeekUInt64(DLMSVariant * pValue, bool BigEndian = true) const;
-//        bool PeekInt8(DLMSVariant * pValue) const;
-//        bool PeekInt16(DLMSVariant * pValue, bool BigEndian = true) const;
-//        bool PeekInt32(DLMSVariant * pValue, bool BigEndian = true) const;
-//        bool PeekInt64(DLMSVariant * pValue, bool BigEndian = true) const;
-
+        
         std::string ToString();
 
         DLMSVector& operator=(DLMSVector& lval);
