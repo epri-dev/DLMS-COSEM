@@ -38,7 +38,13 @@ namespace EPRI
             rejected_transient = 2
         };
         
-        enum AssociateDiagnosticUser : int32_t
+        enum AssociateDiagnosticChoice : int8_t
+        {
+            acse_service_user     = 1,
+            acse_service_provider = 2
+        };
+            
+        enum AssociateDiagnosticUser : int8_t
         {
             user_null = 0,
             user_no_reason_given = 1,
@@ -49,7 +55,7 @@ namespace EPRI
             authentication_required = 14
         };
         
-        enum AssociateDiagnosticProvider : int32_t
+        enum AssociateDiagnosticProvider : int8_t
         {
             provider_null = 0,
             provider_no_reason_given = 1,

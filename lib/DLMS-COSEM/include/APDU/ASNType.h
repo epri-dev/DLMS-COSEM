@@ -67,6 +67,9 @@ namespace EPRI
         
 #define ASN_SCHEMA_INTERNAL_DATA_TYPE(SCH)\
         ((SCH)->m_SchemaType & 0xF0000000)
+
+#define ASN_IS_SCHEMA_END(SCH)\
+        (EPRI::ASN::InternalDataType::END_SCHEMA_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(SCH))
             
 #define ASN_SCHEMA_OPTIONS(SCH)\
         ((SCH)->m_SchemaType & 0x0F000000)
@@ -146,6 +149,7 @@ namespace EPRI
         virtual bool IsEmpty() const;
         virtual void Clear();
         virtual void Rewind();
+        virtual bool SelectChoice(int8_t Choice);
         virtual bool Append(const DLMSVariant& Value);
         virtual bool Append(const ASNType& Value);
         virtual bool GetCurrentSchemaValue(DLMSVariant * pVariant) const;
@@ -179,18 +183,21 @@ namespace EPRI
         bool GetNextSchemaEntry(ASN::SchemaEntryPtr * ppSchemaEntry);
         bool InternalAppend(const DLMSVariant& Value);
         bool InternalAppend(const ASNType& Value);
+        bool InternalSimpleAppend(ASN::SchemaEntryPtr SchemaEntry, const ASNType& Value);
         bool InternalAppend(const DLMSVector& Value);
        
         enum AppendStates
         {
             ST_SIMPLE,
             ST_CHOICE,
+            ST_CHOICE_ENTRY,
             ST_SEQUENCE
         }                              m_AppendState = ST_SIMPLE;
         ASN::SchemaEntry               m_SingleDataType[2] = { { ASN::VOID }, { ASN::END_SCHEMA_T } };
         ASN::SchemaEntryPtr            m_pSchema = nullptr;
         ASN::SchemaEntryPtr            m_pCurrentSchema = nullptr;
         DLMSVector                     m_Data;
+        int8_t                         m_Choice = 0;
     };
     
     class ASNObjectIdentifier : public ASNType
@@ -235,6 +242,5 @@ namespace EPRI
     public:
         ASNVoid();
     };
-
     
 }

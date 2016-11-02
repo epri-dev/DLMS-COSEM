@@ -9,9 +9,44 @@
 
 namespace EPRI
 {
-    bool IsValueInVariant(const DLMSVariant& Variant, const DLMSVariant& Value)
+    bool IsValueInVariant(const DLMSVariant& Value, const DLMSVariant& Variant)
     {
-        return false;
+        bool RetVal = false;
+        switch (Variant.which())
+        {
+        case VAR_INIT_LIST:
+            {
+                uint32_t CompareValue;
+                switch (Value.which())
+                {
+                case VAR_INT8:
+                    CompareValue = Value.get<int8_t>();
+                    break;
+                case VAR_UINT8: 
+                    CompareValue = Value.get<uint8_t>();
+                    break;
+                case VAR_INT16: 
+                    CompareValue = Value.get<int16_t>();
+                    break;
+                case VAR_UINT16:
+                    CompareValue = Value.get<uint16_t>();
+                    break;
+                case VAR_INT32: 
+                    CompareValue = Value.get<int32_t>();
+                    break;
+                case VAR_UINT32:
+                    CompareValue = Value.get<uint32_t>();
+                    break;
+                default:
+                    return false;
+                }
+                RetVal = std::find(Variant.get<DLMSVariantInitList>().begin(),
+                    Variant.get<DLMSVariantInitList>().end(),
+                    CompareValue) != Variant.get<DLMSVariantInitList>().end();
+            }
+            break;
+        }
+        return RetVal;
     }
     
     DLMSVector::DLMSVector()
@@ -259,26 +294,6 @@ namespace EPRI
         m_Data.clear();
     }
     
-//    bool DLMSVector::GetFloat(DLMSVariant * pValue)
-//    {
-//        bool RetVal = PeekFloat(pValue);
-//        if (RetVal)
-//        {
-//            m_ReadPosition += sizeof(float);
-//        }
-//        return RetVal;
-//    }
-//    
-//    bool DLMSVector::GetDouble(DLMSVariant * pValue)
-//    {
-//        bool RetVal = PeekDouble(pValue);
-//        if (RetVal)
-//        {
-//            m_ReadPosition += sizeof(double);
-//        }
-//        return RetVal;
-//    }
-
     bool DLMSVector::GetBuffer(uint8_t * pValue, size_t Count)
     {
         if (m_ReadPosition + Count <= m_Data.size())
@@ -324,42 +339,6 @@ namespace EPRI
         }
         return false;
     }
-    
-//    bool DLMSVector::PeekFloat(DLMSVariant * pValue) const
-//    {
-//        if (m_ReadPosition + sizeof(float) < m_Data.size())
-//        {
-//            union
-//            {
-//                float   Float;
-//                uint8_t Bytes[sizeof(float)];
-//            } Convert;
-//            if (PeekBuffer(Convert.Bytes, sizeof(Convert.Bytes)))
-//            {
-//                pValue->set<float>(Convert.Float);
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-//    
-//    bool DLMSVector::PeekDouble(DLMSVariant * pValue) const 
-//    {
-//        if (m_ReadPosition + sizeof(double) < m_Data.size())
-//        {
-//            union
-//            {
-//                double   Double;
-//                uint8_t  Bytes[sizeof(double)];
-//            } Convert;
-//            if (PeekBuffer(Convert.Bytes, sizeof(Convert.Bytes)))
-//            {
-//                pValue->set<double>(Convert.Double);
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
     
     std::string DLMSVector::ToString()
     {

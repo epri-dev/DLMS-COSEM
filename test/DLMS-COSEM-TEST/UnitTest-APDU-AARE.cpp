@@ -19,12 +19,15 @@ TEST(AARE, GeneralUsage)
         0x74, 0x05, 0x08, 0x01, 0x01 };
     ASSERT_TRUE(a1.application_context_name == A1CHECK_CONTEXT_NAME);
 
-    ASSERT_TRUE(a1.result.Append(ASNType(ASN::INTEGER, int32_t(AARE::AssociationResult::accepted))));
+    ASSERT_TRUE(a1.result.Append(
+        ASNType(ASN::INTEGER, int8_t(AARE::AssociationResult::accepted))));
     std::vector<uint8_t> A1CHECK_RESULT = 
         { 0xA2, 0x03, 0x02, 0x01, 0x00 };
     ASSERT_TRUE(a1.result == A1CHECK_RESULT);
     
-    ASSERT_TRUE(a1.result_source_diagnostic.Append(ASNType(ASN::INTEGER, DLMSVariant(0))));
+    ASSERT_TRUE(a1.result_source_diagnostic.SelectChoice(AARE::AssociateDiagnosticChoice::acse_service_user));
+    ASSERT_TRUE(a1.result_source_diagnostic.Append(
+        ASNType(ASN::INTEGER, int8_t(AARE::AssociateDiagnosticUser::user_null))));
     std::vector<uint8_t> A1CHECK_DIAGNOSTIC = 
     { 0xA3, 0x05, 0xA1, 0x03, 0x02, 0x01, 0x00 };
     ASSERT_TRUE(a1.result_source_diagnostic == A1CHECK_DIAGNOSTIC);

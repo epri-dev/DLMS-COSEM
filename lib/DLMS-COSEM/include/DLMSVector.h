@@ -39,7 +39,7 @@ namespace EPRI
         VAR_INIT_LIST = 14
     };
     
-    bool IsValueInVariant(const DLMSVariant& Variant, const DLMSVariant& Value);
+    bool IsValueInVariant(const DLMSVariant& Value, const DLMSVariant& Variant);
 
     class DLMSVector
     {
@@ -122,26 +122,22 @@ namespace EPRI
             bool Get(DLMSVariant * pValue, bool BigEndian = true)
             {
                 size_t BytesPeeked = 0;
-                bool   RetVal = Peek<_VariantType, BitsToGet>(pValue, BigEndian, &BytesPeeked);
+                bool   RetVal = Peek<_VariantType, BitsToGet>(pValue, BigEndian, 0, &BytesPeeked);
                 if (RetVal)
                 {
                     m_ReadPosition += BytesPeeked;
                 }
                 return RetVal;
             }
-//        bool GetFloat(DLMSVariant * pValue);
-//        bool GetDouble(DLMSVariant * pValue);
         bool GetBuffer(uint8_t * pValue, size_t Count);
         bool GetVector(std::vector<uint8_t> * pValue, size_t Count);
         std::vector<uint8_t> GetBytes() const;
         
         int PeekByte(size_t OffsetFromGetPosition = 0) const;
         bool PeekBuffer(uint8_t * pValue, size_t Count) const;
-//        bool PeekFloat(DLMSVariant * pValue) const;
-//        bool PeekDouble(DLMSVariant * pValue)const ;
        
         template <typename _VariantType, uint8_t BitsToPeek = 0>
-            bool Peek(DLMSVariant * pValue, bool BigEndian = true, size_t * pBytesPeeked = nullptr) const
+            bool Peek(DLMSVariant * pValue, bool BigEndian = true, size_t Offset = 0, size_t * pBytesPeeked = nullptr) const
             {
                 static_assert(BitsToPeek == 0 || BitsToPeek == 8 || BitsToPeek == 16 || 
                               BitsToPeek == 32 || BitsToPeek == 64,
@@ -192,18 +188,18 @@ namespace EPRI
                 static_assert(sizeof(_VariantType) >= sizeof(PeekBaseType),
                     "Variant type is too small");
                     
-                if (m_ReadPosition + sizeof(PeekBaseType) <= m_Data.size())
+                if (m_ReadPosition + sizeof(PeekBaseType) + Offset <= m_Data.size())
                 {
                     PeekBaseType V = 0;
                     for (int Index = 0; Index < sizeof(PeekBaseType); ++Index)
                     {
                         if (BigEndian)
                         {
-                            V |= (PeekBaseType(m_Data[m_ReadPosition + Index]) << ((sizeof(PeekBaseType) - Index - 1) * 8));
+                            V |= (PeekBaseType(m_Data[m_ReadPosition + Offset + Index]) << ((sizeof(PeekBaseType) - Index - 1) * 8));
                         }
                         else
                         {
-                            V |= (PeekBaseType(m_Data[m_ReadPosition + 
+                            V |= (PeekBaseType(m_Data[m_ReadPosition + Offset + 
                                     (sizeof(PeekBaseType) - Index) - 1]) << ((sizeof(PeekBaseType) - Index - 1) * 8));
                         }
                     }

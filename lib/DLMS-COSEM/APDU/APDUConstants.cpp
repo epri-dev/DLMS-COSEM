@@ -12,7 +12,9 @@ namespace EPRI
     ASN_END_SCHEMA
     ASN_BEGIN_SCHEMA(APDUConstants::authentication_value_Schema)
         ASN_BEGIN_CHOICE
-            ASN_GraphicString_TYPE(ASN::IMPLICIT)
+            ASN_BEGIN_CHOICE_ENTRY(APDUConstants::AuthenticationValueChoice::charstring)
+                ASN_GraphicString_TYPE(ASN::IMPLICIT)
+            ASN_END_CHOICE_ENTRY
         ASN_END_CHOICE
     ASN_END_SCHEMA
 

@@ -29,6 +29,7 @@ TEST(AARQ, GeneralUsage)
     { 0x8B, 0x07, 0x60, 0x85, 0x74, 0x05, 0x08,  0x02, 0x01 };
     ASSERT_TRUE(a1.mechanism_name == A1CHECK_MECHANISM_NAME);
  
+    ASSERT_TRUE(a1.calling_authentication_value.SelectChoice(APDUConstants::AuthenticationValueChoice::charstring));
     ASSERT_TRUE(a1.calling_authentication_value.Append(ASNType(ASN::GraphicString, std::string("33333333"))));
     std::vector<uint8_t> A1CHECK_AUTHENTICATION_VALUE = { 0xAC, 0x0A, 0x80, 0x08, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33 };
     ASSERT_TRUE(a1.calling_authentication_value == A1CHECK_AUTHENTICATION_VALUE);

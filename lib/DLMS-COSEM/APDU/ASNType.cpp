@@ -105,13 +105,31 @@ namespace EPRI
     void ASNType::Clear()
     {
         m_Data.Clear();
+        Rewind();
     }
     
     void ASNType::Rewind()
     {
         m_pCurrentSchema = m_pSchema;
         m_AppendState = ST_SIMPLE;
+        m_Choice = 0;
         m_Data.SetReadPosition(0);
+    }
+    
+    bool ASNType::SelectChoice(int8_t Choice)
+    {
+        // The only time we can select a choice is if we are sitting within
+        // a CHOICE section.
+        //
+        ASN::SchemaEntryPtr pSchemaEntry = GetCurrentSchemaEntry();
+        if (nullptr != pSchemaEntry &&
+            (ASN::BEGIN_CHOICE_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(pSchemaEntry) ||
+             ASN::BEGIN_CHOICE_ENTRY_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(pSchemaEntry)))
+        {
+            m_Choice = Choice;
+            return true;
+        }
+        return false;
     }
 
     bool ASNType::GetCurrentSchemaValue(DLMSVariant * pVariant) const
@@ -138,16 +156,16 @@ namespace EPRI
                     switch (m_Data.PeekByte(1))
                     {
                     case 1:
-                        RetVal = m_Data.Peek<int8_t>(pVariant);
+                        RetVal = m_Data.Peek<int8_t>(pVariant, true, 2);
                         break;
                     case 2:
-                        RetVal = m_Data.Peek<int16_t>(pVariant);
+                        RetVal = m_Data.Peek<int16_t>(pVariant, true, 2);
                         break;
                     case 4:
-                        RetVal = m_Data.Peek<int32_t>(pVariant);
+                        RetVal = m_Data.Peek<int32_t>(pVariant, true, 2);
                         break;
                     case 8:
-                        RetVal = m_Data.Peek<int64_t>(pVariant);
+                        RetVal = m_Data.Peek<int64_t>(pVariant, true, 2);
                         break;
                     default:
                         RetVal = false;
@@ -294,9 +312,32 @@ namespace EPRI
         return false;
     }
     
+    bool ASNType::InternalSimpleAppend(ASN::SchemaEntryPtr SchemaEntry, const ASNType& Value)
+    {
+        if (ASN::INTEGER_LIST_T == 
+            ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
+        {
+            if (ASN::INTEGER == Value.GetCurrentSchemaType() &&
+                SchemaEntry->m_Extra.which() == VAR_INIT_LIST)
+            {
+                DLMSVariant Variant;
+                if (Value.GetCurrentSchemaValue(&Variant) &&
+                    IsValueInVariant(Variant, SchemaEntry->m_Extra))
+                {
+                    return InternalAppend(Value.m_Data);
+                }
+            }
+        }
+        else if(ASN_SCHEMA_DATA_TYPE(SchemaEntry) ==
+                    ASN_SCHEMA_DATA_TYPE(Value.m_pSchema))
+        {
+            return InternalAppend(Value.m_Data);
+        }
+        return false;
+    }
+
     bool ASNType::InternalAppend(const ASNType& Value)
     {
-        uint8_t             ChoiceIndex = 0;
         ASN::SchemaEntryPtr SchemaEntry;
         bool                Appended = false;
         
@@ -311,21 +352,8 @@ namespace EPRI
                     m_AppendState = ST_CHOICE;
                     break;
                 }
-                else if (ASN::INTEGER_LIST_T == 
-                    ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
+                else if (InternalSimpleAppend(SchemaEntry, Value))
                 {
-//                    if (ASN::INTEGER == Value.GetCurrentSchemaType() &&
-//                        SchemaEntry->m_Extra.which() == VAR_INIT_LIST &&
-//                        IsValueInVariant(SchemaEntry->m_Extra, Value.GetCurrentSchemaValue()))
-//                    {
-//                        InternalAppend(Value.m_Data);
-//                        return true;
-//                    }
-                }
-                else if (ASN_SCHEMA_DATA_TYPE(SchemaEntry) ==
-                            ASN_SCHEMA_DATA_TYPE(Value.m_pSchema))
-                {
-                    InternalAppend(Value.m_Data);
                     return true;
                 }
                 return false;
@@ -333,22 +361,45 @@ namespace EPRI
                 if (ASN::END_CHOICE_T == 
                     ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
                 {
-                    ChoiceIndex = 0;
                     m_AppendState = ST_SIMPLE;  
+                    m_Choice = 0;
+                    
                     if (!Appended)
                     {
                         return false;
                     }
                     return true;
                 }
-                if (!Appended &&
-                    (ASN_SCHEMA_DATA_TYPE(SchemaEntry) ==
-                        Value.m_pSchema->m_SchemaType))
+                else if (ASN::BEGIN_CHOICE_ENTRY_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry) &&
+                         m_Choice == ASN_SCHEMA_DATA_TYPE_SIZE(SchemaEntry))
                 {
-                    m_Data.Append<uint8_t>(0x80 | ChoiceIndex);
-                    Appended = InternalAppend(Value.m_Data);
+                    m_AppendState = ST_CHOICE_ENTRY;  
                 }
-                ++ChoiceIndex;
+                break;
+            case ST_CHOICE_ENTRY:
+                if (!Appended)
+                {
+                    bool Constructed = ASN_SCHEMA_OPTIONS(SchemaEntry) & ASN::CONSTRUCTED;
+                    m_Data.Append<uint8_t>(0x80 | m_Choice | 
+                        (Constructed ? 0b00100000 : 0x00));
+                    //
+                    // TODO - Handle real length...
+                    //
+                    ssize_t LengthIndex = -1;
+                    if (Constructed)
+                    {
+                        LengthIndex = m_Data.Append<uint8_t>(0x00);
+                    }
+                    Appended = InternalSimpleAppend(SchemaEntry, Value);
+                    if (Constructed && Appended)
+                    {
+                        m_Data[LengthIndex] = m_Data.Size() - LengthIndex - sizeof(uint8_t);
+                    }
+                }
+                else if (ASN::END_CHOICE_ENTRY_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
+                {
+                    m_AppendState = ST_CHOICE;
+                }
                 break;
             default:
                 return false;
@@ -359,9 +410,7 @@ namespace EPRI
     
     bool ASNType::InternalAppend(const DLMSVector& Value)
     {
-        bool RetVal = true;
-        m_Data.Append(Value);
-        return RetVal;
+        return m_Data.Append(Value) >= 0;
     }
 
     //
@@ -481,7 +530,7 @@ namespace EPRI
         : ASNType(ASN::VOID)
     {
     }
-    
+
     const ASNType ASNMissing = ASNVoid();    
         
 }
