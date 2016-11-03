@@ -9,7 +9,7 @@
 
 #include "HDLCLLC.h"
 #include "COSEM.h"
-#include "SerialWrapper.h"
+#include "serialwrapper/SerialWrapper.h"
 
 using namespace std;
 using namespace EPRI;

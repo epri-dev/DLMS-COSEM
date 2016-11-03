@@ -124,6 +124,9 @@ namespace EPRI
 #define ASN_END_SCHEMA\
             { EPRI::ASN::InternalDataType::END_SCHEMA_T }\
         };
+        
+#define ASN_MAKE_TAG(TAG, OPTIONS)\
+        (TAG | (OPTIONS & ASN::CONSTRUCTED ? 0b00100000 : 0x00))        
         //
         // Standard Schema Definitions
         //
@@ -135,10 +138,14 @@ namespace EPRI
 
     }
     
+    class ASNObjectIdentifier;
+    
     class ASNType
     {
+        friend class ASNObjectIdentifier;
+        
     public:
-        ASNType() = delete;
+        ASNType();
         ASNType(ASN::SchemaEntryPtr Schema);
         ASNType(ASN::DataTypes DT, const DLMSVariant& Value);
         virtual ~ASNType();
@@ -152,7 +159,9 @@ namespace EPRI
         virtual bool SelectChoice(int8_t Choice);
         virtual bool Append(const DLMSVariant& Value);
         virtual bool Append(const ASNType& Value);
-        virtual bool GetCurrentSchemaValue(DLMSVariant * pVariant) const;
+        virtual bool GetCurrentSchemaValue(ASNType * pValue) const;
+        virtual bool GetCurrentSchemaValue(DLMSVariant * pValue) const;
+        virtual bool MoveToNextSchemaEntry();
         
         inline ASN::DataTypes GetCurrentSchemaType() const
         {
@@ -165,15 +174,18 @@ namespace EPRI
         //
         // Operators
         //
-        bool operator==(const std::vector<uint8_t>& rhs);
+        bool operator==(const std::vector<uint8_t>& rhs) const;
+        bool operator==(const ASNType& rhs) const;
         //
         // Helpers
         //
         static bool AppendLength(size_t Length, DLMSVector * pData);
+        static bool GetLength(DLMSVector * pData, size_t * pLength);
         static uint8_t CalculateLengthBytes(size_t Length);
 
     protected:
         ASNType(ASN::DataTypes DT);
+        void SetDataType(ASN::DataTypes DT);
         
         inline ASN::SchemaEntryPtr GetCurrentSchemaEntry() const
         {
@@ -200,6 +212,8 @@ namespace EPRI
         int8_t                         m_Choice = 0;
     };
     
+    bool IsValueInVariant(const ASNType& Value, const DLMSVariant& Variant);
+    
     class ASNObjectIdentifier : public ASNType
     {
         using ArcList = std::initializer_list<uintmax_t>;
@@ -214,10 +228,10 @@ namespace EPRI
         
         ASNObjectIdentifier() = delete;
         ASNObjectIdentifier(ArcList List, OIDType OT = ABSOLUTE);
-
         virtual ~ASNObjectIdentifier();
 
         virtual bool Get(ArcVector * pVector);
+        static bool Peek(const ASNType& Value, DLMSVariant * pVariant);
         
     };
     

@@ -7,8 +7,22 @@
 
 namespace EPRI
 {
+    class IAPDU
+    {
+    public:
+        virtual ~IAPDU()
+        {
+        }
+        virtual void RegisterComponent(IAPDUComponent * pComponent) = 0;
+        virtual std::vector<uint8_t> GetBytes() = 0;
+        virtual bool Parse(DLMSVector * pData) = 0;
+        virtual bool IsValid() const = 0;
+        virtual ASN::TagIDType GetTag() = 0;
+
+    };
+    
     template <ASN::TagIDType TAG>
-    class APDU
+    class APDU : public IAPDU
     {
         using ComponentVector = std::vector<IAPDUComponent *>;
         
@@ -17,6 +31,11 @@ namespace EPRI
         
         virtual ~APDU()
         {
+        }
+        
+        virtual ASN::TagIDType GetTag()
+        {
+            return Tag;
         }
         
         virtual void RegisterComponent(IAPDUComponent * pComponent)
@@ -52,6 +71,31 @@ namespace EPRI
                 {
                     break;
                 }
+            }
+            return RetVal;
+        }
+        
+        virtual bool Parse(DLMSVector * pData)
+        {
+            bool   RetVal = false;
+            size_t Length = 0;
+            
+            if (Tag == pData->Peek<uint8_t>() &&
+                pData->Skip(sizeof(uint8_t)) &&
+                ASNType::GetLength(pData, &Length) &&
+                (pData->Size() - pData->GetReadPosition()) >= Length)
+            {
+                size_t                    ComponentsProcessed = 0;
+                ComponentVector::iterator it = m_Components.begin();
+                while (it != m_Components.end())
+                {
+                    RetVal = (*it++)->Parse(pData);
+                    if (RetVal)
+                    {
+                        ComponentsProcessed++;
+                    }
+                }
+                RetVal = ComponentsProcessed;
             }
             return RetVal;
         }

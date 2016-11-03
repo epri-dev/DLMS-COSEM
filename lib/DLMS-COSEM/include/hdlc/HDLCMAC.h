@@ -18,6 +18,7 @@
 #include "HDLCStatistics.h"
 #include "StateMachine.h"
 #include "Callback.h"
+#include "DLMSVector.h"
 
 namespace EPRI
 {
@@ -126,7 +127,7 @@ namespace EPRI
     struct DLDataRequestParameter : public HDLCCallbackParameter
     {
         static const uint16_t ID = 0x1004;
-        DLDataRequestParameter(const HDLCAddress& DA, HDLCControl::Control FT, const std::vector<uint8_t>& D)
+        DLDataRequestParameter(const HDLCAddress& DA, HDLCControl::Control FT, const DLMSVector& D)
             :
             HDLCCallbackParameter(DA),
             FrameType(FT),
@@ -134,7 +135,7 @@ namespace EPRI
         {
         }
         HDLCControl::Control FrameType;
-        std::vector<uint8_t> Data;
+        DLMSVector           Data;
     };
 
     template<typename TInternal>

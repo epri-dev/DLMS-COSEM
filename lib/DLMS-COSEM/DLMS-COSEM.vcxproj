@@ -66,6 +66,7 @@
     <ClCompile Include="APDU\AARE.cpp" />
     <ClCompile Include="APDU\AARQ.cpp" />
     <ClCompile Include="APDU\APDUConstants.cpp" />
+    <ClCompile Include="APDU\APDUFactory.cpp" />
     <ClCompile Include="APDU\ASNType.cpp" />
     <ClCompile Include="DLMS-COSEM.cpp" />
     <ClCompile Include="hdlc\HDLCAddress.cpp" />
@@ -80,6 +81,7 @@
     <ClCompile Include="COSEM.cpp" />
     <ClCompile Include="COSEMServer.cpp" />
     <ClCompile Include="DLMSVector.cpp" />
+    <ClCompile Include="Wrapper.cpp" />
     <ClCompile Include="serialwrapper\SerialWrapper.cpp" />
     <ClCompile Include="StateMachine.cpp" />
   </ItemGroup>
@@ -89,6 +91,7 @@
     <ClInclude Include="include\APDU\APDU.h" />
     <ClInclude Include="include\APDU\APDUComponent.h" />
     <ClInclude Include="include\APDU\APDUConstants.h" />
+    <ClInclude Include="include\APDU\APDUFactory.h" />
     <ClInclude Include="include\APDU\ASNType.h" />
     <ClInclude Include="include\Callback.h" />
     <ClInclude Include="include\COSEM.h" />
@@ -124,9 +127,10 @@
     <ClInclude Include="include\mapbox\recursive_wrapper.hpp" />
     <ClInclude Include="include\mapbox\variant.hpp" />
     <ClInclude Include="include\mapbox\variant_io.hpp" />
-    <ClInclude Include="include\SerialWrapper.h" />
+    <ClInclude Include="include\serialwrapper\SerialWrapper.h" />
     <ClInclude Include="include\StateMachine.h" />
     <ClInclude Include="include\Transport.h" />
+    <ClInclude Include="include\Wrapper.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="debug.mak" />

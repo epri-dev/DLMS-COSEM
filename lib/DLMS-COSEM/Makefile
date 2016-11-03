@@ -35,7 +35,7 @@ error:
 	$(error Invalid configuration, please check your inputs)
 endif
 
-SOURCEFILES := APDU/AARE.cpp APDU/AARQ.cpp APDU/APDUConstants.cpp APDU/ASNType.cpp DLMS-COSEM.cpp hdlc/HDLCAddress.cpp hdlc/HDLCClient.cpp hdlc/HDLCHelpers.cpp hdlc/HDLCLLC.cpp hdlc/HDLCServer.cpp hdlc/HDLCStatistics.cpp hdlc/modcnt.cpp hdlc/packet.cpp hdlc/HDLCMAC.cpp COSEM.cpp COSEMServer.cpp DLMSVector.cpp serialwrapper/SerialWrapper.cpp StateMachine.cpp COSEMClient.cpp
+SOURCEFILES := APDU/AARE.cpp APDU/AARQ.cpp APDU/APDUConstants.cpp APDU/APDUFactory.cpp APDU/ASNType.cpp DLMS-COSEM.cpp hdlc/HDLCAddress.cpp hdlc/HDLCClient.cpp hdlc/HDLCHelpers.cpp hdlc/HDLCLLC.cpp hdlc/HDLCServer.cpp hdlc/HDLCStatistics.cpp hdlc/modcnt.cpp hdlc/packet.cpp hdlc/HDLCMAC.cpp COSEM.cpp COSEMServer.cpp DLMSVector.cpp Wrapper.cpp serialwrapper/SerialWrapper.cpp StateMachine.cpp COSEMClient.cpp
 EXTERNAL_LIBS := 
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 
@@ -190,6 +190,10 @@ $(BINARYDIR)/AARQ.o : APDU/AARQ.cpp $(all_make_files) |$(BINARYDIR)
 
 
 $(BINARYDIR)/APDUConstants.o : APDU/APDUConstants.cpp $(all_make_files) |$(BINARYDIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
+
+
+$(BINARYDIR)/APDUFactory.o : APDU/APDUFactory.cpp $(all_make_files) |$(BINARYDIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
 
 

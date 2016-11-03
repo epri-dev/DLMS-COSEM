@@ -300,8 +300,8 @@ namespace EPRI
                     pParam->Data.DestinationAddress,
                     m_MyAddress,
                     HDLCControl(HDLCControl::INFO),
-                    pParam->Data.Data.data(),
-                    pParam->Data.Data.size());
+                    pParam->Data.Data.GetData(),
+                    pParam->Data.Data.Size());
                 if (SUCCESS == ReturnCode)
                 {
                     EnqueueWorkingTXPacket();

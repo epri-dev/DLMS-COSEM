@@ -76,6 +76,12 @@
     <ClCompile Include="DLMSVector.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="Wrapper.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="APDU\APDUFactory.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ERROR_TYPE.h">
@@ -195,9 +201,6 @@
     <ClInclude Include="include\mapbox\variant_io.hpp">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SerialWrapper.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="include\APDU\AARE.h">
       <Filter>Header files</Filter>
     </ClInclude>
@@ -205,6 +208,15 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="include\DLMSVector.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Wrapper.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serialwrapper\SerialWrapper.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\APDU\APDUFactory.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

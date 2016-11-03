@@ -17,17 +17,20 @@ namespace EPRI
 #define ASN_END_COMPONENTS
    
     extern const ASNType ASNMissing;  
+    class IAPDU;
 
     class IAPDUComponent
     {
         template <ASN::TagIDType TAG> 
             friend class APDU;
+        friend class IAPDU;
         
     public:
         virtual ~IAPDUComponent() 
         {
         }
         virtual bool IsValid() const = 0;
+        virtual bool Parse(DLMSVector * pData) = 0;
         
     protected:
         virtual bool Append(DLMSVector * pVector) = 0;
@@ -77,6 +80,33 @@ namespace EPRI
         //
         // IAPDUComponent
         //
+        virtual bool Parse(DLMSVector * pData)
+        {
+            bool RetVal = false;
+            try
+            {
+                // My tag?
+                //
+                if(ASN_MAKE_TAG(APDUTagClass | Tag, Options) == pData->Peek<uint8_t>() &&
+                    pData->Skip(sizeof(uint8_t)))
+                {
+                    size_t Length = 0;
+                    RetVal = GetLength(pData, &Length);
+                    if (RetVal)
+                    {
+                        RetVal = m_Data.Append(pData, Length) >= 0;
+                    }
+                }
+                
+            }
+            catch (std::overflow_error ex)
+            {
+                RetVal = false;
+            }
+            return RetVal;
+
+        }
+        
         virtual bool IsValid() const
         {
             bool RetVal = (!(Options & ASN::OPTIONAL) &&

@@ -4,50 +4,12 @@
 #include <iomanip>
 #include <iterator>
 #include <type_traits>
+#include <stdexcept>
 
 #include "DLMSVector.h"
 
 namespace EPRI
 {
-    bool IsValueInVariant(const DLMSVariant& Value, const DLMSVariant& Variant)
-    {
-        bool RetVal = false;
-        switch (Variant.which())
-        {
-        case VAR_INIT_LIST:
-            {
-                uint32_t CompareValue;
-                switch (Value.which())
-                {
-                case VAR_INT8:
-                    CompareValue = Value.get<int8_t>();
-                    break;
-                case VAR_UINT8: 
-                    CompareValue = Value.get<uint8_t>();
-                    break;
-                case VAR_INT16: 
-                    CompareValue = Value.get<int16_t>();
-                    break;
-                case VAR_UINT16:
-                    CompareValue = Value.get<uint16_t>();
-                    break;
-                case VAR_INT32: 
-                    CompareValue = Value.get<int32_t>();
-                    break;
-                case VAR_UINT32:
-                    CompareValue = Value.get<uint32_t>();
-                    break;
-                default:
-                    return false;
-                }
-                RetVal = std::find(Variant.get<DLMSVariantInitList>().begin(),
-                    Variant.get<DLMSVariantInitList>().end(),
-                    CompareValue) != Variant.get<DLMSVariantInitList>().end();
-            }
-            break;
-        }
-        return RetVal;
-    }
     
     DLMSVector::DLMSVector()
     {
@@ -67,7 +29,12 @@ namespace EPRI
     {
         m_Data = Value.m_Data;
     }
-
+    
+    DLMSVector::DLMSVector(const std::vector<uint8_t>& Value)
+    {
+        m_Data = Value;    
+    }
+    
     DLMSVector::~DLMSVector()
     {
     }
@@ -89,7 +56,17 @@ namespace EPRI
         m_ReadPosition = Value;
         return true;
     }
-
+    
+    bool DLMSVector::Skip(size_t Count)
+    {
+        return SetReadPosition(m_ReadPosition + Count);
+    }
+    
+    bool DLMSVector::IsAtEnd() const
+    {
+        return m_ReadPosition >= m_Data.size();
+    }
+    
     bool DLMSVector::Zero(size_t Position /* = 0 */, size_t Count /* = 0 */)
     {
         if (0 == Count)
@@ -160,6 +137,23 @@ namespace EPRI
         AppendBuffer(Value.m_Data.data() + Position, Count);
         return RetVal;
     }
+    
+    ssize_t DLMSVector::Append(DLMSVector * pValue, size_t Count /* = 0 */)
+    {
+        ssize_t RetVal = m_Data.size();
+        if (0 == Count)
+        {
+            Count = pValue->Size();
+        }
+        if (pValue->GetReadPosition() + Count > pValue->Size())
+            return -1;
+        size_t Position = AppendExtra(Count);
+        if (!pValue->GetBuffer(&m_Data[Position], Count))
+        {
+            RetVal = -1;
+        }
+        return RetVal;
+    }
 
     size_t DLMSVector::Append(const std::string& Value)
     {
@@ -172,6 +166,13 @@ namespace EPRI
     {
         size_t RetVal = m_Data.size();
         m_Data.insert(m_Data.end(), Value.begin(), Value.end());
+        return RetVal;
+    }
+    
+    size_t DLMSVector::AppendExtra(size_t Count)
+    {
+        size_t RetVal = m_Data.size();
+        m_Data.resize(RetVal + Count);
         return RetVal;
     }
     
@@ -238,16 +239,20 @@ namespace EPRI
         }
         void operator()(const std::string& Value)
         {
+            throw std::logic_error("Not implemented");
         }
         void operator()(const double& Value)
         {
+            throw std::logic_error("Not implemented");
         }
         void operator()(const DLMSVector& Value)
         {
+            m_pVector->Append(Value);
         }
         void operator()(const std::initializer_list<uint32_t>& Value)
         {
-        }
+            throw std::logic_error("Not implemented");
+     }
         
     protected:
         void AppendTrimmedInteger(uint64_t Value)
@@ -321,6 +326,11 @@ namespace EPRI
         return m_Data;
     }
     
+    const uint8_t * DLMSVector::GetData() const
+    {
+        return m_Data.data();
+    }
+    
     int DLMSVector::PeekByte(size_t OffsetFromGetPosition /* = 0 */) const
     {
         if (m_ReadPosition + OffsetFromGetPosition < m_Data.size())
@@ -366,5 +376,10 @@ namespace EPRI
     {
         return m_Data[Index];
     }
-   
+    
+    bool DLMSVector::operator==(const DLMSVector& rhs) const
+    {
+        return rhs.m_Data == m_Data;
+    }
+
 }

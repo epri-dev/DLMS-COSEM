@@ -27,8 +27,71 @@ namespace EPRI
         
     }
     //
+    // Global Functions
+    //
+    bool IsValueInVariant(const ASNType& Value, const DLMSVariant& Variant)
+    {
+        bool RetVal = false;
+        switch (Variant.which())
+        {
+        case VAR_INIT_LIST:
+            {
+                DLMSVariant VariantCompare;
+                uint32_t    CompareValue = 0;
+                switch (Value.GetCurrentSchemaType())
+                {
+                case ASN::INTEGER:
+                    RetVal = Value.GetCurrentSchemaValue(&VariantCompare);
+                    if (RetVal)
+                    {
+                        switch (VariantCompare.which())
+                        {
+                        case VAR_INT8:  
+                            CompareValue = VariantCompare.get<int8_t>();
+                            break;
+                        case VAR_UINT8: 
+                            CompareValue = VariantCompare.get<uint8_t>();
+                            break;
+                        case VAR_INT16: 
+                            CompareValue = VariantCompare.get<int16_t>();
+                            break;
+                        case VAR_UINT16:
+                            CompareValue = VariantCompare.get<uint16_t>();
+                            break;
+                        case VAR_INT32 :
+                            CompareValue = VariantCompare.get<int32_t>();
+                            break;
+                        case VAR_UINT32:
+                            CompareValue = VariantCompare.get<uint32_t>();
+                            break;
+                        default:
+                            RetVal = false;
+                            break;
+                        }
+                    }
+                    break;
+                default:
+                    break;
+                }
+                if (RetVal)
+                {
+                    RetVal = std::find(Variant.get<DLMSVariantInitList>().begin(),
+                        Variant.get<DLMSVariantInitList>().end(),
+                        CompareValue) != Variant.get<DLMSVariantInitList>().end();
+                }
+            }
+            break;
+        }
+        return RetVal;
+    }
+    
+    //
     // ASNType
     //
+    ASNType::ASNType()
+    {
+    }
+
     ASNType::ASNType(ASN::SchemaEntryPtr Schema) : 
         m_pSchema(Schema),
         m_pCurrentSchema(Schema)
@@ -65,13 +128,16 @@ namespace EPRI
         // If this is optional or default and not data, then
         // we have nothing to give
         //
-        if ((Options & ASN::OPTIONAL) && 
-            (0 == Length))
+        if ((nullptr == m_pSchema) ||
+            ((Options & ASN::OPTIONAL) && 
+             (0 == Length)))
         {
             return std::vector<uint8_t>();
         }
+        //
         // Outer tag
-        RetVal.Append<uint8_t>(Tag | (Options & ASN::CONSTRUCTED ? 0b00100000 : 0x00));
+        RetVal.Append<uint8_t>(ASN_MAKE_TAG(Tag, Options));
+        //
         // Length   
         if (!(Options & ASN::CONSTRUCTED))
         {
@@ -81,9 +147,11 @@ namespace EPRI
                 Position += 2;
             }
         }
+        //
         // Length
         if (AppendLength(Length, &RetVal))
         {
+            //
             // Data
             RetVal.Append(m_Data,
                           Position,
@@ -131,8 +199,8 @@ namespace EPRI
         }
         return false;
     }
-
-    bool ASNType::GetCurrentSchemaValue(DLMSVariant * pVariant) const
+    
+    bool ASNType::GetCurrentSchemaValue(DLMSVariant * pValue) const
     {
         bool RetVal = false;
         //
@@ -156,16 +224,16 @@ namespace EPRI
                     switch (m_Data.PeekByte(1))
                     {
                     case 1:
-                        RetVal = m_Data.Peek<int8_t>(pVariant, true, 2);
+                        RetVal = m_Data.Peek<int8_t>(pValue, true, 2);
                         break;
                     case 2:
-                        RetVal = m_Data.Peek<int16_t>(pVariant, true, 2);
+                        RetVal = m_Data.Peek<int16_t>(pValue, true, 2);
                         break;
                     case 4:
-                        RetVal = m_Data.Peek<int32_t>(pVariant, true, 2);
+                        RetVal = m_Data.Peek<int32_t>(pValue, true, 2);
                         break;
                     case 8:
-                        RetVal = m_Data.Peek<int64_t>(pVariant, true, 2);
+                        RetVal = m_Data.Peek<int64_t>(pValue, true, 2);
                         break;
                     default:
                         RetVal = false;
@@ -174,10 +242,58 @@ namespace EPRI
                 }
             }
             break;
+        case ASN::OBJECT_IDENTIFIER:
+            RetVal = ASNObjectIdentifier::Peek(*this, pValue);
+            break;
         default:
             break;
         }
         return RetVal;
+        
+    }
+
+    bool ASNType::GetCurrentSchemaValue(ASNType * pValue) const
+    {
+        bool        RetVal = false;
+        DLMSVariant Variant;
+        //
+        // PRECONDITIONS
+        //
+        if (m_Data.Size() == 0)
+        {
+            return false;
+        }
+        
+        switch (GetCurrentSchemaType())
+        {
+        case ASN::OBJECT_IDENTIFIER:
+        case ASN::INTEGER:
+            RetVal = GetCurrentSchemaValue(&Variant);
+            if (RetVal)
+            {
+                pValue->SetDataType(GetCurrentSchemaType());
+                RetVal = pValue->Append(Variant);
+                pValue->Rewind();
+            }
+            break;
+        default:
+            break;
+        }
+        return RetVal;
+    }
+    
+    bool ASNType::MoveToNextSchemaEntry()
+    {
+        if (nullptr == m_pCurrentSchema)
+        {
+            return false;
+        }
+        if (ASN::END_SCHEMA_T != m_pCurrentSchema->m_SchemaType)
+        {
+            ++m_pCurrentSchema;
+            return true;
+        }
+        return false;
     }
     
     bool ASNType::Append(const DLMSVariant& Value)
@@ -221,25 +337,72 @@ namespace EPRI
     {
         return (Length / 0x7F) + 1;
     }
+    
+    bool ASNType::GetLength(DLMSVector * pData, size_t * pLength)
+    {
+        uint8_t LengthSize = 0;
+        //
+        // PRECONDITIONS
+        //
+        if (pData->IsAtEnd())
+        {
+            return false;
+        }
+        if (pData->Peek<uint8_t>() & 0x80)
+        {
+            LengthSize = pData->Get<uint8_t>() & 0x7F;
+            if (0 == (LengthSize & 0x7F) ||
+                LengthSize > sizeof(size_t))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            LengthSize = 1;
+        }
+        
+        *pLength = 0;
+        while (LengthSize > 0)
+        {
+            if (pData->IsAtEnd())
+            {
+                return false;
+            }
+            
+            *pLength <<= 8;
+            *pLength |= pData->Get<uint8_t>();
+
+            LengthSize--;
+        }
+        return true;       
+    }
     //
     // Operators
     //
-    bool ASNType::operator==(const std::vector<uint8_t>& rhs)
+    bool ASNType::operator==(const std::vector<uint8_t>& rhs) const
     {
         return rhs == m_Data.GetBytes();
+    }
+    
+    bool ASNType::operator==(const ASNType& rhs) const
+    {
+        return rhs.m_Data == m_Data;
     }
     //
     // Protected Methods
     //
+    void ASNType::SetDataType(ASN::DataTypes DT)
+    {
+        m_pSchema = m_SingleDataType;
+        m_SingleDataType[0].m_SchemaType = DT;
+        Clear();
+    }
+    
     bool ASNType::GetNextSchemaEntry(ASN::SchemaEntryPtr * ppSchemaEntry)
     {
         *ppSchemaEntry = m_pCurrentSchema;
-        if (ASN::END_SCHEMA_T != m_pCurrentSchema->m_SchemaType)
-        {
-            ++m_pCurrentSchema;
-            return true;
-        }
-        return false;
+        return MoveToNextSchemaEntry();
     }
     
     bool ASNType::InternalAppend(const DLMSVariant& Value)
@@ -262,37 +425,34 @@ namespace EPRI
                 switch (ASN_SCHEMA_DATA_TYPE(SchemaEntry))
                 {
                 case ASN::GraphicString:
+                    if (Value.which() == VAR_STRING)
                     {
-                        if (Value.which() == VAR_STRING)
-                        {
-                            AppendLength(Value.get<std::string>().length(), &m_Data);
-                            m_Data.Append(Value.get<std::string>());
-                            return true;
-                        }
-                        return false;
+                        AppendLength(Value.get<std::string>().length(), &m_Data);
+                        m_Data.Append(Value.get<std::string>());
+                        return true;
                     }
-                    break;
+                    return false;
                 case ASN::OCTET_STRING:
+                    if (Value.which() == VAR_VECTOR)
                     {
-                        if (Value.which() == VAR_VECTOR)
-                        {
-                            m_Data.Append<uint8_t>(ASN::OCTET_STRING);
-                            AppendLength(Value.get<DLMSVector>().Size(), &m_Data);
-                            m_Data.Append(Value.get<DLMSVector>());
-                            return true;
-                        }
-                        return false;
+                        m_Data.Append<uint8_t>(ASN::OCTET_STRING);
+                        AppendLength(Value.get<DLMSVector>().Size(), &m_Data);
+                        m_Data.Append(Value.get<DLMSVector>());
+                        return true;
                     }
-                    break;
+                    return false;
                 case ASN::INTEGER:
                     {
-                        m_Data.Append<uint8_t>(ASN::INTEGER);
+                        m_Data.Append<uint8_t>(ASN_SCHEMA_DATA_TYPE(SchemaEntry));
                         size_t LengthIndex = m_Data.Append<uint8_t>(0);
                         m_Data.Append(Value);
                         m_Data[LengthIndex] = m_Data.Size() - LengthIndex - 1;
                     }
                     return true;
-            case ASN::VOID:
+                case ASN::OBJECT_IDENTIFIER:
+                    m_Data.Append(Value);
+                    return true;
+                case ASN::VOID:
                 default:
                     break;
                 }
@@ -314,15 +474,20 @@ namespace EPRI
     
     bool ASNType::InternalSimpleAppend(ASN::SchemaEntryPtr SchemaEntry, const ASNType& Value)
     {
+        if (nullptr == Value.m_pSchema)
+        {
+            return false;
+        }
+        
         if (ASN::INTEGER_LIST_T == 
             ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
         {
             if (ASN::INTEGER == Value.GetCurrentSchemaType() &&
                 SchemaEntry->m_Extra.which() == VAR_INIT_LIST)
             {
-                DLMSVariant Variant;
-                if (Value.GetCurrentSchemaValue(&Variant) &&
-                    IsValueInVariant(Variant, SchemaEntry->m_Extra))
+                ASNType Current;
+                if (Value.GetCurrentSchemaValue(&Current) &&
+                    IsValueInVariant(Current, SchemaEntry->m_Extra))
                 {
                     return InternalAppend(Value.m_Data);
                 }
@@ -478,6 +643,30 @@ namespace EPRI
 
     ASNObjectIdentifier::~ASNObjectIdentifier()
     {
+    }
+    
+    bool ASNObjectIdentifier::Peek(const ASNType& Value, DLMSVariant * pVariant)
+    {
+        DLMSVector Output;
+        int        Byte = Value.m_Data.PeekByte();
+
+        if (ABSOLUTE == Byte || RELATIVE == Byte)
+        { 
+            Output.Append<uint8_t>(Byte);
+            Byte = Value.m_Data.PeekByte(1);
+            if (Byte >= 0)
+            {
+                Output.Append<uint8_t>(Byte);
+                if (Output.Append(Value.m_Data, 
+                    Value.m_Data.GetReadPosition() + 2,
+                    Byte) >= 0)
+                {
+                    pVariant->set<DLMSVector>(Output);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     
     bool ASNObjectIdentifier::Get(ArcVector * pVector)

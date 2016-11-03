@@ -35,8 +35,10 @@ namespace EPRI
     
     DLDataRequestParameter& HDLCLLC::AddLLCHeader(DLDataRequestParameter * pParameters)
     {
-        pParameters->Data.insert(pParameters->Data.begin(), 
-            LLC_HEADER, LLC_HEADER + sizeof(LLC_HEADER));
+        DLMSVector LLCData;
+        LLCData.AppendBuffer(LLC_HEADER, sizeof(LLC_HEADER));
+        LLCData.Append(pParameters->Data);
+        pParameters->Data = LLCData;
         return *pParameters;
     }
 

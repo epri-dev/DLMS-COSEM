@@ -1,9 +1,9 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
 
 #include "Callback.h"
+#include "DLMSVector.h"
 
 namespace EPRI
 {
@@ -19,11 +19,11 @@ namespace EPRI
         struct DataRequestParameter
         {
             static const uint16_t ID = 0x7000;
-            DataRequestParameter(const std::vector<uint8_t>& D) :
+            DataRequestParameter(const DLMSVector& D) :
                 Data(D)
             {
             }
-            std::vector<uint8_t> Data;
+            DLMSVector Data;
         };
         
         typedef Callback<bool, uint16_t, TransportEvent> CallBacker;
@@ -43,7 +43,7 @@ namespace EPRI
         bool FireTransportEvent(TransportEvent Event)
         {
             bool bRetVal = false;
-            m_Callbacker.FireCallback(ID, Event, &bRetVal);
+            return m_Callbacker.FireCallback(ID, Event, &bRetVal);
             return bRetVal;
         }
         

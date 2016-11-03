@@ -39,8 +39,6 @@ namespace EPRI
         VAR_INIT_LIST = 14
     };
     
-    bool IsValueInVariant(const DLMSVariant& Value, const DLMSVariant& Variant);
-
     class DLMSVector
     {
     public:
@@ -48,11 +46,14 @@ namespace EPRI
         DLMSVector(size_t Size);
         DLMSVector(const std::initializer_list<uint8_t>& Value);
         DLMSVector(const DLMSVector& Value);
+        DLMSVector(const std::vector<uint8_t>& Value);
         ~DLMSVector();
 
         size_t Size() const;
         size_t GetReadPosition() const;
         bool SetReadPosition(size_t value);
+        bool IsAtEnd() const;
+        bool Skip(size_t Count);
         bool Zero(size_t Position = 0, size_t Count = 0);
         
         template <typename _VariantType, uint8_t BitsToAppend = 0>
@@ -114,9 +115,11 @@ namespace EPRI
         size_t AppendDouble(double Value);
         size_t AppendBuffer(const void * pValue, size_t Count);
         ssize_t Append(const DLMSVector& Value, size_t Position = 0, size_t Count = 0);
+        ssize_t Append(DLMSVector * pValue, size_t Count = 0);
         size_t Append(const std::string& Value);
         size_t Append(const std::vector<uint8_t>& Value);
         size_t Append(const DLMSVariant& Value, bool Trim = true);
+        size_t AppendExtra(size_t Count);
         void Clear();
         template <typename _VariantType, uint8_t BitsToGet = 0>
             bool Get(DLMSVariant * pValue, bool BigEndian = true)
@@ -129,13 +132,24 @@ namespace EPRI
                 }
                 return RetVal;
             }
+        template <typename T, uint8_t BitsToGet = 0>
+            T Get(bool BigEndian = true) throw(std::out_of_range)
+            {
+                DLMSVariant Value;
+                if (Get<T, BitsToGet>(&Value, BigEndian))
+                {
+                    return Value.get<T>();
+                }
+                throw std::out_of_range("Get failed.");
+            }
         bool GetBuffer(uint8_t * pValue, size_t Count);
         bool GetVector(std::vector<uint8_t> * pValue, size_t Count);
         std::vector<uint8_t> GetBytes() const;
+        const uint8_t * GetData() const;
         
         int PeekByte(size_t OffsetFromGetPosition = 0) const;
         bool PeekBuffer(uint8_t * pValue, size_t Count) const;
-       
+        
         template <typename _VariantType, uint8_t BitsToPeek = 0>
             bool Peek(DLMSVariant * pValue, bool BigEndian = true, size_t Offset = 0, size_t * pBytesPeeked = nullptr) const
             {
@@ -212,12 +226,23 @@ namespace EPRI
                 }
                 return false;
             }
+        template <typename T, uint8_t BitsToGet = 0>
+            T Peek(bool BigEndian = true) const throw(std::out_of_range)
+            {
+                DLMSVariant Value;
+                if (Peek<T, BitsToGet>(&Value, BigEndian))
+                {
+                    return Value.get<T>();
+                }
+                throw std::out_of_range("Peek failed.");
+            }
         
         std::string ToString();
 
         DLMSVector& operator=(DLMSVector& lval);
         uint8_t& operator[](size_t Index);
         const uint8_t& operator[](size_t Index) const;
+        bool operator==(const DLMSVector& rhs) const;
         
     private:
         using RawData = std::vector<uint8_t>;
