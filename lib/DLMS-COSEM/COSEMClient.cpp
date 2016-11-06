@@ -55,14 +55,19 @@ namespace EPRI
     {
         AARQ Request;
         
-        Request.application_context_name.Append(ASNObjectIdentifier({ 2, 16, 756, 5, 8, 1, 1 }));
-        Request.sender_acse_requirements.Append(
-            ASNBitString(Request.sender_acse_requirements.GetCurrentSchemaTypeSize(), 1));
-        Request.mechanism_name.Append(ASNObjectIdentifier({ 2, 16, 756, 5, 8, 2, 1 }));
-        Request.calling_authentication_value.Append(ASNType(ASN::GraphicString, std::string("33333333")));
-        Request.user_information.Append(
-            ASNType(ASN::OCTET_STRING, 
-            DLMSVector({ 0x01, 0x00, 0x00, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00, 0x00, 0x7E, 0x1F, 0x00, 0x00 })));
+        ASNObjectIdentifier ApplicationContext({ 2, 16, 756, 5, 8, 1, 1 });
+        ASNBitString        ACSERequirements(Request.sender_acse_requirements.GetCurrentSchemaTypeSize(), 1);
+        ASNObjectIdentifier MechanismName({ 2, 16, 756, 5, 8, 2, 1 });
+        ASNType             AuthenticationValue(ASN::GraphicString, std::string("33333333"));
+        ASNType             UserInformation(ASN::OCTET_STRING, 
+                                DLMSVector({ 0x01, 0x00, 0x00, 0x00, 0x06, 0x5F, 
+                                              0x1F, 0x04, 0x00, 0x00, 0x7E, 0x1F, 0x00, 0x00 }));
+
+        Request.application_context_name.Append(&ApplicationContext);
+        Request.sender_acse_requirements.Append(&ACSERequirements);
+        Request.mechanism_name.Append(&MechanismName);
+        Request.calling_authentication_value.Append(&AuthenticationValue);
+        Request.user_information.Append(&UserInformation);
         Transport * pTransport = GetTransport();
         if (nullptr != pTransport)
         {

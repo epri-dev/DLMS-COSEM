@@ -6,6 +6,7 @@
 #include <vector>
 #include <limits>
 #include <bitset>
+#include <limits>
 
 #include "mapbox/variant.hpp"
 #include "DLMSVector.h"
@@ -157,11 +158,21 @@ namespace EPRI
         virtual void Clear();
         virtual void Rewind();
         virtual bool SelectChoice(int8_t Choice);
+        virtual bool GetChoice(int8_t * pChoice);
         virtual bool Append(const DLMSVariant& Value);
-        virtual bool Append(const ASNType& Value);
-        virtual bool GetCurrentSchemaValue(ASNType * pValue) const;
-        virtual bool GetCurrentSchemaValue(DLMSVariant * pValue) const;
-        virtual bool MoveToNextSchemaEntry();
+        virtual bool Append(ASNType * Value);
+        
+        enum GetNextValueResult
+        {
+            VALUE_RETRIEVED = 0,
+            END_OF_SCHEMA,
+            NO_VALUE_FOUND,
+            SCHEMA_MISMATCH,
+            INVALID_CONDITION
+        };
+        
+        virtual GetNextValueResult GetNextValue(ASNType * pValue);
+        virtual GetNextValueResult GetNextValue(DLMSVariant * pValue);
         
         inline ASN::DataTypes GetCurrentSchemaType() const
         {
@@ -194,25 +205,28 @@ namespace EPRI
         
         bool GetNextSchemaEntry(ASN::SchemaEntryPtr * ppSchemaEntry);
         bool InternalAppend(const DLMSVariant& Value);
-        bool InternalAppend(const ASNType& Value);
-        bool InternalSimpleAppend(ASN::SchemaEntryPtr SchemaEntry, const ASNType& Value);
+        bool InternalAppend(ASNType * pValue);
+        bool InternalSimpleAppend(ASN::SchemaEntryPtr SchemaEntry, ASNType * pValue);
         bool InternalAppend(const DLMSVector& Value);
+
+        GetNextValueResult InternalSimpleGet(ASN::SchemaEntryPtr SchemaEntry, DLMSVariant * pValue);
+        bool GetINTEGER(DLMSVariant * pValue);
        
-        enum AppendStates
+        const int8_t                  INVALID_CHOICE = std::numeric_limits<int8_t>::lowest();
+        enum ParseStates
         {
             ST_SIMPLE,
             ST_CHOICE,
             ST_CHOICE_ENTRY,
             ST_SEQUENCE
         }                              m_AppendState = ST_SIMPLE;
+        ParseStates                    m_GetState = ST_SIMPLE;
         ASN::SchemaEntry               m_SingleDataType[2] = { { ASN::VOID }, { ASN::END_SCHEMA_T } };
         ASN::SchemaEntryPtr            m_pSchema = nullptr;
         ASN::SchemaEntryPtr            m_pCurrentSchema = nullptr;
         DLMSVector                     m_Data;
-        int8_t                         m_Choice = 0;
+        int8_t                         m_Choice = INVALID_CHOICE;
     };
-    
-    bool IsValueInVariant(const ASNType& Value, const DLMSVariant& Variant);
     
     class ASNObjectIdentifier : public ASNType
     {
@@ -231,7 +245,8 @@ namespace EPRI
         virtual ~ASNObjectIdentifier();
 
         virtual bool Get(ArcVector * pVector);
-        static bool Peek(const ASNType& Value, DLMSVariant * pVariant);
+        static bool Peek(const ASNType& Value, DLMSVariant * pVariant, size_t * pBytes = nullptr);
+        static bool Get(ASNType * pValue, DLMSVariant * pVariant);
         
     };
     

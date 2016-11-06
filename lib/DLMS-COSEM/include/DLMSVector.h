@@ -38,6 +38,8 @@ namespace EPRI
         VAR_VECTOR    = 13,
         VAR_INIT_LIST = 14
     };
+
+    bool IsValueInVariant(const DLMSVariant& Value, const DLMSVariant& Variant);
     
     class DLMSVector
     {

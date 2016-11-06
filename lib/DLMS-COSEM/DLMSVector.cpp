@@ -10,6 +10,50 @@
 
 namespace EPRI
 {
+    bool IsValueInVariant(const DLMSVariant& Value, const DLMSVariant& Variant)
+    {
+        bool RetVal = true;
+        uint32_t    CompareValue = 0;
+        switch (Variant.which())
+        {
+        case VAR_INIT_LIST:
+            {
+                switch (Value.which())
+                {
+                case VAR_INT8:  
+                    CompareValue = Value.get<int8_t>();
+                    break;
+                case VAR_UINT8: 
+                    CompareValue = Value.get<uint8_t>();
+                    break;
+                case VAR_INT16: 
+                    CompareValue = Value.get<int16_t>();
+                    break;
+                case VAR_UINT16:
+                    CompareValue = Value.get<uint16_t>();
+                    break;
+                case VAR_INT32 :
+                    CompareValue = Value.get<int32_t>();
+                    break;
+                case VAR_UINT32:
+                    CompareValue = Value.get<uint32_t>();
+                    break;
+                default:
+                    RetVal = false;
+                    break;
+                }
+            }
+        default:
+            break;
+        }
+        if (RetVal)
+        {
+            RetVal = std::find(Variant.get<DLMSVariantInitList>().begin(),
+                Variant.get<DLMSVariantInitList>().end(),
+                CompareValue) != Variant.get<DLMSVariantInitList>().end();
+        }
+        return RetVal;
+    }
     
     DLMSVector::DLMSVector()
     {
@@ -193,6 +237,36 @@ namespace EPRI
         {
             m_pVector->Append<uint8_t>(Value ? 1 : 0);
         }
+        void operator()(const int8_t& Value)
+        {
+            m_pVector->Append(Value);
+        }
+        void operator()(const uint8_t& Value)
+        {
+            m_pVector->Append(Value);
+        }
+        void operator()(const int16_t& Value)
+        {
+            if (!m_Trim)
+            {
+                m_pVector->Append(Value);
+            }
+            else
+            {
+                AppendTrimmedInteger(Value);
+            }
+        }
+        void operator()(const uint16_t& Value)
+        {
+            if (!m_Trim)
+            {
+                m_pVector->Append(Value);
+            }
+            else
+            {
+                AppendTrimmedInteger(Value);
+            }
+        }
         void operator()(const int32_t& Value)
         {
             if (!m_Trim)
@@ -342,7 +416,7 @@ namespace EPRI
     
     bool DLMSVector::PeekBuffer(uint8_t * pValue, size_t Count) const
     {
-        if (m_ReadPosition + Count < m_Data.size())
+        if (m_ReadPosition + Count <= m_Data.size())
         {
             std::memcpy(pValue, &m_Data[m_ReadPosition], Count);
             return true;

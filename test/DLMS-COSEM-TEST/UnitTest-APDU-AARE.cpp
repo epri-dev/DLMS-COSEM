@@ -14,9 +14,15 @@ static const std::vector<uint8_t> FINAL =
 
 TEST(AARE, Build) 
 {
-    AARE a1;
-  
-    ASSERT_TRUE(a1.application_context_name.Append(ASNObjectIdentifier({ 2, 16, 756, 5, 8, 1, 1 })));
+    AARE                a1;
+    ASNObjectIdentifier ApplicationContext({ 2, 16, 756, 5, 8, 1, 1 });
+    ASNType             Result(ASN::INTEGER, int8_t(AARE::AssociationResult::accepted));
+    ASNType             Diagnostic(ASN::INTEGER, int8_t(AARE::AssociateDiagnosticUser::user_null));
+    ASNType             UserInformation(ASN::OCTET_STRING, 
+                                        DLMSVector({ 0x08, 0x00, 0x06, 0x5F, 0x1F, 0x04, 
+                                                     0x00, 0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07 }));
+    
+    ASSERT_TRUE(a1.application_context_name.Append(&ApplicationContext));
     //
     // Just the application_context_name does not make a valid AARE...
     //
@@ -27,23 +33,18 @@ TEST(AARE, Build)
         0x74, 0x05, 0x08, 0x01, 0x01 };
     ASSERT_TRUE(a1.application_context_name == A1CHECK_CONTEXT_NAME);
 
-    ASSERT_TRUE(a1.result.Append(
-        ASNType(ASN::INTEGER, int8_t(AARE::AssociationResult::accepted))));
+    ASSERT_TRUE(a1.result.Append(&Result));
     std::vector<uint8_t> A1CHECK_RESULT = 
         { 0xA2, 0x03, 0x02, 0x01, 0x00 };
     ASSERT_TRUE(a1.result == A1CHECK_RESULT);
     
     ASSERT_TRUE(a1.result_source_diagnostic.SelectChoice(AARE::AssociateDiagnosticChoice::acse_service_user));
-    ASSERT_TRUE(a1.result_source_diagnostic.Append(
-        ASNType(ASN::INTEGER, int8_t(AARE::AssociateDiagnosticUser::user_null))));
+    ASSERT_TRUE(a1.result_source_diagnostic.Append(&Diagnostic));
     std::vector<uint8_t> A1CHECK_DIAGNOSTIC = 
     { 0xA3, 0x05, 0xA1, 0x03, 0x02, 0x01, 0x00 };
     ASSERT_TRUE(a1.result_source_diagnostic == A1CHECK_DIAGNOSTIC);
  
- 
-    ASSERT_TRUE(a1.user_information.Append(
-        ASNType(ASN::OCTET_STRING, 
-        DLMSVector({0x08, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00, 0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07}))));
+    ASSERT_TRUE(a1.user_information.Append(&UserInformation));
     std::vector<uint8_t> AARE_VEC = a1.GetBytes();
     ASSERT_TRUE(AARE_VEC == FINAL);
     
@@ -58,7 +59,59 @@ TEST(AARE, Parse)
     //
     // Let's validate what we have!
     //
+    ASNObjectIdentifier ApplicationContext({ 2, 16, 756, 5, 8, 1, 1 });
+    ASNType             Result(ASN::INTEGER, int8_t(AARE::AssociationResult::accepted));
+    ASNType             Diagnostic(ASN::INTEGER, int8_t(AARE::AssociateDiagnosticUser::user_null));
+    ASNType             UserInformation(ASN::OCTET_STRING, 
+                                        DLMSVector({ 0x08, 0x00, 0x06, 0x5F, 0x1F, 0x04, 
+                                                     0x00, 0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07 }));
+    
     ASNType Current;
-    ASSERT_TRUE(a1.application_context_name.GetCurrentSchemaValue(&Current));
-    ASSERT_TRUE(ASNObjectIdentifier({ 2, 16, 756, 5, 8, 1, 1 }) == Current);
+    ASSERT_EQ(ASNType::GetNextValueResult::VALUE_RETRIEVED, a1.application_context_name.GetNextValue(&Current));
+    ASSERT_TRUE(ApplicationContext == Current);
+    
+    DLMSVariant Variant1;
+    ASSERT_EQ(ASNType::GetNextValueResult::VALUE_RETRIEVED, a1.result.GetNextValue(&Variant1));
+    ASSERT_EQ(Variant1.get<int8_t>(), int8_t(AARE::AssociationResult::accepted));
+
+    
+    //    ASN_BEGIN_SCHEMA(AARE::Associate_Source_Diagnostic_Schema)
+    //        ASN_BEGIN_CHOICE
+    //            ASN_BEGIN_CHOICE_ENTRY(acse_service_user)
+    //                ASN_INTEGER_LIST_TYPE
+    //                (   
+    //                    ASN::CONSTRUCTED, 
+    //                    { 
+    //                        user_null, 
+    //                        user_no_reason_given, 
+    //                        application_context_name_not_supported,
+    //                        authentication_mechanism_name_not_recognized,
+    //                        authentication_mechanism_name_required,
+    //                        authentication_failure,
+    //                        authentication_required,
+    //                    }
+    //                )
+    //            ASN_END_CHOICE_ENTRY
+    //            ASN_BEGIN_CHOICE_ENTRY(acse_service_provider)
+    //                ASN_INTEGER_LIST_TYPE
+    //                (   
+    //                    ASN::CONSTRUCTED, 
+    //                    { 
+    //                        provider_null, 
+    //                        provider_no_reason_given, 
+    //                        no_common_acse_version,
+    //                    }
+    //                )
+    //            ASN_END_CHOICE_ENTRY
+    //        ASN_END_CHOICE
+    //    ASN_END_SCHEMA
+
+    // Loop until we get a value... or fail...
+    //
+    int8_t Choice;
+    ASSERT_EQ(ASNType::GetNextValueResult::VALUE_RETRIEVED, a1.result_source_diagnostic.GetNextValue(&Variant1));
+    ASSERT_TRUE(a1.result_source_diagnostic.GetChoice(&Choice));
+    ASSERT_EQ(AARE::AssociateDiagnosticChoice::acse_service_user, Choice);
+    ASSERT_EQ(Variant1.get<int8_t>(), int8_t(AARE::AssociateDiagnosticUser::user_null));
+
 }

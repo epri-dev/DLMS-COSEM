@@ -61,9 +61,9 @@ namespace EPRI
             return GetBytes(APDUTagClass | Tag, Options);
         }
         
-        virtual bool Append(const ASNType& Value)
+        virtual bool Append(ASNType * pValue)
         {
-            return ASNType::Append(Value);
+            return ASNType::Append(pValue);
         }
         //
         // Operators

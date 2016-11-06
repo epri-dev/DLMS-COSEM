@@ -10,9 +10,11 @@ TEST(DLMSVector, InitialSettings)
     
     DLMSVariant Variant1;
     DLMSVector Vector1;
+    ASSERT_TRUE(Vector1.IsAtEnd());
     ASSERT_EQ(0, Vector1.Size());
     ASSERT_EQ(0, Vector1.GetReadPosition());
     ASSERT_FALSE(Vector1.SetReadPosition(1));
+    ASSERT_FALSE(Vector1.Skip(1));
 
     ASSERT_FALSE(Vector1.Get<uint8_t>(&Variant1));
     ASSERT_FALSE(Vector1.Get<uint16_t>(&Variant1));
@@ -29,19 +31,57 @@ TEST(DLMSVector, InitialSettings)
     ASSERT_EQ(0, Vector1.ToString().length());
 }
 
+TEST(DLMSVector, AppendGeneral)
+{
+    DLMSVector Vector1;
+    
+    ASSERT_EQ(0, Vector1.Size());
+    ASSERT_EQ(0, Vector1.AppendExtra(10));
+    ASSERT_EQ(10, Vector1.Size());
+    Vector1[5] = 0x42;
+    ASSERT_EQ(0x42, Vector1[5]);
+    const std::vector<uint8_t> VALIDATE1 = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x42, 0x00, 0x00, 0x00, 0x00 };
+    ASSERT_EQ(VALIDATE1, Vector1.GetBytes());
+    ASSERT_TRUE(Vector1.Zero());
+    const std::vector<uint8_t> VALIDATE2 = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };    
+    ASSERT_EQ(VALIDATE2, Vector1.GetBytes());
+    Vector1.Clear();
+    ASSERT_EQ(0, Vector1.Size());
+
+}
+
+TEST(DLMSVector, SkipsAndReads)
+{
+    DLMSVector Vector1({ 1, 2, 3, 4, 5, 6, 7 });
+    ASSERT_EQ(7, Vector1.Size());
+    ASSERT_FALSE(Vector1.IsAtEnd());
+    ASSERT_TRUE(Vector1.Skip(3));
+    ASSERT_EQ(4, Vector1.PeekByte());
+    ASSERT_FALSE(Vector1.Skip(10));
+    ASSERT_EQ(3, Vector1.GetReadPosition());
+    ASSERT_EQ(4, Vector1.Get<uint8_t>());
+    ASSERT_EQ(4, Vector1.GetReadPosition());
+    uint8_t BUFFER[10] = { };
+    const uint8_t COMPAREBUFFER[] = { 5, 6, 7 };
+    ASSERT_TRUE(Vector1.PeekBuffer(BUFFER, 3));
+    ASSERT_EQ(0, std::memcmp(BUFFER, COMPAREBUFFER, 3));
+    ASSERT_EQ(4, Vector1.GetReadPosition());
+    
+}
+
+TEST(DLMSVector, Operators)
+{
+    DLMSVector Vector1({ 1, 2, 3, 4 });
+    DLMSVector Vector2(std::vector<uint8_t>({ 1, 2, 3, 4 }));   
+    DLMSVector Vector3;
+    ASSERT_EQ(Vector1, Vector2);
+    
+    Vector3 = Vector1;
+    ASSERT_EQ(Vector1, Vector3);
+}
+
 TEST(DLMSVector, AppendBigEndian) 
 {
-//    uint8_t u8;
-//    uint16_t u16;
-//    uint32_t u32;
-//    uint64_t u64;
-//    int8_t  i8;
-//    int16_t i16;
-//    int32_t i32;
-//    int64_t i64;
-//    float   f;
-//    double  d;
-    
     DLMSVariant Variant1;
     DLMSVector Vector1;
     
@@ -100,16 +140,6 @@ TEST(DLMSVector, AppendBigEndian)
 
 TEST(DLMSVector, AppendLittleEndian) 
 {
-//    uint8_t u8;
-//    uint16_t u16;
-//    uint32_t u32;
-//    uint64_t u64;
-//    int8_t  i8;
-//    int16_t i16;
-//    int32_t i32;
-//    int64_t i64;
-//    float   f;
-//    double  d;
     
     DLMSVariant Variant1;
     DLMSVector Vector1;
@@ -173,12 +203,12 @@ TEST(DLMSVector, AppendVariant)
     uint16_t u16;
     uint32_t u32;
     uint64_t u64;
-    int8_t  i8;
-    int16_t i16;
-    int32_t i32;
-    int64_t i64;
-    float   f;
-    double  d;
+    int8_t  i8 = -1;
+    int16_t i16 = -32000;
+    int32_t i32 = -34000000;
+    int64_t i64 = -6500000000;
+    float   f = -38738.23;
+    double  d = -498459849894894.4784784748487;
     
     DLMSVariant Variant = 1;
     DLMSVector Vector1;
@@ -190,6 +220,9 @@ TEST(DLMSVector, AppendVariant)
     ASSERT_EQ(3, Vector1.Append(Variant));
     Variant = 0x1FFFFFFFF;
     ASSERT_EQ(7, Vector1.Append(Variant));
+    Variant = i8;
+    ASSERT_EQ(13, Vector1.Append(Variant));
+   
    
 }
 
