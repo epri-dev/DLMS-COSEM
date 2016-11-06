@@ -67,11 +67,11 @@ TEST(AARE, Parse)
                                                      0x00, 0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07 }));
     
     ASNType Current;
-    ASSERT_EQ(ASNType::GetNextValueResult::VALUE_RETRIEVED, a1.application_context_name.GetNextValue(&Current));
+    ASSERT_EQ(ASNType::GetNextResult::VALUE_RETRIEVED, a1.application_context_name.GetNextValue(&Current));
     ASSERT_TRUE(ApplicationContext == Current);
     
     DLMSVariant Variant1;
-    ASSERT_EQ(ASNType::GetNextValueResult::VALUE_RETRIEVED, a1.result.GetNextValue(&Variant1));
+    ASSERT_EQ(ASNType::GetNextResult::VALUE_RETRIEVED, a1.result.GetNextValue(&Variant1));
     ASSERT_EQ(Variant1.get<int8_t>(), int8_t(AARE::AssociationResult::accepted));
 
     
@@ -109,9 +109,26 @@ TEST(AARE, Parse)
     // Loop until we get a value... or fail...
     //
     int8_t Choice;
-    ASSERT_EQ(ASNType::GetNextValueResult::VALUE_RETRIEVED, a1.result_source_diagnostic.GetNextValue(&Variant1));
+    ASSERT_EQ(ASNType::GetNextResult::VALUE_RETRIEVED, a1.result_source_diagnostic.GetNextValue(&Variant1));
     ASSERT_TRUE(a1.result_source_diagnostic.GetChoice(&Choice));
     ASSERT_EQ(AARE::AssociateDiagnosticChoice::acse_service_user, Choice);
     ASSERT_EQ(Variant1.get<int8_t>(), int8_t(AARE::AssociateDiagnosticUser::user_null));
+    //
+    // We should be at the end of the schema...
+    //
+    ASSERT_EQ(ASNType::GetNextResult::END_OF_SCHEMA, a1.result_source_diagnostic.GetNextValue(&Variant1));
+    a1.result_source_diagnostic.Rewind();
+    ASSERT_FALSE(a1.result_source_diagnostic.GetChoice(&Choice));
+    //
+    // After Rewind, we should be able to get the value again...
+    //
+    ASSERT_EQ(ASNType::GetNextResult::VALUE_RETRIEVED, a1.result_source_diagnostic.GetNextValue(&Variant1));
+    ASSERT_TRUE(a1.result_source_diagnostic.GetChoice(&Choice));
+    ASSERT_EQ(AARE::AssociateDiagnosticChoice::acse_service_user, Choice);
+    ASSERT_EQ(Variant1.get<int8_t>(), int8_t(AARE::AssociateDiagnosticUser::user_null));
+   
+    ASSERT_EQ(ASNType::GetNextResult::VALUE_RETRIEVED, a1.user_information.GetNextValue(&Current));
+    ASSERT_TRUE(UserInformation == Current);
+    
 
 }

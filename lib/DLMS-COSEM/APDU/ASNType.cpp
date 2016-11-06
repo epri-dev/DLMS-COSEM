@@ -156,9 +156,11 @@ namespace EPRI
         return false;
     }
     
-    bool ASNType::GetINTEGER(DLMSVariant * pValue)
+    ASNType::GetNextResult ASNType::GetINTEGER(DLMSVariant * pValue)
     {
-        bool RetVal = false;
+        GetNextResult RetVal = NO_VALUE_FOUND;
+        bool          GetResult = false;
+        //
         // Validate our appropriate lengths for this data type.
         //
         const std::set<uint8_t> VALID_LENGTHS({ 1, 2, 4, 8 });
@@ -169,46 +171,72 @@ namespace EPRI
             switch (m_Data.Get<uint8_t>())
             {
             case 1:
-                RetVal = m_Data.Get<int8_t>(pValue);
+                GetResult = m_Data.Get<int8_t>(pValue);
                 break;
             case 2:
-                RetVal = m_Data.Get<int16_t>(pValue);
+                GetResult = m_Data.Get<int16_t>(pValue);
                 break;
             case 4:
-                RetVal = m_Data.Get<int32_t>(pValue);
+                GetResult = m_Data.Get<int32_t>(pValue);
                 break;
             case 8:
-                RetVal = m_Data.Get<int64_t>(pValue);
+                GetResult = m_Data.Get<int64_t>(pValue);
                 break;
             default:
-                RetVal = false;
+                RetVal = INVALID_CONDITION;
                 break;                        
+            }
+            if (GetResult)
+            {
+                RetVal = VALUE_RETRIEVED;
             }
         }
         return RetVal;
     }
     
-    ASNType::GetNextValueResult ASNType::InternalSimpleGet(ASN::SchemaEntryPtr SchemaEntry, DLMSVariant * pValue)
+    ASNType::GetNextResult ASNType::GetOCTET_STRING(DLMSVariant * pValue)
     {
-        GetNextValueResult RetVal = INVALID_CONDITION;
+        GetNextResult RetVal = INVALID_STREAM;
+        //
+        // Validate our appropriate lengths for this data type.
+        //
+        if (m_Data.PeekByte() == ASN::OCTET_STRING)
+        {
+            size_t Length = 0;
+            m_Data.Skip(sizeof(uint8_t));
+            if (GetLength(&m_Data, &Length))
+            {
+                DLMSVector Vector;
+                if (m_Data.GetVector(&Vector, Length))
+                {
+                    pValue->set<DLMSVector>(Vector);
+                    RetVal = VALUE_RETRIEVED;
+                }
+            }
+        }
+        return RetVal;
+    }
+    
+    ASNType::GetNextResult ASNType::InternalSimpleGet(ASN::SchemaEntryPtr SchemaEntry, DLMSVariant * pValue)
+    {
+        GetNextResult RetVal = INVALID_CONDITION;
         if(ASN::INTEGER_LIST_T == 
            ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
         {
-            if (GetINTEGER(pValue))
-            {
-                RetVal = VALUE_RETRIEVED;
-            }
+            RetVal = GetINTEGER(pValue);
         }
         else
         {
             switch (ASN_SCHEMA_DATA_TYPE(SchemaEntry))
             {
             case ASN::INTEGER:
-                RetVal = GetINTEGER(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
+                RetVal = GetINTEGER(pValue);
                 break;
             case ASN::OBJECT_IDENTIFIER:
                 RetVal = ASNObjectIdentifier::Get(this, pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
                 break;
+            case ASN::OCTET_STRING:
+                RetVal = GetOCTET_STRING(pValue);
             default:
                 break;
             }
@@ -216,10 +244,11 @@ namespace EPRI
         return RetVal;
     }
     
-    ASNType::GetNextValueResult ASNType::GetNextValue(DLMSVariant * pValue)
+    ASNType::GetNextResult ASNType::GetNextValue(DLMSVariant * pValue)
     {
         ASN::SchemaEntryPtr SchemaEntry;
         bool                Gotten = false;
+        GetNextResult       GetNextRetVal = INVALID_CONDITION;
         //
         // PRECONDITIONS
         //
@@ -227,7 +256,7 @@ namespace EPRI
         {
             return INVALID_CONDITION;
         }
-        while (GetNextSchemaEntry(&SchemaEntry))
+        while (VALUE_RETRIEVED == (GetNextRetVal = GetNextSchemaEntry(&SchemaEntry)))
         {
             switch (m_GetState)
             {
@@ -296,16 +325,16 @@ namespace EPRI
                 }
                 break;
             default:
-                break;
+                throw std::out_of_range("Not implemented.");
             }
         }
-        return INVALID_CONDITION;
+        return GetNextRetVal;
     }
 
-    ASNType::GetNextValueResult ASNType::GetNextValue(ASNType * pValue)
+    ASNType::GetNextResult ASNType::GetNextValue(ASNType * pValue)
     {
-        GetNextValueResult  RetVal = INVALID_CONDITION;
-        DLMSVariant         Variant;
+        GetNextResult  RetVal = INVALID_CONDITION;
+        DLMSVariant    Variant;
         //
         // PRECONDITIONS
         //
@@ -319,6 +348,7 @@ namespace EPRI
         {
         case ASN::OBJECT_IDENTIFIER:
         case ASN::INTEGER:
+        case ASN::OCTET_STRING:
             RetVal = GetNextValue(&Variant);
             if (VALUE_RETRIEVED == RetVal)
             {
@@ -442,19 +472,19 @@ namespace EPRI
         Clear();
     }
     
-    bool ASNType::GetNextSchemaEntry(ASN::SchemaEntryPtr * ppSchemaEntry)
+    ASNType::GetNextResult ASNType::GetNextSchemaEntry(ASN::SchemaEntryPtr * ppSchemaEntry)
     {
         *ppSchemaEntry = m_pCurrentSchema;
         if (nullptr == m_pCurrentSchema)
         {
-            return false;
+            return INVALID_CONDITION;
         }
         if (ASN::END_SCHEMA_T != m_pCurrentSchema->m_SchemaType)
         {
             ++m_pCurrentSchema;
-            return true;
+            return VALUE_RETRIEVED;
         }
-        return false;
+        return END_OF_SCHEMA;
     }
     
     bool ASNType::InternalAppend(const DLMSVariant& Value)
@@ -463,7 +493,7 @@ namespace EPRI
         uint8_t             ChoiceIndex = 0;
         ASN::SchemaEntryPtr SchemaEntry;
        
-        while (GetNextSchemaEntry(&SchemaEntry))
+        while (VALUE_RETRIEVED == GetNextSchemaEntry(&SchemaEntry))
         {
             switch (m_AppendState)
             {
@@ -558,7 +588,7 @@ namespace EPRI
         ASN::SchemaEntryPtr SchemaEntry;
         bool                Appended = false;
         
-        while (GetNextSchemaEntry(&SchemaEntry))
+        while (VALUE_RETRIEVED == GetNextSchemaEntry(&SchemaEntry))
         {
             switch (m_AppendState)
             {

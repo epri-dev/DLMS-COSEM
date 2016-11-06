@@ -384,11 +384,12 @@ namespace EPRI
         return false;
     }
     
-    bool DLMSVector::GetVector(std::vector<uint8_t> * pValue, size_t Count)
+    bool DLMSVector::GetVector(DLMSVector * pValue, size_t Count)
     {
         if (m_ReadPosition + Count <= m_Data.size())
         {
-            pValue->insert(pValue->end(), m_Data.begin(), m_Data.begin() + Count);
+            pValue->m_Data.insert(pValue->m_Data.end(), 
+                m_Data.begin(), m_Data.begin() + Count);
             m_ReadPosition += Count;
             return true;
         }

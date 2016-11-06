@@ -145,7 +145,7 @@ namespace EPRI
                 throw std::out_of_range("Get failed.");
             }
         bool GetBuffer(uint8_t * pValue, size_t Count);
-        bool GetVector(std::vector<uint8_t> * pValue, size_t Count);
+        bool GetVector(DLMSVector * pValue, size_t Count);
         std::vector<uint8_t> GetBytes() const;
         const uint8_t * GetData() const;
         

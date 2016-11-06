@@ -162,17 +162,18 @@ namespace EPRI
         virtual bool Append(const DLMSVariant& Value);
         virtual bool Append(ASNType * Value);
         
-        enum GetNextValueResult
+        enum GetNextResult
         {
             VALUE_RETRIEVED = 0,
             END_OF_SCHEMA,
             NO_VALUE_FOUND,
             SCHEMA_MISMATCH,
+            INVALID_STREAM,
             INVALID_CONDITION
         };
         
-        virtual GetNextValueResult GetNextValue(ASNType * pValue);
-        virtual GetNextValueResult GetNextValue(DLMSVariant * pValue);
+        virtual GetNextResult GetNextValue(ASNType * pValue);
+        virtual GetNextResult GetNextValue(DLMSVariant * pValue);
         
         inline ASN::DataTypes GetCurrentSchemaType() const
         {
@@ -203,15 +204,16 @@ namespace EPRI
             return m_pCurrentSchema;
         }
         
-        bool GetNextSchemaEntry(ASN::SchemaEntryPtr * ppSchemaEntry);
+        GetNextResult GetNextSchemaEntry(ASN::SchemaEntryPtr * ppSchemaEntry);
         bool InternalAppend(const DLMSVariant& Value);
         bool InternalAppend(ASNType * pValue);
         bool InternalSimpleAppend(ASN::SchemaEntryPtr SchemaEntry, ASNType * pValue);
         bool InternalAppend(const DLMSVector& Value);
 
-        GetNextValueResult InternalSimpleGet(ASN::SchemaEntryPtr SchemaEntry, DLMSVariant * pValue);
-        bool GetINTEGER(DLMSVariant * pValue);
-       
+        GetNextResult InternalSimpleGet(ASN::SchemaEntryPtr SchemaEntry, DLMSVariant * pValue);
+        GetNextResult GetINTEGER(DLMSVariant * pValue);
+        GetNextResult GetOCTET_STRING(DLMSVariant * pValue);
+      
         const int8_t                  INVALID_CHOICE = std::numeric_limits<int8_t>::lowest();
         enum ParseStates
         {
