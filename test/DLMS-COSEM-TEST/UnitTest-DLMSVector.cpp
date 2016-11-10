@@ -7,6 +7,7 @@ using namespace EPRI;
 TEST(DLMSVector, InitialSettings) 
 {
     uint8_t u8;
+    std::string String;
     
     DLMSVariant Variant1;
     DLMSVector Vector1;
@@ -27,6 +28,7 @@ TEST(DLMSVector, InitialSettings)
     ASSERT_FALSE(Vector1.Get<float>(&Variant1));
     ASSERT_FALSE(Vector1.Get<double>(&Variant1));
     ASSERT_FALSE(Vector1.GetBuffer(&u8, 1));
+    ASSERT_FALSE(Vector1.Get(&String, 1));
     ASSERT_EQ(0, Vector1.GetBytes().size());
     ASSERT_EQ(0, Vector1.ToString().length());
 }
@@ -223,7 +225,31 @@ TEST(DLMSVector, AppendVariant)
     Variant = i8;
     ASSERT_EQ(13, Vector1.Append(Variant));
    
-   
+}
+
+TEST(DLMSVector, AppendString)
+{
+    DLMSVector Vector1;
+    std::string String;
+    
+    ASSERT_EQ(0, Vector1.Append(std::string("1234567")));
+    ASSERT_EQ(7, Vector1.Append(std::string("890")));
+    ASSERT_TRUE(Vector1.Get(&String, 7));
+    ASSERT_EQ(String, "1234567");
+    ASSERT_TRUE(Vector1.Get(&String, 3));
+    ASSERT_EQ(String, "890");
+    ASSERT_FALSE(Vector1.Get(&String, 3));
+
+    Vector1.Clear();
+    ASSERT_EQ(0, Vector1.Append(std::string("123")));
+    ASSERT_EQ(3, Vector1.Append(std::string("456")));
+    
+    std::string String1;
+    ASSERT_TRUE(Vector1.Get(&String1, 2, true));
+    ASSERT_EQ(String1, "12");
+    ASSERT_TRUE(Vector1.Get(&String1, 4, true));
+    ASSERT_EQ(String1, "123456");
+    
 }
 
 

@@ -157,7 +157,7 @@ namespace EPRI
     template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::CONSTRUCTED | ASN::OPTIONAL>
         using APDU_AE_invocation_identifier = APDUComponent<TAGID, ASN::IntegerSchema, OPT>;
     template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::OPTIONAL | ASN::IMPLICIT>
-        using APDU_Mechanism_name = APDUComponent<TAGID, ASN::ObjectIdentifierSchema, OPT>;
+        using APDU_Mechanism_name = APDUComponent<TAGID, ASN::ImplicitObjectIdentifierSchema, OPT>;
     template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::OPTIONAL | ASN::IMPLICIT>
         using APDU_Implementation_data = APDUComponent<TAGID, ASN::GraphicStringSchema, OPT>;
     template <ASN::TagIDType TAGID, ASN::ComponentOptionType OPT = ASN::CONSTRUCTED | ASN::OPTIONAL | ASN::EXPLICIT>

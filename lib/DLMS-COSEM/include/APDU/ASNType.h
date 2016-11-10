@@ -73,7 +73,10 @@ namespace EPRI
         (EPRI::ASN::InternalDataType::END_SCHEMA_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(SCH))
             
 #define ASN_SCHEMA_OPTIONS(SCH)\
-        ((SCH)->m_SchemaType & 0x0F000000)
+        ASN::ComponentOptionType((SCH)->m_SchemaType & 0x0F000000)
+
+#define ASN_IS_IMPLICIT(SCH)\
+        (ASN_SCHEMA_OPTIONS(SCH) & ASN::IMPLICIT)
             
 #define ASN_SCHEMA_DATA_TYPE(SCH)\
         ASN::DataTypes((SCH)->m_SchemaType & 0x0000FFFF)
@@ -136,19 +139,23 @@ namespace EPRI
         extern const SchemaEntry ObjectIdentifierSchema[];
         extern const SchemaEntry IntegerSchema[];
         extern const SchemaEntry GraphicStringSchema[];
+        extern const SchemaEntry ImplicitOctetStringSchema[];
+        extern const SchemaEntry ImplicitObjectIdentifierSchema[];
 
     }
     
     class ASNObjectIdentifier;
-    
+    class ASNBitString;
+   
     class ASNType
     {
         friend class ASNObjectIdentifier;
+        friend class ASNBitString;
         
     public:
         ASNType();
         ASNType(ASN::SchemaEntryPtr Schema);
-        ASNType(ASN::DataTypes DT, const DLMSVariant& Value);
+        ASNType(ASN::SchemaBaseType DT, const DLMSVariant& Value);
         virtual ~ASNType();
         
         virtual std::vector<uint8_t> GetBytes() const;
@@ -179,9 +186,17 @@ namespace EPRI
         {
             return ASN_SCHEMA_DATA_TYPE(GetCurrentSchemaEntry());
         }
+        inline ASN::ComponentOptionType GetCurrentSchemaOptions() const
+        {
+            return ASN_SCHEMA_OPTIONS(GetCurrentSchemaEntry());
+        }
         inline uint32_t GetCurrentSchemaTypeSize() const
         {
             return ASN_SCHEMA_DATA_TYPE_SIZE(GetCurrentSchemaEntry());
+        }
+        inline bool IsCurrentSchemaImplicit() const
+        {
+            return ASN_IS_IMPLICIT(GetCurrentSchemaEntry());
         }
         //
         // Operators
@@ -193,11 +208,12 @@ namespace EPRI
         //
         static bool AppendLength(size_t Length, DLMSVector * pData);
         static bool GetLength(DLMSVector * pData, size_t * pLength);
+        static bool PeekLength(const DLMSVector& Data, size_t Offset, size_t * pLength, size_t * pBytes = nullptr);
         static uint8_t CalculateLengthBytes(size_t Length);
 
     protected:
-        ASNType(ASN::DataTypes DT);
-        void SetDataType(ASN::DataTypes DT);
+        ASNType(ASN::SchemaBaseType DT);
+        void SetSchemaType(ASN::SchemaBaseType DT);
         
         inline ASN::SchemaEntryPtr GetCurrentSchemaEntry() const
         {
@@ -211,9 +227,9 @@ namespace EPRI
         bool InternalAppend(const DLMSVector& Value);
 
         GetNextResult InternalSimpleGet(ASN::SchemaEntryPtr SchemaEntry, DLMSVariant * pValue);
-        GetNextResult GetINTEGER(DLMSVariant * pValue);
-        GetNextResult GetOCTET_STRING(DLMSVariant * pValue);
-      
+        GetNextResult GetINTEGER(ASN::SchemaEntryPtr SchemaEntry, DLMSVariant * pValue);
+        GetNextResult GetSTRING(ASN::SchemaEntryPtr SchemaEntry, DLMSVariant * pValue);
+     
         const int8_t                  INVALID_CHOICE = std::numeric_limits<int8_t>::lowest();
         enum ParseStates
         {
@@ -243,25 +259,25 @@ namespace EPRI
         };
         
         ASNObjectIdentifier() = delete;
-        ASNObjectIdentifier(ArcList List, OIDType OT = ABSOLUTE);
+        ASNObjectIdentifier(ArcList List, ASN::ComponentOptions Options = ASN::NO_OPTIONS, OIDType OT = ABSOLUTE);
         virtual ~ASNObjectIdentifier();
 
         virtual bool Get(ArcVector * pVector);
-        static bool Peek(const ASNType& Value, DLMSVariant * pVariant, size_t * pBytes = nullptr);
-        static bool Get(ASNType * pValue, DLMSVariant * pVariant);
+        static bool Peek(ASN::SchemaEntryPtr SchemaEntry, const ASNType& Value, DLMSVariant * pVariant, size_t * pBytes = nullptr);
+        static bool Get(ASN::SchemaEntryPtr SchemaEntry, ASNType * pValue, DLMSVariant * pVariant);
         
     };
     
     class ASNBitString : public ASNType
     {
     public:
-        using ASNBitSet = std::bitset<64>;
-        
         ASNBitString();
         virtual ~ASNBitString();
-        ASNBitString(size_t BitsExpected, const ASNBitSet& Value);
+        ASNBitString(size_t BitsExpected, const DLMSBitSet& Value);
+        ASNBitString(size_t BitsExpected);
         
-        virtual bool Get(ASNBitSet * pBitSet);
+        static bool Peek(ASN::SchemaEntryPtr SchemaEntry, const ASNType& Value, DLMSVariant * pVariant, size_t * pBytes = nullptr);
+        static bool Get(ASN::SchemaEntryPtr SchemaEntry, ASNType * pValue, DLMSVariant * pVariant);
         
     protected:
         size_t m_BitsExpected;

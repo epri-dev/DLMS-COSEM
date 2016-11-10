@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <bitset>
 #include <cstdint>
 #include <cstddef>
 #include <string>
@@ -18,8 +19,10 @@ namespace EPRI
     class DLMSVector;
     
     using DLMSVariantInitList = std::initializer_list<uint32_t>;
+    using DLMSBitSet = std::bitset<64>;
+
     using DLMSVariant = variant<blank, bool, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t, 
-        std::string, float , double, DLMSVector, DLMSVariantInitList>;
+        std::string, float, double, DLMSVector, DLMSVariantInitList, DLMSBitSet>;
     enum DLMSVariantIndex
     {
         VAR_BLANK     = 0,
@@ -36,7 +39,8 @@ namespace EPRI
         VAR_FLOAT     = 11,
         VAR_DOUBLE    = 12,
         VAR_VECTOR    = 13,
-        VAR_INIT_LIST = 14
+        VAR_INIT_LIST = 14,
+        VAR_BITSET    = 15
     };
 
     bool IsValueInVariant(const DLMSVariant& Value, const DLMSVariant& Variant);
@@ -144,6 +148,7 @@ namespace EPRI
                 }
                 throw std::out_of_range("Get failed.");
             }
+        bool Get(std::string * pValue, size_t Count, bool Append = false);
         bool GetBuffer(uint8_t * pValue, size_t Count);
         bool GetVector(DLMSVector * pValue, size_t Count);
         std::vector<uint8_t> GetBytes() const;

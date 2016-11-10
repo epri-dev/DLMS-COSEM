@@ -326,7 +326,11 @@ namespace EPRI
         void operator()(const std::initializer_list<uint32_t>& Value)
         {
             throw std::logic_error("Not implemented");
-     }
+        }
+        void operator()(const DLMSBitSet& Value)
+        {
+            m_pVector->Append(Value.to_ullong());
+        }
         
     protected:
         void AppendTrimmedInteger(uint64_t Value)
@@ -371,6 +375,7 @@ namespace EPRI
     void DLMSVector::Clear()
     {
         m_Data.clear();
+        m_ReadPosition = 0;
     }
     
     bool DLMSVector::GetBuffer(uint8_t * pValue, size_t Count)
@@ -389,7 +394,26 @@ namespace EPRI
         if (m_ReadPosition + Count <= m_Data.size())
         {
             pValue->m_Data.insert(pValue->m_Data.end(), 
-                m_Data.begin(), m_Data.begin() + Count);
+                m_Data.begin() + m_ReadPosition, 
+                m_Data.begin() + m_ReadPosition + Count);
+            m_ReadPosition += Count;
+            return true;
+        }
+        return false;
+    }
+
+    bool DLMSVector::Get(std::string * pValue, size_t Count, bool Append /*= false*/)
+    {
+        if (m_ReadPosition + Count <= m_Data.size())
+        {
+            if (!Append)
+            {
+                pValue->clear();
+            }
+            std::string::iterator it = Append ? pValue->end() : pValue->begin();
+            pValue->insert(it,
+                m_Data.begin() + m_ReadPosition, 
+                m_Data.begin() + m_ReadPosition + Count);
             m_ReadPosition += Count;
             return true;
         }

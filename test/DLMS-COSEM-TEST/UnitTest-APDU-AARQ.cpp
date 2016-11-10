@@ -4,11 +4,20 @@
 
 using namespace EPRI;
 
+static const std::vector<uint8_t> FINAL = 
+{ 
+    0x60, 0x36, 0xA1, 0x09, 0x06, 0x07, 0x60, 0x85, 
+    0x74, 0x05, 0x08, 0x01, 0x01, 0x8A, 0x02, 0x07, 0x80, 0x8B, 0x07, 0x60, 0x85, 0x74, 0x05, 0x08, 
+    0x02, 0x01, 0xAC, 0x0A, 0x80, 0x08, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0xBE, 0x10, 
+    0x04, 0x0E, 0x01, 0x00, 0x00, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00, 0x00, 0x7E, 0x1F, 0x00, 0x00, 
+};
+
+
 TEST(AARQ, GeneralUsage) 
 {
     AARQ a1;
     ASNObjectIdentifier ApplicationContext({ 2, 16, 756, 5, 8, 1, 1 });
-    ASNObjectIdentifier MechanismName({ 2, 16, 756, 5, 8, 2, 1 });
+    ASNObjectIdentifier MechanismName({ 2, 16, 756, 5, 8, 2, 1 }, ASN::IMPLICIT);
     ASNType             AuthenticationValue(ASN::GraphicString, std::string("33333333"));
     ASNType             UserInformation(ASN::OCTET_STRING, 
                             DLMSVector({ 0x01, 0x00, 0x00, 0x00, 0x06, 0x5F, 
@@ -39,17 +48,45 @@ TEST(AARQ, GeneralUsage)
     ASSERT_TRUE(a1.calling_authentication_value.Append(&AuthenticationValue));
     std::vector<uint8_t> A1CHECK_AUTHENTICATION_VALUE = { 0xAC, 0x0A, 0x80, 0x08, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33 };
     ASSERT_TRUE(a1.calling_authentication_value == A1CHECK_AUTHENTICATION_VALUE);
-        
-    std::vector<uint8_t> FINAL = 
-    { 
-        0x60, 0x36, 0xA1, 0x09, 0x06, 0x07, 0x60, 0x85, 
-        0x74, 0x05, 0x08, 0x01, 0x01, 0x8A, 0x02, 0x07, 0x80, 0x8B, 0x07, 0x60, 0x85, 0x74, 0x05, 0x08, 
-        0x02, 0x01, 0xAC, 0x0A, 0x80, 0x08, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0x33, 0xBE, 0x10, 
-        0x04, 0x0E, 0x01, 0x00, 0x00, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00, 0x00, 0x7E, 0x1F, 0x00, 0x00, 
-    };
  
     ASSERT_TRUE(a1.user_information.Append(&UserInformation));
     std::vector<uint8_t> AARQ_VEC = a1.GetBytes();
     ASSERT_TRUE(AARQ_VEC == FINAL);
     
+}
+
+TEST(AARQ, Parse) 
+{
+    AARQ        a1;
+    DLMSVector  Data(FINAL);
+    
+    ASSERT_TRUE(a1.Parse(&Data));
+
+    ASNObjectIdentifier ApplicationContext({ 2, 16, 756, 5, 8, 1, 1 });
+    ASNObjectIdentifier MechanismName({ 2, 16, 756, 5, 8, 2, 1 }, ASN::IMPLICIT);
+    ASNType             UserInformation(ASN::OCTET_STRING, 
+                            DLMSVector({ 0x01, 0x00, 0x00, 0x00, 0x06, 0x5F, 
+                                            0x1F, 0x04, 0x00, 0x00, 0x7E, 0x1F, 0x00, 0x00 }));
+    ASNType             Current;
+    ASSERT_EQ(ASNType::GetNextResult::VALUE_RETRIEVED, a1.application_context_name.GetNextValue(&Current));
+    ASSERT_TRUE(ApplicationContext == Current);
+    
+    ASNBitString        ACSERequirements(a1.sender_acse_requirements.GetCurrentSchemaTypeSize(), 1);
+    ASNBitString        BitString(a1.sender_acse_requirements.GetCurrentSchemaTypeSize());
+    ASSERT_EQ(ASNType::GetNextResult::VALUE_RETRIEVED, a1.sender_acse_requirements.GetNextValue(&BitString));
+    ASSERT_TRUE(ACSERequirements == BitString);
+
+    ASSERT_EQ(ASNType::GetNextResult::VALUE_RETRIEVED, a1.mechanism_name.GetNextValue(&Current));
+    ASSERT_TRUE(MechanismName == Current);
+
+    int8_t              Choice;
+    DLMSVariant         Variant1;
+    ASSERT_EQ(ASNType::GetNextResult::VALUE_RETRIEVED, a1.calling_authentication_value.GetNextValue(&Variant1));
+    ASSERT_TRUE(a1.calling_authentication_value.GetChoice(&Choice));
+    ASSERT_EQ(APDUConstants::AuthenticationValueChoice::charstring, Choice);
+    ASSERT_EQ(Variant1.get<std::string>(), std::string("33333333"));
+ 
+    ASSERT_EQ(ASNType::GetNextResult::VALUE_RETRIEVED, a1.user_information.GetNextValue(&Current));
+    ASSERT_TRUE(UserInformation == Current);
+
 }

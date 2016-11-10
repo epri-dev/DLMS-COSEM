@@ -9,14 +9,14 @@
       <LocalDirForRelativePaths />
     </CustomSourceDirectories>
     <BuildHost>
-      <HostName>192.168.11.131</HostName>
+      <HostName>192.168.11.132</HostName>
       <Transport>SSH</Transport>
       <UserName>gbarrett</UserName>
     </BuildHost>
     <MainSourceTransferCommand>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
-        <HostName>192.168.11.131</HostName>
+        <HostName>192.168.11.132</HostName>
         <Transport>SSH</Transport>
         <UserName>gbarrett</UserName>
       </RemoteHost>
