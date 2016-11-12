@@ -66,6 +66,7 @@
     <ClCompile Include="DLMS-COSEM-TEST.cpp" />
     <ClCompile Include="UnitTest-APDU-AARE.cpp" />
     <ClCompile Include="UnitTest-APDU-AARQ.cpp" />
+    <ClCompile Include="UnitTest-APDU-GET-Request.cpp" />
     <ClCompile Include="UnitTest-COSEM-Client.cpp" />
     <ClCompile Include="UnitTest-DLMSVector.cpp" />
     <ClCompile Include="UnitTest-HDLC-Address.cpp" />

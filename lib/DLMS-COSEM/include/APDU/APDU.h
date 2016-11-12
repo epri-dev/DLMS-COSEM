@@ -109,4 +109,57 @@ namespace EPRI
         
     };
     
+    template <ASN::TagIDType TAG>
+    class APDUSingleType : public IAPDU
+    {
+    public:
+        const ASN::TagIDType Tag = TAG;
+        
+        APDUSingleType() = delete;
+        virtual ~APDUSingleType()
+        {
+        }
+        
+        virtual ASN::TagIDType GetTag()
+        {
+            return Tag;
+        }
+        
+        virtual std::vector<uint8_t> GetBytes()
+        {
+            DLMSVector RetVal;
+            RetVal.Append<uint8_t>(Tag);
+            RetVal.Append(m_Type.GetBytes());
+            return RetVal.GetBytes();            
+        }
+        
+        virtual bool Parse(DLMSVector * pData)
+        {
+            if (Tag == pData->Peek<uint8_t>() &&
+                pData->Skip(sizeof(uint8_t)))
+            {
+                return m_Type.Parse(pData);
+            }
+            return false;            
+        }
+        
+        // NOTE: DERIVED CLASSES MUST IMPLEMENT IsValid()
+
+    protected:
+        APDUSingleType(ASN::SchemaEntryPtr SchemaEntry) :
+            m_Type(SchemaEntry)
+        {
+        }
+        
+        ASNType         m_Type;
+        
+    private:
+        void RegisterComponent(IAPDUComponent * pComponent) final
+        {
+            // NOT IMPLEMENTED AND VISIBILITY CHANGE
+        }
+        
+    };
+
+    
 }

@@ -19,7 +19,7 @@ namespace EPRI
             external = 2,
             other = 3
         };
-            
+        
     };
 
 }

@@ -115,7 +115,7 @@ namespace EPRI
     {
         if (0 == Count)
         {
-            Count = m_Data.size();
+            Count = m_Data.size() - Position;
         }
         if (Position + Count > m_Data.size())
         {
@@ -174,7 +174,7 @@ namespace EPRI
         ssize_t RetVal = m_Data.size();
         if (0 == Count)
         {
-            Count = Value.Size();
+            Count = Value.Size() - Position;
         }
         if (Position + Count > Value.Size())
             return -1;
@@ -187,7 +187,7 @@ namespace EPRI
         ssize_t RetVal = m_Data.size();
         if (0 == Count)
         {
-            Count = pValue->Size();
+            Count = pValue->Size() - pValue->GetReadPosition();
         }
         if (pValue->GetReadPosition() + Count > pValue->Size())
             return -1;

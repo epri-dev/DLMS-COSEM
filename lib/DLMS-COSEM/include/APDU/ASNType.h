@@ -30,6 +30,17 @@ namespace EPRI
             TeletexString     = 20,
             VisibleString     = 26,
             GraphicString     = 25,
+
+            DT_Base           = 200,
+            DT_Integer8       = DT_Base + DLMSVariantIndex::VAR_INT8,
+            DT_Unsigned8      = DT_Base + DLMSVariantIndex::VAR_UINT8,
+            DT_Integer16      = DT_Base + DLMSVariantIndex::VAR_INT16,
+            DT_Unsigned16     = DT_Base + DLMSVariantIndex::VAR_UINT16,
+            DT_Integer32      = DT_Base + DLMSVariantIndex::VAR_INT32,
+            DT_Unsigned32     = DT_Base + DLMSVariantIndex::VAR_UINT32,
+            DT_Integer64      = DT_Base + DLMSVariantIndex::VAR_INT64,
+            DT_Unsigned64     = DT_Base + DLMSVariantIndex::VAR_UINT64,
+            
             VOID              = 0xFF
         };
         
@@ -77,7 +88,10 @@ namespace EPRI
 
 #define ASN_IS_IMPLICIT(SCH)\
         (ASN_SCHEMA_OPTIONS(SCH) & ASN::IMPLICIT)
-            
+
+#define ASN_IS_CONSTRUCTED(SCH)\
+        (ASN_SCHEMA_OPTIONS(SCH) & ASN::CONSTRUCTED)
+
 #define ASN_SCHEMA_DATA_TYPE(SCH)\
         ASN::DataTypes((SCH)->m_SchemaType & 0x0000FFFF)
             
@@ -97,6 +111,10 @@ namespace EPRI
 #define ASN_BEGIN_CHOICE_ENTRY(E)\
             { ((E << 16) | \
                EPRI::ASN::InternalDataType::BEGIN_CHOICE_ENTRY_T) },
+#define ASN_BEGIN_CHOICE_ENTRY_WITH_OPTIONS(E, OPTIONS)\
+            { ((E << 16) | \
+               EPRI::ASN::InternalDataType::BEGIN_CHOICE_ENTRY_T |\
+               (OPTIONS)) },
 #define ASN_END_CHOICE_ENTRY\
             { EPRI::ASN::InternalDataType::END_CHOICE_ENTRY_T },
 #define ASN_BEGIN_SEQUENCE(OPTIONS)\
@@ -107,6 +125,9 @@ namespace EPRI
             { EPRI::ASN::DataTypes::NULL },
 #define ASN_OCTET_STRING_TYPE(OPTIONS)\
             { (EPRI::ASN::DataTypes::OCTET_STRING | (OPTIONS)) },
+#define ASN_FIXED_OCTET_STRING_TYPE(OPTIONS, SIZE)\
+            { ((OPTIONS) | (EPRI::ASN::SchemaBaseType(SIZE) << 16) | \
+                EPRI::ASN::DataTypes::OCTET_STRING) },
 #define ASN_BIT_STRING_TYPE(OPTIONS, MAXSIZE)\
             { ((OPTIONS) | (EPRI::ASN::SchemaBaseType(MAXSIZE) << 16) | \
                 EPRI::ASN::DataTypes::BIT_STRING) },
@@ -125,6 +146,8 @@ namespace EPRI
             { (EPRI::ASN::DataTypes::REAL | (OPTIONS)) },
 #define ASN_GraphicString_TYPE(OPTIONS)\
             { (EPRI::ASN::DataTypes::GraphicString | (OPTIONS)) },
+#define ASN_BASE_TYPE(DT)\
+            { DT },
 #define ASN_END_SCHEMA\
             { EPRI::ASN::InternalDataType::END_SCHEMA_T }\
         };
@@ -161,6 +184,8 @@ namespace EPRI
         virtual std::vector<uint8_t> GetBytes() const;
         virtual std::vector<uint8_t> GetBytes(ASN::TagIDType Tag, ASN::ComponentOptionType Options);
 
+        virtual bool Parse(DLMSVector * pData);
+
         virtual bool IsEmpty() const;
         virtual void Clear();
         virtual void Rewind();
@@ -181,6 +206,7 @@ namespace EPRI
         
         virtual GetNextResult GetNextValue(ASNType * pValue);
         virtual GetNextResult GetNextValue(DLMSVariant * pValue);
+        virtual GetNextResult GetNextValue(DLMSSequence * pValue);
         
         inline ASN::DataTypes GetCurrentSchemaType() const
         {
@@ -224,6 +250,7 @@ namespace EPRI
         bool InternalAppend(const DLMSVariant& Value);
         bool InternalAppend(ASNType * pValue);
         bool InternalSimpleAppend(ASN::SchemaEntryPtr SchemaEntry, ASNType * pValue);
+        bool InternalSimpleAppend(ASN::SchemaEntryPtr SchemaEntry, const DLMSVariant& Value);
         bool InternalAppend(const DLMSVector& Value);
 
         GetNextResult InternalSimpleGet(ASN::SchemaEntryPtr SchemaEntry, DLMSVariant * pValue);

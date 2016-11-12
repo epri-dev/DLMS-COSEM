@@ -23,6 +23,7 @@ namespace EPRI
 
     using DLMSVariant = variant<blank, bool, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t, 
         std::string, float, double, DLMSVector, DLMSVariantInitList, DLMSBitSet>;
+    using DLMSSequence = std::vector<DLMSVariant>;
     enum DLMSVariantIndex
     {
         VAR_BLANK     = 0,
@@ -42,7 +43,7 @@ namespace EPRI
         VAR_INIT_LIST = 14,
         VAR_BITSET    = 15
     };
-
+    
     bool IsValueInVariant(const DLMSVariant& Value, const DLMSVariant& Variant);
     
     class DLMSVector
