@@ -130,10 +130,15 @@ namespace EPRI
     void ASNType::Rewind()
     {
         m_pCurrentSchema = m_pSchema;
-        m_AppendState = ST_SIMPLE;
-        m_GetState = ST_SIMPLE;
-        m_Choice = INVALID_CHOICE;
         m_Data.SetReadPosition(0);
+        while (m_GetStates.size())
+        {
+            m_GetStates.pop();
+        }
+        while (m_AppendStates.size())
+        {
+            m_AppendStates.pop();
+        }
     }
     
     bool ASNType::Parse(DLMSVector * pData)
@@ -141,30 +146,40 @@ namespace EPRI
         return m_Data.Append(pData) >= 0;
     }
     
+    #define CURRENT_APPEND_STATE m_AppendStates.top()
     bool ASNType::SelectChoice(int8_t Choice)
     {
+        //
+        // PRECONDITIONS
+        //
+        if (m_AppendStates.empty())
+        {
+            m_AppendStates.emplace(nullptr, ST_SIMPLE, Choice);
+            return true;
+        }
+        //
         // The only time we can select a choice is if we are sitting within
         // a CHOICE section.
         //
-        ASN::SchemaEntryPtr pSchemaEntry = GetCurrentSchemaEntry();
-        if (nullptr != pSchemaEntry &&
-            (ASN::BEGIN_CHOICE_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(pSchemaEntry) ||
-             ASN::BEGIN_CHOICE_ENTRY_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(pSchemaEntry)))
+        if (nullptr != CURRENT_APPEND_STATE.m_SchemaEntry &&
+            (ASN::BEGIN_CHOICE_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry)))
         {
-            m_Choice = Choice;
+            CURRENT_APPEND_STATE.m_Choice = Choice;
             return true;
         }
         return false;
     }
-    
+
+    #define CURRENT_GET_STATE m_GetStates.top()
     bool ASNType::GetChoice(int8_t * pChoice)
     {
-        if (INVALID_CHOICE != m_Choice)
+        if (m_GetStates.size() && INVALID_CHOICE != CURRENT_GET_STATE.m_Choice)
         {
-            *pChoice = m_Choice;
+            *pChoice = CURRENT_GET_STATE.m_Choice;
             return true;
         }
         return false;
+
     }
     
     ASNType::GetNextResult ASNType::GetINTEGER(ASN::SchemaEntryPtr SchemaEntry, DLMSVariant * pValue)
@@ -279,7 +294,7 @@ namespace EPRI
                 RetVal = ASNBitString::Get(SchemaEntry, this, pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
                 break;
                 //
-                // TODO
+                // TODO - Make Smarter and Smaller
                 //
             case ASN::DT_Integer8:
                 RetVal = m_Data.Get<int8_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
@@ -305,6 +320,16 @@ namespace EPRI
             case ASN::DT_Unsigned64:
                 RetVal = m_Data.Get<uint64_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
                 break;
+            case ASN::DT_Data:
+                {
+                    DLMSVector Vector;
+                    if (m_Data.GetVector(&Vector, m_Data.Size() - m_Data.GetReadPosition()))
+                    {
+                        pValue->set<DLMSVector>(Vector);
+                        RetVal = VALUE_RETRIEVED;
+                    }
+                }
+                break;
             default:
                 throw std::out_of_range("InternalSimpleGet: Type not implemented.");
             }
@@ -312,11 +337,10 @@ namespace EPRI
         return RetVal;
     }
     
-    ASNType::GetNextResult ASNType::GetNextValue(DLMSVariant * pValue)
+    ASNType::GetNextResult ASNType::GetNextValue(DLMSValue * pValue)
     {
-        ASN::SchemaEntryPtr SchemaEntry;
-        bool                Gotten = false;
         GetNextResult       GetNextRetVal = INVALID_CONDITION;
+        DLMSSequence        Sequence;
         //
         // PRECONDITIONS
         //
@@ -324,176 +348,138 @@ namespace EPRI
         {
             return INVALID_CONDITION;
         }
-        while (VALUE_RETRIEVED == (GetNextRetVal = GetNextSchemaEntry(&SchemaEntry)))
+        if (m_Data.IsAtEnd())
         {
-            switch (m_GetState)
+            return END_OF_SCHEMA;
+        }
+        if (m_GetStates.empty())
+        {
+            m_GetStates.emplace(nullptr, ST_SIMPLE, INVALID_CHOICE);
+        }
+        while (VALUE_RETRIEVED == (GetNextRetVal = GetNextSchemaEntry(&CURRENT_GET_STATE.m_SchemaEntry)))
+        {
+            switch (CURRENT_GET_STATE.m_State)
             {
             case ST_SIMPLE:
                 if (ASN::BEGIN_CHOICE_T == 
-                    ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
+                    ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
                 {
-                    m_GetState = ST_CHOICE;
-                    m_Choice = INVALID_CHOICE;
+                    m_GetStates.emplace(nullptr, ST_CHOICE, INVALID_CHOICE);
+                    break;
+                }
+                else if (ASN::BEGIN_SEQUENCE_T == 
+                         ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
+                {
+                    m_GetStates.emplace(nullptr, ST_SEQUENCE, INVALID_CHOICE);
                     break;
                 }
                 else
                 {
-                    return InternalSimpleGet(SchemaEntry, pValue);
-                }
-                break;
-            case ST_CHOICE:
-                if (ASN::END_CHOICE_T ==  
-                    ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
-                {
-                    m_GetState = ST_SIMPLE;  
-                    if (Gotten)
-                    {
-                        return VALUE_RETRIEVED;
-                    }
-                    else
-                    {
-                        m_Choice = INVALID_CHOICE;
-                    }
-                    return NO_VALUE_FOUND;
-                }
-                else if (ASN::BEGIN_CHOICE_ENTRY_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry) &&
-                         (ASN_IS_IMPLICIT(SchemaEntry) || (m_Data.PeekByte() & 0x80)))
-                {
-                    int8_t Choice = m_Data.PeekByte() & 0b00011111;
-                    if (ASN_SCHEMA_DATA_TYPE_SIZE(SchemaEntry) == Choice)
-                    {
-                        m_GetState = ST_CHOICE_ENTRY;  
-                        m_Choice = Choice;
-                    }
-                }
-                else if (!Gotten)
-                {
-                    m_GetState = ST_SIMPLE;  
-                    m_Choice = INVALID_CHOICE;
-                    return SCHEMA_MISMATCH;
-                }
-                break;
-            case ST_CHOICE_ENTRY:
-                if (!Gotten)
-                {
-                    m_Data.Skip(sizeof(uint8_t));
-                    if (ASN_SCHEMA_OPTIONS(SchemaEntry) & ASN::CONSTRUCTED)
-                    {
-                        // TODO
-                        m_Data.Skip(sizeof(uint8_t));
-                    }
-                    if (VALUE_RETRIEVED == InternalSimpleGet(SchemaEntry, pValue))
-                    {
-                        Gotten = true;
-                    }
-                }
-                else if (ASN::END_CHOICE_ENTRY_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
-                {
-                    m_GetState = ST_CHOICE;
-                }
-                break;
-            default:
-                throw std::out_of_range("GetNextValue Not implemented.");
-            }
-        }
-        return GetNextRetVal;
-    }
-
-    ASNType::GetNextResult ASNType::GetNextValue(DLMSSequence * pValue)
-    {
-        ASN::SchemaEntryPtr SchemaEntry;
-        GetNextResult       GetNextRetVal = INVALID_CONDITION;
-        DLMSVariant         CurrentValue;
-        //
-        // PRECONDITIONS
-        //
-        if (m_Data.Size() == 0)
-        {
-            return INVALID_CONDITION;
-        }
-        while (VALUE_RETRIEVED == (GetNextRetVal = GetNextSchemaEntry(&SchemaEntry)))
-        {
-            switch (m_GetState)
-            {
-            case ST_SIMPLE:
-                if (ASN::BEGIN_CHOICE_T == 
-                    ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
-                {
-                    m_GetState = ST_CHOICE;
-                    m_Choice = INVALID_CHOICE;
-                    break;
-                }
-                else
-                {
-                    GetNextRetVal = InternalSimpleGet(SchemaEntry, &CurrentValue);
+                    DLMSVariant Value;
+                    GetNextRetVal = InternalSimpleGet(CURRENT_GET_STATE.m_SchemaEntry, &Value);
                     if (VALUE_RETRIEVED == GetNextRetVal)
                     {
-                        pValue->push_back(CurrentValue);
+                        *pValue = Value;
                     }
                     return GetNextRetVal;
                 }
-                break;
+                return SCHEMA_MISMATCH;
             case ST_CHOICE:
                 if (ASN::END_CHOICE_T ==  
-                    ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
+                    ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
                 {
-                    m_GetState = ST_SIMPLE;  
-                    if (pValue->size())
-                    {
-                        return VALUE_RETRIEVED;
-                    }
-                    else
-                    {
-                        m_Choice = INVALID_CHOICE;
-                    }
-                    return NO_VALUE_FOUND;
+                    m_GetStates.pop();
+                    break;
                 }
-                else if (ASN::BEGIN_CHOICE_ENTRY_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry) &&
-                         (ASN_IS_IMPLICIT(SchemaEntry) || (m_Data.PeekByte() & 0x80)))
+                else if (ASN::BEGIN_CHOICE_ENTRY_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry) &&
+                         (ASN_IS_IMPLICIT(CURRENT_GET_STATE.m_SchemaEntry) || (m_Data.PeekByte() & 0x80)))
                 {
                     int8_t Choice = m_Data.Get<uint8_t>() & 0b00011111;
-                    if (ASN_SCHEMA_DATA_TYPE_SIZE(SchemaEntry) == Choice)
+                    if (ASN_SCHEMA_DATA_TYPE_SIZE(CURRENT_GET_STATE.m_SchemaEntry) == Choice)
                     {
-                        m_GetState = ST_CHOICE_ENTRY;  
-                        m_Choice = Choice;
+                        m_GetStates.emplace(nullptr, ST_CHOICE_ENTRY, Choice);
+                        break;
                     }
                 }
-                else if (pValue->size() == 0)
-                {
-                    m_GetState = ST_SIMPLE;  
-                    m_Choice = INVALID_CHOICE;
-                    return SCHEMA_MISMATCH;
-                }
-                break;
+                return SCHEMA_MISMATCH;
             case ST_CHOICE_ENTRY:
-                if (ASN::END_CHOICE_ENTRY_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
+                if (ASN::END_CHOICE_ENTRY_T == 
+                    ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
                 {
-                    m_GetState = ST_CHOICE;
+                    m_GetStates.pop();
+                    break;
+                }
+                else if (ASN::BEGIN_CHOICE_T == 
+                         ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
+                {
+                    m_GetStates.emplace(nullptr, ST_CHOICE, INVALID_CHOICE);
+                    break;
+                }
+                else if (ASN::BEGIN_SEQUENCE_T == 
+                         ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
+                {
+                    m_GetStates.emplace(nullptr, ST_SEQUENCE, INVALID_CHOICE);
+                    break;
                 }
                 else
                 {
-                    if (ASN_SCHEMA_OPTIONS(SchemaEntry) & ASN::CONSTRUCTED)
+                    DLMSVariant Value;
+                    if (ASN_SCHEMA_OPTIONS(CURRENT_GET_STATE.m_SchemaEntry) & ASN::CONSTRUCTED)
                     {
                         // TODO
                         m_Data.Skip(sizeof(uint8_t));
                     }
-                    if (VALUE_RETRIEVED == InternalSimpleGet(SchemaEntry, &CurrentValue))
+                    GetNextRetVal = InternalSimpleGet(CURRENT_GET_STATE.m_SchemaEntry, &Value);
+                    if (VALUE_RETRIEVED == GetNextRetVal)
                     {
-                        pValue->push_back(CurrentValue);
+                        *pValue = Value;
+                    }
+                    return GetNextRetVal;
+                }
+                return SCHEMA_MISMATCH;
+            case ST_SEQUENCE:
+                if (ASN::END_SEQUENCE_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
+                {
+                    m_GetStates.pop();
+                    *pValue = Sequence;
+                    if (Sequence.size())
+                    {
+                        return VALUE_RETRIEVED; 
+                    }
+                    return NO_VALUE_FOUND;
+                }
+                else if (ASN::BEGIN_CHOICE_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
+                {
+                    m_GetStates.emplace(nullptr, ST_CHOICE, INVALID_CHOICE);
+                    break;
+                }
+                else
+                {
+                    DLMSVariant Value;
+                    if (ASN_SCHEMA_OPTIONS(CURRENT_GET_STATE.m_SchemaEntry) & ASN::CONSTRUCTED)
+                    {
+                        // TODO
+                        m_Data.Skip(sizeof(uint8_t));
+                    }
+                    GetNextRetVal = InternalSimpleGet(CURRENT_GET_STATE.m_SchemaEntry, &Value);
+                    if (VALUE_RETRIEVED == GetNextRetVal)
+                    {
+                        Sequence.push_back(Value);
+                        break;
                     }
                 }
-                break;
+                return SCHEMA_MISMATCH;
             default:
                 throw std::out_of_range("GetNextValue Not implemented.");
             }
         }
         return GetNextRetVal;
     }
-
+    
     ASNType::GetNextResult ASNType::GetNextValue(ASNType * pValue)
     {
         GetNextResult  RetVal = INVALID_CONDITION;
-        DLMSVariant    Variant;
+        DLMSValue      Value;
         //
         // PRECONDITIONS
         //
@@ -518,11 +504,11 @@ namespace EPRI
         case ASN::DT_Unsigned32:
         case ASN::DT_Integer64:
         case ASN::DT_Unsigned64:
-            RetVal = GetNextValue(&Variant);
+            RetVal = GetNextValue(&Value);
             if (VALUE_RETRIEVED == RetVal)
             {
                 pValue->SetSchemaType(SchemaEntry->m_SchemaType);
-                if (!pValue->Append(Variant))
+                if (!pValue->Append(Value.get<DLMSVariant>()))
                 {
                     RetVal = INVALID_CONDITION;
                 }
@@ -539,16 +525,11 @@ namespace EPRI
         return RetVal;
     }
     
-    bool ASNType::Append(const DLMSVariant& Value)
+    bool ASNType::Append(const DLMSValue& Value)
     {
         return InternalAppend(Value);
     }
     
-    bool ASNType::Append(ASNType * pValue)
-    {
-        return InternalAppend(pValue);
-    }
-
     bool ASNType::AppendLength(size_t Length, DLMSVector * pData)
     {
         if (Length > 0x7F)
@@ -676,7 +657,13 @@ namespace EPRI
     
     bool ASNType::InternalSimpleAppend(ASN::SchemaEntryPtr SchemaEntry, const DLMSVariant& Value)
     {
-        switch (ASN_SCHEMA_DATA_TYPE(SchemaEntry))
+        ASN::DataTypes DT = ASN_SCHEMA_DATA_TYPE(SchemaEntry);
+        if (ASN::INTEGER_LIST_T == 
+            ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
+        {
+            DT = ASN::INTEGER;
+        }
+        switch (DT)
         {
         case ASN::GraphicString:
             if (Value.which() == VAR_STRING)
@@ -689,12 +676,22 @@ namespace EPRI
         case ASN::OCTET_STRING:
             if (Value.which() == VAR_VECTOR)
             {
-                if (!ASN_IS_IMPLICIT(SchemaEntry))
+                ssize_t Length = -1;
+                bool    IsImplicit = ASN_IS_IMPLICIT(SchemaEntry);
+                if (!IsImplicit)
                 {
                     m_Data.Append<uint8_t>(ASN::OCTET_STRING);
+                    Length = Value.get<DLMSVector>().Size();
+                }
+                else if (ASN_SCHEMA_DATA_TYPE_SIZE(SchemaEntry))
+                {
+                    Length = ASN_SCHEMA_DATA_TYPE_SIZE(SchemaEntry);
+                }
+                if (!IsImplicit && Length >= 0)
+                {
                     AppendLength(Value.get<DLMSVector>().Size(), &m_Data);
                 }
-                m_Data.Append(Value.get<DLMSVector>());
+                m_Data.Append(Value.get<DLMSVector>(), 0, Length);
                 return true;
             }
             return false;
@@ -703,7 +700,7 @@ namespace EPRI
                 ssize_t LengthIndex = -1;
                 if (!ASN_IS_IMPLICIT(SchemaEntry))
                 {
-                    m_Data.Append<uint8_t>(ASN_SCHEMA_DATA_TYPE(SchemaEntry));
+                    m_Data.Append<uint8_t>(ASN::INTEGER);
                     LengthIndex = m_Data.Append<uint8_t>(0);
                 }
                 m_Data.Append(Value);
@@ -718,18 +715,29 @@ namespace EPRI
             return true;
         case ASN::BIT_STRING:
             {
-                bool   NeedLength = ASN_IS_IMPLICIT(SchemaEntry);
-                size_t LengthIndex = 0;
-                if (NeedLength)
+                if (Value.which() == VAR_BITSET)
                 {
-                    m_Data.Append<uint8_t>(ASN_SCHEMA_DATA_TYPE(SchemaEntry));
-                    LengthIndex = m_Data.Append<uint8_t>(0);
+                    bool   NeedLength = ASN_IS_IMPLICIT(SchemaEntry);
+                    size_t LengthIndex = 0;
+                    if (NeedLength)
+                    {
+                        m_Data.Append<uint8_t>(ASN::BIT_STRING);
+                        LengthIndex = m_Data.Append<uint8_t>(0);
+                    }
+                    ASNBitString Conversion(ASN_SCHEMA_DATA_TYPE_SIZE(SchemaEntry), Value.get<DLMSBitSet>());
+                    m_Data.Append(Conversion.GetBytes());
+                    if (NeedLength)
+                    {
+                        m_Data[LengthIndex] = m_Data.Size() - LengthIndex - 1;
+                    }
                 }
-                ASNBitString Conversion(ASN_SCHEMA_DATA_TYPE_SIZE(SchemaEntry), Value.get<DLMSBitSet>());
-                m_Data.Append(Conversion.GetBytes());
-                if (NeedLength)
+                else if (Value.which() == VAR_VECTOR)
                 {
-                    m_Data[LengthIndex] = m_Data.Size() - LengthIndex - 1;
+                    m_Data.Append(Value.get<DLMSVector>());
+                }
+                else
+                {
+                    return false;
                 }
             }
             return true;
@@ -750,52 +758,72 @@ namespace EPRI
         return false;
     }
     
-    bool ASNType::InternalAppend(const DLMSVariant& Value)
+    bool ASNType::InternalAppend(const DLMSValue& Value)
     {
-        ASN::SchemaEntryPtr SchemaEntry;
-        
-        while (VALUE_RETRIEVED == GetNextSchemaEntry(&SchemaEntry))
+        if (m_AppendStates.empty())
         {
-            switch (m_AppendState)
+            m_AppendStates.emplace(nullptr, ST_SIMPLE, INVALID_CHOICE);
+        }
+        while (VALUE_RETRIEVED == GetNextSchemaEntry(&CURRENT_APPEND_STATE.m_SchemaEntry))
+        {
+            switch (CURRENT_APPEND_STATE.m_State)
             {
             case ST_SIMPLE:
                 if (ASN::BEGIN_CHOICE_T == 
-                    ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
+                    ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
                 {
-                    m_AppendState = ST_CHOICE;
+                    m_AppendStates.emplace(nullptr, ST_CHOICE, CURRENT_APPEND_STATE.m_Choice);
                     break;
                 }
-                else if (InternalSimpleAppend(SchemaEntry, Value))
+                else if (ASN::BEGIN_SEQUENCE_T == 
+                         ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
                 {
-                    return true;
+                    m_AppendStates.emplace(nullptr, ST_SEQUENCE, INVALID_CHOICE);
+                    break;
+                }
+                else 
+                {
+                    return InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, Value.get<DLMSVariant>());                  
                 }
                 return false;
             case ST_CHOICE:
                 if (ASN::END_CHOICE_T ==  
-                    ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
+                    ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
                 {
-                    m_AppendState = ST_SIMPLE;  
-                    m_Choice = INVALID_CHOICE;
-                    return true;
+                    m_AppendStates.pop();
                 }
-                else if (ASN::BEGIN_CHOICE_ENTRY_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry) &&
-                         m_Choice == ASN_SCHEMA_DATA_TYPE_SIZE(SchemaEntry))
+                else if (ASN::BEGIN_CHOICE_ENTRY_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry) &&
+                         CURRENT_APPEND_STATE.m_Choice == ASN_SCHEMA_DATA_TYPE_SIZE(CURRENT_APPEND_STATE.m_SchemaEntry))
                 {
-                    ASN::ComponentOptionType Options = ASN_SCHEMA_OPTIONS(SchemaEntry);
+                    ASN::ComponentOptionType Options = ASN_SCHEMA_OPTIONS(CURRENT_APPEND_STATE.m_SchemaEntry);
                     m_Data.Append<uint8_t>(
-                        (Options & ASN::IMPLICIT ? 0x00 : 0x80) | m_Choice | 
+                        (Options & ASN::IMPLICIT ? 0x00 : 0x80) | CURRENT_APPEND_STATE.m_Choice | 
                         (Options & ASN::CONSTRUCTED ? 0b00100000 : 0x00));
-                    m_AppendState = ST_CHOICE_ENTRY;  
+                    
+                    m_AppendStates.emplace(nullptr, ST_CHOICE_ENTRY, CURRENT_APPEND_STATE.m_Choice);
                 }
                 break;
             case ST_CHOICE_ENTRY:
-                if (ASN::END_CHOICE_ENTRY_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
+                if (ASN::END_CHOICE_ENTRY_T == 
+                    ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
                 {
-                    m_AppendState = ST_CHOICE;
+                    m_AppendStates.pop();
+                }
+                else if (ASN::BEGIN_CHOICE_T == 
+                         ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
+                {
+                    m_AppendStates.emplace(nullptr, ST_CHOICE, INVALID_CHOICE);
+                    break;
+                }
+                else if (ASN::BEGIN_SEQUENCE_T == 
+                         ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
+                {
+                    m_AppendStates.emplace(nullptr, ST_SEQUENCE, INVALID_CHOICE);
+                    break;
                 }
                 else
                 {
-                    bool Constructed = ASN_IS_CONSTRUCTED(SchemaEntry);
+                    bool Constructed = ASN_IS_CONSTRUCTED(CURRENT_APPEND_STATE.m_SchemaEntry);
                     bool Appended = false;
                     //
                     // TODO - Handle real length...
@@ -805,7 +833,7 @@ namespace EPRI
                     {
                         LengthIndex = m_Data.Append<uint8_t>(0x00);
                     }
-                    Appended = InternalSimpleAppend(SchemaEntry, Value);
+                    Appended = InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, Value.get<DLMSVariant>());
                     if (Constructed && Appended)
                     {
                         m_Data[LengthIndex] = m_Data.Size() - LengthIndex - sizeof(uint8_t);
@@ -815,116 +843,76 @@ namespace EPRI
                         return true;
                     }
                 }
-                break;
-            default:
                 return false;
-            }
-        }
-        return false;
-    }
-    
-    bool ASNType::InternalSimpleAppend(ASN::SchemaEntryPtr SchemaEntry, ASNType * pValue)
-    {
-        if (nullptr == pValue->m_pSchema)
-        {
-            return false;
-        }
-        
-        if (ASN::INTEGER_LIST_T == 
-            ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
-        {
-            if (ASN::INTEGER == pValue->GetCurrentSchemaType() &&
-                SchemaEntry->m_Extra.which() == VAR_INIT_LIST)
-            {
-                DLMSVariant Current;
-                if (VALUE_RETRIEVED == pValue->GetNextValue(&Current) &&
-                    IsValueInVariant(Current, SchemaEntry->m_Extra))
+            case ST_SEQUENCE:
+                if (ASN::END_SEQUENCE_T == 
+                    ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
                 {
-                    return InternalAppend(pValue->m_Data);
+                    m_AppendStates.pop();
+                    return true;
                 }
-            }
-        }
-        else if(ASN_SCHEMA_DATA_TYPE(SchemaEntry) ==
-                    ASN_SCHEMA_DATA_TYPE(pValue->m_pSchema))
-        {
-            return InternalAppend(pValue->m_Data);
-        }
-        return false;
-    }
-
-    bool ASNType::InternalAppend(ASNType * pValue)
-    {
-        ASN::SchemaEntryPtr SchemaEntry;
-        bool                Appended = false;
-        
-        while (VALUE_RETRIEVED == GetNextSchemaEntry(&SchemaEntry))
-        {
-            switch (m_AppendState)
-            {
-            case ST_SIMPLE:
-                if (ASN::BEGIN_CHOICE_T == 
-                    ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
+                else if (ASN::BEGIN_CHOICE_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
                 {
-                    m_AppendState = ST_CHOICE;
+                    m_AppendStates.emplace(nullptr, ST_CHOICE, INVALID_CHOICE);
                     break;
                 }
-                else if (InternalSimpleAppend(SchemaEntry, pValue))
+                else
                 {
-                    return true;
+                    if (IsSequence(Value))
+                    {
+                        const DLMSSequence& Sequence = DLMSValueGetSequence(Value);
+                        for (DLMSSequence::const_iterator it = Sequence.begin();
+                             it != Sequence.end(); ++it)
+                        {
+                            bool Constructed = ASN_IS_CONSTRUCTED(CURRENT_APPEND_STATE.m_SchemaEntry);
+                            bool Appended = false;
+                            //
+                            // TODO - Handle real length...
+                            //
+                            ssize_t LengthIndex = -1;
+                            if (Constructed)
+                            {
+                                LengthIndex = m_Data.Append<uint8_t>(0x00);
+                            }
+                            Appended = InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, *it);
+                            if (Constructed && Appended)
+                            {
+                                m_Data[LengthIndex] = m_Data.Size() - LengthIndex - sizeof(uint8_t);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        bool Constructed = ASN_IS_CONSTRUCTED(CURRENT_APPEND_STATE.m_SchemaEntry);
+                        bool Appended = false;
+                        //
+                        // TODO - Handle real length...
+                        //
+                        ssize_t LengthIndex = -1;
+                        if (Constructed)
+                        {
+                            LengthIndex = m_Data.Append<uint8_t>(0x00);
+                        }
+                        Appended = InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, Value.get<DLMSVariant>());
+                        if (Constructed && Appended)
+                        {
+                            m_Data[LengthIndex] = m_Data.Size() - LengthIndex - sizeof(uint8_t);
+                        }
+                        if (Appended)
+                        {
+                            return true;
+                        }
+                    }
                 }
                 return false;
-            case ST_CHOICE:
-                if (ASN::END_CHOICE_T ==  
-                    ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
-                {
-                    m_AppendState = ST_SIMPLE;  
-                    m_Choice = INVALID_CHOICE;
-                    
-                    if (!Appended)
-                    {
-                        return false;
-                    }
-                    return true;
-                }
-                else if (ASN::BEGIN_CHOICE_ENTRY_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry) &&
-                         m_Choice == ASN_SCHEMA_DATA_TYPE_SIZE(SchemaEntry))
-                {
-                    m_AppendState = ST_CHOICE_ENTRY;  
-                }
-                break;
-            case ST_CHOICE_ENTRY:
-                if (!Appended)
-                {
-                    bool Constructed = ASN_SCHEMA_OPTIONS(SchemaEntry) & ASN::CONSTRUCTED;
-                    m_Data.Append<uint8_t>(0x80 | m_Choice | 
-                        (Constructed ? 0b00100000 : 0x00));
-
-                    //
-                    // TODO - Handle real length...
-                    //
-                    ssize_t LengthIndex = -1;
-                    if (Constructed)
-                    {
-                        LengthIndex = m_Data.Append<uint8_t>(0x00);
-                    }
-                    Appended = InternalSimpleAppend(SchemaEntry, pValue);
-                    if (Constructed && Appended)
-                    {
-                        m_Data[LengthIndex] = m_Data.Size() - LengthIndex - sizeof(uint8_t);
-                    }
-                }
-                else if (ASN::END_CHOICE_ENTRY_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
-                {
-                    m_AppendState = ST_CHOICE;
-                }
-                break;
+                
             default:
                 return false;
             }
         }
         return false;
     }
-    
+
     bool ASNType::InternalAppend(const DLMSVector& Value)
     {
         return m_Data.Append(Value) >= 0;
@@ -1003,6 +991,11 @@ namespace EPRI
 
     ASNObjectIdentifier::~ASNObjectIdentifier()
     {
+    }
+    
+    ASNObjectIdentifier::operator DLMSVariant() const
+    {
+        return m_Data;
     }
     
     bool ASNObjectIdentifier::Peek(ASN::SchemaEntryPtr SchemaEntry, const ASNType& Value, DLMSVariant * pVariant, size_t * pBytes /* = nullptr*/)
@@ -1110,6 +1103,11 @@ namespace EPRI
             m_Data.Append<uint8_t>(CurrentByte);
         }
         
+    }
+    
+    ASNBitString::operator DLMSVariant() const
+    {
+        return m_Data;
     }
     
     bool ASNBitString::Peek(ASN::SchemaEntryPtr SchemaEntry, const ASNType& Value, DLMSVariant * pVariant, size_t * pBytes /* = nullptr*/)

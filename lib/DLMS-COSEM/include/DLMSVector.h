@@ -24,6 +24,7 @@ namespace EPRI
     using DLMSVariant = variant<blank, bool, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t, 
         std::string, float, double, DLMSVector, DLMSVariantInitList, DLMSBitSet>;
     using DLMSSequence = std::vector<DLMSVariant>;
+    using DLMSValue = variant<DLMSVariant, DLMSSequence>;
     enum DLMSVariantIndex
     {
         VAR_BLANK     = 0,
@@ -257,5 +258,31 @@ namespace EPRI
         RawData                 m_Data;
         size_t                  m_ReadPosition = 0;
     };
-
+    
+    template <typename T>
+        T& DLMSValueGet(DLMSValue& V)
+        {
+            return V.get<DLMSVariant>().get<T>();
+        }
+    template <typename T>
+        const T& DLMSValueGet(const DLMSValue& V)
+        {
+            return V.get<DLMSVariant>().get<T>();
+        }
+    
+    inline bool IsSequence(const DLMSValue& Value)
+    {
+        return Value.which() == 1;
+    }
+    
+    inline DLMSSequence& DLMSValueGetSequence(DLMSValue& V)
+    {
+        return V.get<DLMSSequence>();
+    }
+    
+    inline const DLMSSequence& DLMSValueGetSequence(const DLMSValue& V)
+    {
+        return V.get<DLMSSequence>();
+    }
+    
 }

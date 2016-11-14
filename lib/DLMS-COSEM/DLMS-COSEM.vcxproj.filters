@@ -85,6 +85,9 @@
     <ClCompile Include="APDU\GET-Request.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="APDU\GET-Response.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ERROR_TYPE.h">
@@ -223,6 +226,9 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="include\APDU\GET-Request.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\APDU\GET-Response.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

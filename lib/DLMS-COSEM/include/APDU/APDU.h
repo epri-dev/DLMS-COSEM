@@ -51,7 +51,7 @@ namespace EPRI
             RetVal.Append<uint8_t>(Tag);
             for (int Index = 0; Index < m_Components.size(); ++Index)
             {
-                if (!m_Components[Index]->Append(&ComponentData))
+                if (!m_Components[Index]->AppendToVector(&ComponentData))
                 {
                     return std::vector<uint8_t>();
                 }

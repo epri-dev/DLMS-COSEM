@@ -69,6 +69,7 @@
     <ClCompile Include="APDU\APDUFactory.cpp" />
     <ClCompile Include="APDU\ASNType.cpp" />
     <ClCompile Include="APDU\GET-Request.cpp" />
+    <ClCompile Include="APDU\GET-Response.cpp" />
     <ClCompile Include="DLMS-COSEM.cpp" />
     <ClCompile Include="hdlc\HDLCAddress.cpp" />
     <ClCompile Include="hdlc\HDLCClient.cpp" />
@@ -95,6 +96,7 @@
     <ClInclude Include="include\APDU\APDUFactory.h" />
     <ClInclude Include="include\APDU\ASNType.h" />
     <ClInclude Include="include\APDU\GET-Request.h" />
+    <ClInclude Include="include\APDU\GET-Response.h" />
     <ClInclude Include="include\Callback.h" />
     <ClInclude Include="include\COSEM.h" />
     <ClInclude Include="include\DLMSVector.h" />

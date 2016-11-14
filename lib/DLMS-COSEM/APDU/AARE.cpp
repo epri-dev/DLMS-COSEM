@@ -16,7 +16,7 @@ namespace EPRI
     ASN_END_SCHEMA
     ASN_BEGIN_SCHEMA(AARE::Associate_Source_Diagnostic_Schema)
         ASN_BEGIN_CHOICE
-            ASN_BEGIN_CHOICE_ENTRY(acse_service_user)
+            ASN_BEGIN_CHOICE_ENTRY_WITH_OPTIONS(acse_service_user, ASN::CONSTRUCTED)
                 ASN_INTEGER_LIST_TYPE
                 (   
                     ASN::CONSTRUCTED, 
@@ -31,7 +31,7 @@ namespace EPRI
                     }
                 )
             ASN_END_CHOICE_ENTRY
-            ASN_BEGIN_CHOICE_ENTRY(acse_service_provider)
+            ASN_BEGIN_CHOICE_ENTRY_WITH_OPTIONS(acse_service_provider, ASN::CONSTRUCTED)
                 ASN_INTEGER_LIST_TYPE
                 (   
                     ASN::CONSTRUCTED, 

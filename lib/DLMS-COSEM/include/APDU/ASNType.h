@@ -7,6 +7,7 @@
 #include <limits>
 #include <bitset>
 #include <limits>
+#include <stack>
 
 #include "mapbox/variant.hpp"
 #include "DLMSVector.h"
@@ -40,6 +41,8 @@ namespace EPRI
             DT_Unsigned32     = DT_Base + DLMSVariantIndex::VAR_UINT32,
             DT_Integer64      = DT_Base + DLMSVariantIndex::VAR_INT64,
             DT_Unsigned64     = DT_Base + DLMSVariantIndex::VAR_UINT64,
+            
+            DT_Data           = DT_Base + 50,
             
             VOID              = 0xFF
         };
@@ -117,7 +120,9 @@ namespace EPRI
                (OPTIONS)) },
 #define ASN_END_CHOICE_ENTRY\
             { EPRI::ASN::InternalDataType::END_CHOICE_ENTRY_T },
-#define ASN_BEGIN_SEQUENCE(OPTIONS)\
+#define ASN_BEGIN_SEQUENCE\
+            { (EPRI::ASN::InternalDataType::BEGIN_SEQUENCE_T) },
+#define ASN_BEGIN_SEQUENCE_WITH_OPTIONS(OPTIONS)\
             { (EPRI::ASN::InternalDataType::BEGIN_SEQUENCE_T | (OPTIONS)) },
 #define ASN_END_SEQUENCE\
             { EPRI::ASN::InternalDataType::END_SEQUENCE_T },
@@ -148,6 +153,8 @@ namespace EPRI
             { (EPRI::ASN::DataTypes::GraphicString | (OPTIONS)) },
 #define ASN_BASE_TYPE(DT)\
             { DT },
+#define ASN_DATA_TYPE\
+            { EPRI::ASN::DataTypes::DT_Data },
 #define ASN_END_SCHEMA\
             { EPRI::ASN::InternalDataType::END_SCHEMA_T }\
         };
@@ -191,8 +198,7 @@ namespace EPRI
         virtual void Rewind();
         virtual bool SelectChoice(int8_t Choice);
         virtual bool GetChoice(int8_t * pChoice);
-        virtual bool Append(const DLMSVariant& Value);
-        virtual bool Append(ASNType * Value);
+        virtual bool Append(const DLMSValue& Value);
         
         enum GetNextResult
         {
@@ -205,8 +211,7 @@ namespace EPRI
         };
         
         virtual GetNextResult GetNextValue(ASNType * pValue);
-        virtual GetNextResult GetNextValue(DLMSVariant * pValue);
-        virtual GetNextResult GetNextValue(DLMSSequence * pValue);
+        virtual GetNextResult GetNextValue(DLMSValue * pValue);
         
         inline ASN::DataTypes GetCurrentSchemaType() const
         {
@@ -247,9 +252,9 @@ namespace EPRI
         }
         
         GetNextResult GetNextSchemaEntry(ASN::SchemaEntryPtr * ppSchemaEntry);
-        bool InternalAppend(const DLMSVariant& Value);
+        
+        bool InternalAppend(const DLMSValue& Value);
         bool InternalAppend(ASNType * pValue);
-        bool InternalSimpleAppend(ASN::SchemaEntryPtr SchemaEntry, ASNType * pValue);
         bool InternalSimpleAppend(ASN::SchemaEntryPtr SchemaEntry, const DLMSVariant& Value);
         bool InternalAppend(const DLMSVector& Value);
 
@@ -264,13 +269,28 @@ namespace EPRI
             ST_CHOICE,
             ST_CHOICE_ENTRY,
             ST_SEQUENCE
-        }                              m_AppendState = ST_SIMPLE;
-        ParseStates                    m_GetState = ST_SIMPLE;
+        };
+        struct ParseState
+        {
+            ParseState(ASN::SchemaEntryPtr SchemaEntry,
+                ParseStates State,
+                int8_t Choice)
+                : m_SchemaEntry(SchemaEntry)
+                , m_State(State)
+                , m_Choice(Choice)
+            {
+            }
+            ASN::SchemaEntryPtr        m_SchemaEntry;
+            ParseStates                m_State;
+            int8_t                     m_Choice;
+        };
+        std::stack<ParseState>         m_GetStates;
+        std::stack<ParseState>         m_AppendStates;
+        //
         ASN::SchemaEntry               m_SingleDataType[2] = { { ASN::VOID }, { ASN::END_SCHEMA_T } };
         ASN::SchemaEntryPtr            m_pSchema = nullptr;
         ASN::SchemaEntryPtr            m_pCurrentSchema = nullptr;
         DLMSVector                     m_Data;
-        int8_t                         m_Choice = INVALID_CHOICE;
     };
     
     class ASNObjectIdentifier : public ASNType
@@ -290,6 +310,13 @@ namespace EPRI
         virtual ~ASNObjectIdentifier();
 
         virtual bool Get(ArcVector * pVector);
+        //
+        // Operators
+        //
+        operator DLMSVariant() const;
+        //
+        // Helpers
+        //
         static bool Peek(ASN::SchemaEntryPtr SchemaEntry, const ASNType& Value, DLMSVariant * pVariant, size_t * pBytes = nullptr);
         static bool Get(ASN::SchemaEntryPtr SchemaEntry, ASNType * pValue, DLMSVariant * pVariant);
         
@@ -302,7 +329,13 @@ namespace EPRI
         virtual ~ASNBitString();
         ASNBitString(size_t BitsExpected, const DLMSBitSet& Value);
         ASNBitString(size_t BitsExpected);
-        
+         //
+        // Operators
+        //
+        operator DLMSVariant() const;
+        //
+        // Helpers
+        //
         static bool Peek(ASN::SchemaEntryPtr SchemaEntry, const ASNType& Value, DLMSVariant * pVariant, size_t * pBytes = nullptr);
         static bool Get(ASN::SchemaEntryPtr SchemaEntry, ASNType * pValue, DLMSVariant * pVariant);
         

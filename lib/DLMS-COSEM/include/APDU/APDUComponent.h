@@ -39,7 +39,7 @@ namespace EPRI
         virtual bool Parse(DLMSVector * pData) = 0;
         
     protected:
-        virtual bool Append(DLMSVector * pVector) = 0;
+        virtual bool AppendToVector(DLMSVector * pVector) = 0;
     };
 
     template <ASN::TagIDType TAGID, ASN::SchemaType DT, 
@@ -68,9 +68,14 @@ namespace EPRI
             return GetBytes(APDUTagClass | Tag, Options);
         }
         
-        virtual bool Append(ASNType * pValue)
+//        virtual bool Append(ASNType * pValue)
+//        {
+//            return ASNType::Append(pValue);
+//        }
+        
+        virtual bool Append(const DLMSValue& Value)
         {
-            return ASNType::Append(pValue);
+            return ASNType::Append(Value);
         }
         //
         // Operators
@@ -129,7 +134,7 @@ namespace EPRI
         //
         // IAPDUComponent
         //
-        virtual bool Append(DLMSVector * pVector)
+        virtual bool AppendToVector(DLMSVector * pVector)
         {
             try
             {

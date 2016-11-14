@@ -60,6 +60,9 @@
     <ClCompile Include="UnitTest-APDU-GET-Request.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="UnitTest-APDU-GET-Response.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt">
