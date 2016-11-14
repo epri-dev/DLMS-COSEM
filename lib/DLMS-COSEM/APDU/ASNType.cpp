@@ -161,8 +161,7 @@ namespace EPRI
         // The only time we can select a choice is if we are sitting within
         // a CHOICE section.
         //
-        if (nullptr != CURRENT_APPEND_STATE.m_SchemaEntry &&
-            (ASN::BEGIN_CHOICE_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry)))
+        if (nullptr != CURRENT_APPEND_STATE.m_SchemaEntry)
         {
             CURRENT_APPEND_STATE.m_Choice = Choice;
             return true;
@@ -751,9 +750,16 @@ namespace EPRI
         case ASN::DT_Unsigned64:
             m_Data.Append(Value, false);
             return true;
+        case ASN::DT_Data:
+            if (Value.which() == VAR_VECTOR)
+            {
+                m_Data.Append(Value.get<DLMSVector>());
+                return true;
+            }
+            break;
         case ASN::VOID:
         default:
-            break;
+            throw std::out_of_range("InternalSimpleAppend not implemented.");
         }
         return false;
     }
@@ -778,7 +784,7 @@ namespace EPRI
                 else if (ASN::BEGIN_SEQUENCE_T == 
                          ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
                 {
-                    m_AppendStates.emplace(nullptr, ST_SEQUENCE, INVALID_CHOICE);
+                    m_AppendStates.emplace(nullptr, ST_SEQUENCE, CURRENT_APPEND_STATE.m_Choice);
                     break;
                 }
                 else 
@@ -812,13 +818,13 @@ namespace EPRI
                 else if (ASN::BEGIN_CHOICE_T == 
                          ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
                 {
-                    m_AppendStates.emplace(nullptr, ST_CHOICE, INVALID_CHOICE);
+                    m_AppendStates.emplace(nullptr, ST_CHOICE, CURRENT_APPEND_STATE.m_Choice);
                     break;
                 }
                 else if (ASN::BEGIN_SEQUENCE_T == 
                          ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
                 {
-                    m_AppendStates.emplace(nullptr, ST_SEQUENCE, INVALID_CHOICE);
+                    m_AppendStates.emplace(nullptr, ST_SEQUENCE, CURRENT_APPEND_STATE.m_Choice);
                     break;
                 }
                 else
@@ -853,7 +859,7 @@ namespace EPRI
                 }
                 else if (ASN::BEGIN_CHOICE_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
                 {
-                    m_AppendStates.emplace(nullptr, ST_CHOICE, INVALID_CHOICE);
+                    m_AppendStates.emplace(nullptr, ST_CHOICE, CURRENT_APPEND_STATE.m_Choice);
                     break;
                 }
                 else
