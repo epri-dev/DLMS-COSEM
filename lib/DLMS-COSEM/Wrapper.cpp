@@ -39,18 +39,25 @@ namespace EPRI
 
     bool Wrapper::ProcessReception(DLMSVector * pData)
     {
-        //
-        // Remove the wrapper header and validate.
-        //
-        if (pData->Get<uint16_t>() == 0x0001 &&
-            pData->Get<uint16_t>() == m_Ports.first &&
-            pData->Get<uint16_t>() == m_Ports.second)
+        try
         {
-            size_t Length = pData->Get<uint16_t>();
-            if (Length)
+            //
+            // Remove the wrapper header and validate.
+            //
+            if (pData->Get<uint16_t>() == 0x0001 &&
+                pData->Get<uint16_t>() == m_Ports.first &&
+                pData->Get<uint16_t>() == m_Ports.second)
             {
-                IAPDU * pAPDU = m_APDUFactory.Parse(pData);
+                size_t Length = pData->Get<uint16_t>();
+                if (Length)
+                {
+                    IAPDU * pAPDU = m_APDUFactory.Parse(pData);
+                }
             }
+            return true;
+        }
+        catch (const std::exception&)
+        {
         }
         return false;
     }

@@ -5,42 +5,13 @@
 #include "Callback.h"
 #include "Transport.h"
 #include "StateMachine.h"
+#include "APDU/ASNType.h"
 
 namespace EPRI
 {
     enum COSEMRunResult : uint16_t
     {
         COSEM_RUN_WAIT
-    };
-    //
-    // CONNECT
-    //
-    struct APPConnectConfirmOrResponse
-    {
-        static const uint16_t ID = 0x2001;
-        APPConnectConfirmOrResponse(bool LogicalNameReferencing = true, bool WithCiphering = false) :
-            m_LogicalNameReferencing(LogicalNameReferencing),
-            m_WithCiphering(WithCiphering)
-        {
-        }
-        // Application Context Name Building
-        //
-        bool m_LogicalNameReferencing;
-        bool m_WithCiphering;
-    };
-    
-    struct APPConnectRequestOrIndication
-    {
-        static const uint16_t ID = 0x2002;
-        APPConnectRequestOrIndication(bool LogicalNameReferencing = true, bool WithCiphering = false)
-            : m_LogicalNameReferencing(LogicalNameReferencing)
-            , m_WithCiphering(WithCiphering)
-        {
-        }
-        // Application Context Name Building
-        //
-        bool m_LogicalNameReferencing;
-        bool m_WithCiphering;
     };
     
     template<typename TInternal>
@@ -62,11 +33,22 @@ namespace EPRI
         };
         
     using TransportEventData = COSEMEventData<Transport::TransportEvent>;
-    using ConnectRequestEventData = COSEMEventData<APPConnectRequestOrIndication>;
     
     class COSEM : public Callback<bool, uint16_t>, public StateMachine
     {
     public:
+        static const ASNObjectIdentifier ContextLNRNoCipher;
+        static const ASNObjectIdentifier ContextSNRNoCipher;
+        static const ASNObjectIdentifier MechanismNameLowLevelSecurity;
+        static const ASNObjectIdentifier MechanismNameHighLevelSecurity;
+        
+        enum SecurityLevel : uint8_t
+        {
+            SECURITY_NONE       = 0,
+            SECURITY_LOW_LEVEL  = 1,
+            SECURITY_HIGH_LEVEL = 2
+        };
+        
         typedef int TRANSPORT_HANDLE;
         
         COSEM();
@@ -101,6 +83,46 @@ namespace EPRI
         std::map<TRANSPORT_HANDLE, Transport *> m_Transports;
         
     };
+    //
+    // OPEN
+    //
+    struct APPOpenConfirmOrResponse
+    {
+        static const uint16_t ID = 0x2001;
+        APPOpenConfirmOrResponse(bool LogicalNameReferencing = true, bool WithCiphering = false)
+            : m_LogicalNameReferencing(LogicalNameReferencing)
+            , m_WithCiphering(WithCiphering)
+        {
+        }
+        // Application Context Name Building
+        //
+        bool m_LogicalNameReferencing;
+        bool m_WithCiphering;
+    };
+    
+    struct APPOpenRequestOrIndication
+    {
+        static const uint16_t ID = 0x2002;
+        APPOpenRequestOrIndication(COSEM::SecurityLevel Security = COSEM::SECURITY_NONE, std::string Password = "", 
+                                   bool LogicalNameReferencing = true, bool WithCiphering = false) : 
+            m_LogicalNameReferencing(LogicalNameReferencing), 
+            m_WithCiphering(WithCiphering),
+            m_SecurityLevel(Security),
+            m_Password(Password)
+        {
+        }
+        // Application Context Name Building
+        //
+        bool                 m_LogicalNameReferencing;
+        bool                 m_WithCiphering;
+        //
+        // Mechanism and Security
+        //
+        COSEM::SecurityLevel m_SecurityLevel;
+        std::string          m_Password;
+    };
+
+    using ConnectRequestEventData = COSEMEventData<APPOpenRequestOrIndication>;
     
     class COSEMClient : public COSEM
     {
@@ -108,10 +130,10 @@ namespace EPRI
         COSEMClient();
         virtual ~COSEMClient();
         //
-        // COSEM-CONNECT Service
+        // COSEM-OPEN Service
         //
-        bool ConnectRequest(const APPConnectRequestOrIndication& Parameters);
-        void RegisterConnectConfirm(CallbackFunction Callback);
+        bool OpenRequest(const APPOpenRequestOrIndication& Parameters);
+        void RegisterOpenConfirm(CallbackFunction Callback);
 
     protected:
         //
@@ -138,7 +160,7 @@ namespace EPRI
         // COSEM-CONNECT Service
         //
         void RegisterConnectIndication(CallbackFunction Callback);
-        bool ConnectResponse(const APPConnectConfirmOrResponse& Parameters);
+        bool ConnectResponse(const APPOpenConfirmOrResponse& Parameters);
 
     protected:
         void ST_Inactive_Handler(EventData * pData);

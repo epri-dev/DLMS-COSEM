@@ -2,6 +2,14 @@
 
 namespace EPRI
 {
+    
+    const ASNObjectIdentifier COSEM::ContextLNRNoCipher({ 2, 16, 756, 5, 8, 1, 1 });
+    const ASNObjectIdentifier COSEM::ContextSNRNoCipher({ 2, 16, 756, 5, 8, 1, 2 });
+    const ASNObjectIdentifier COSEM::MechanismNameLowLevelSecurity({ 2, 16, 756, 5, 8, 2, 1 }, 
+                                                                   ASN::IMPLICIT);
+    const ASNObjectIdentifier COSEM::MechanismNameHighLevelSecurity({ 2, 16, 756, 5, 8, 2, 5 }, 
+                                                                    ASN::IMPLICIT);
+
     COSEM::COSEM() :
         StateMachine(ST_MAX_STATES)
     {

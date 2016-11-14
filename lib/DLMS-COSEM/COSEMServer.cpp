@@ -10,13 +10,13 @@ namespace EPRI
     {
     }
     //
-    // COSEM-CONNECT Service
+    // COSEM-OPEN Service
     //
     void COSEMServer::RegisterConnectIndication(CallbackFunction Callback)
     {
     }
     
-    bool COSEMServer::ConnectResponse(const APPConnectConfirmOrResponse& Parameters)
+    bool COSEMServer::ConnectResponse(const APPOpenConfirmOrResponse& Parameters)
     {
     }
     //

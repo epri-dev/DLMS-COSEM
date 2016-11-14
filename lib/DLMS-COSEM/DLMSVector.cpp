@@ -480,5 +480,5 @@ namespace EPRI
     {
         return rhs.m_Data == m_Data;
     }
-
+    
 }

@@ -16,17 +16,19 @@ using namespace EPRI;
 
 int main(int argc, char *argv[])
 {
-	LinuxBaseLibrary bl;
-	ISerial *		 pSerial = bl.GetCore()->GetSerial();
-    int              opt;
-    bool             StartWithIEC = false;
-    bool             Server = false;
-    bool             IsSerialWrapper = false;
-    char *           pPortName = nullptr;
-    char *           pSourceAddress = nullptr;
-    char *           pDestinationAddress = nullptr;
+    LinuxBaseLibrary     bl;
+    ISerial *		     pSerial = bl.GetCore()->GetSerial();
+    int                  opt;
+    bool                 StartWithIEC = false;
+    bool                 Server = false;
+    bool                 IsSerialWrapper = false;
+    char *               pCOMPortName = nullptr;
+    char *               pSourceAddress = nullptr;
+    char *               pDestinationAddress = nullptr;
+    char *               pPassword = nullptr;
+    COSEM::SecurityLevel Security = COSEM::SECURITY_NONE;
     
-    while ((opt =::getopt(argc, argv, "Sp:s:d:IW")) != -1)
+    while ((opt =::getopt(argc, argv, "SC:s:d:IWp:P:")) != -1)
     {
         switch (opt)
         {
@@ -45,8 +47,16 @@ int main(int argc, char *argv[])
         case 'd':
             pDestinationAddress = optarg;
             break;
+        case 'C':
+            pCOMPortName = optarg;
+            break;
         case 'p':
-            pPortName = optarg;
+            pPassword = optarg;
+            Security = COSEM::SECURITY_LOW_LEVEL;
+            break;
+        case 'P':
+            pPassword = optarg;
+            Security = COSEM::SECURITY_HIGH_LEVEL;
             break;
         default:
             std::cerr << "Internal error!\n";
@@ -59,7 +69,7 @@ int main(int argc, char *argv[])
         std::cerr << "NOT IMPLEMENTED!\n";
         exit(-1);
     }
-    else if (nullptr != pPortName &&
+    else if (nullptr != pCOMPortName &&
              nullptr != pSourceAddress &&
              nullptr != pDestinationAddress)
     {
@@ -71,11 +81,11 @@ int main(int argc, char *argv[])
                                         pSerial, HDLCOptions({ StartWithIEC, 3, 500 }));
         SerialWrapper               DLWrapper(pSerial, SerialWrapper::WrapperPorts(SourceAddress, DestinationAddress));
         
-        std::cout << "Operating as a Client (0x" << hex << uint16_t(SourceAddress) << ")... Opening " << pPortName << "\n";
-        if (pSerial->Open(pPortName) != SUCCESS ||
+        std::cout << "Operating as a Client (0x" << hex << uint16_t(SourceAddress) << ")... Opening " << pCOMPortName << "\n";
+        if (pSerial->Open(pCOMPortName) != SUCCESS ||
             pSerial->SetOptions(LinuxSerial::Options(BR)) != SUCCESS)
         {
-            std::cerr << "Error opening port " << pPortName << "\n";
+            std::cerr << "Error opening port " << pCOMPortName << "\n";
             exit(-1);
         }
 
@@ -89,7 +99,7 @@ int main(int argc, char *argv[])
             {
                 if (!bProcessed)
                 {
-                    APClient.ConnectRequest(APPConnectRequestOrIndication());
+                    APClient.OpenRequest(APPOpenRequestOrIndication(Security, pPassword == nullptr ? "" : pPassword));
                     bProcessed = true;                   
                 }
             }    
@@ -115,9 +125,9 @@ int main(int argc, char *argv[])
                 {
                     bConfirmation = false;
                     //
-                    // Now we can COSEM connect!
+                    // Now we can COSEM open!
                     //
-                    APClient.ConnectRequest(APPConnectRequestOrIndication());
+                    APClient.OpenRequest(APPOpenRequestOrIndication());
                 }
             }    
         }

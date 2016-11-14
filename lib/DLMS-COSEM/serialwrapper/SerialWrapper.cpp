@@ -15,7 +15,7 @@ namespace EPRI
     	
     bool SerialWrapper::Process()
     {
-        bool RetVal = false;
+        bool RetVal = true;
         if (!m_bConnectionFired)
         {
             FireTransportEvent(Transport::TRANSPORT_CONNECTED);
@@ -24,22 +24,39 @@ namespace EPRI
         DLMSVector RxData;
         if (Receive(&RxData))
         {
-            RetVal = ProcessReception(&RxData);
+            printf("\n");
+            ProcessReception(&RxData);
         }
         return RetVal;
     }
 
+    bool SerialWrapper::Send(const DLMSVector& Data)
+    {
+        ERROR_TYPE     RetVal = SUCCESSFUL;
+        if ((RetVal = m_pSerial->Write(Data.GetData(), Data.Size())) != SUCCESSFUL) 
+        {
+            return false;
+        }
+        return true;
+    }
+    
     bool SerialWrapper::Receive(DLMSVector * pData)
     {
         uint8_t		   Byte;
-        uint32_t       CharacterTimeout = 0;
-        ERROR_TYPE     RetVal = SUCCESSFUL;
-
-        while ((RetVal = m_pSerial->Read(&Byte, sizeof(Byte), CharacterTimeout)) == SUCCESSFUL)
+        uint32_t       CharacterTimeout = 400;
+        size_t         BytesReceived = 0;
+        //
+        // Check to see if there is a byte available.  If so, then we can just stream 
+        // until we hit a character timeout.
+        //
+        ERROR_TYPE     RetVal = m_pSerial->Read(&Byte, sizeof(Byte), 0);
+        while (SUCCESSFUL == RetVal)
         {
             pData->Append<uint8_t>(Byte);
+            BytesReceived++;
+            RetVal = m_pSerial->Read(&Byte, sizeof(Byte), CharacterTimeout);
         }
-        return true;
+        return BytesReceived;
     }
 	
 } /* namespace EPRI */

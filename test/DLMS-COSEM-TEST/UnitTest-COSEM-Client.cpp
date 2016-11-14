@@ -36,7 +36,7 @@ namespace EPRI
         // We should not be able to perform a COSEM-CONNECT until
         // we are connected at the transport.
         //
-        ASSERT_FALSE(ConnectRequest(APPConnectRequestOrIndication()));
+        ASSERT_FALSE(ConnectRequest(APPOpenRequestOrIndication()));
     }
     
     TEST_F(COSEMClientFixture, ConnectRequest)
@@ -69,7 +69,7 @@ namespace EPRI
         //
         // We are DL connected, we can now issue an APP Connect
         //
-        ASSERT_TRUE(ConnectRequest(APPConnectRequestOrIndication()));
+        ASSERT_TRUE(ConnectRequest(APPOpenRequestOrIndication()));
     }
 
 }

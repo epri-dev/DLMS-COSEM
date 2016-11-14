@@ -76,15 +76,17 @@ namespace EPRI
     }
 	
 
-    void DUMP(const char * szMarker, const uint8_t * pBuffer, size_t BufferSize)
+    void DUMP(const char * szMarker, const uint8_t * pBuffer, size_t BufferSize, bool AddLF = true)
     {
-        printf("%s: ", szMarker);
+        if (AddLF)
+            printf("%s: ", szMarker);
         const uint8_t * p = pBuffer;
         while (p != (pBuffer + BufferSize))
         {
             printf("%02X ", uint16_t(*p++));
         }
-        printf("\n");
+        if (AddLF)
+            printf("\n");
 
     }
 	ERROR_TYPE LinuxSerial::Write(const uint8_t * pBuffer, size_t BufferSize)
@@ -130,7 +132,7 @@ namespace EPRI
 		}
     	if (ActualBytes)
     	{
-        	DUMP("READ", pBuffer, ActualBytes);
+        	DUMP("READ", pBuffer, ActualBytes, false);
     	}
     	return RetVal;
 	}

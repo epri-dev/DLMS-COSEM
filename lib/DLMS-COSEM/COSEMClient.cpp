@@ -12,9 +12,9 @@ namespace EPRI
     {
     }
     //
-    // COSEM-CONNECT Service
+    // COSEM-OPEN Service
     //
-    bool COSEMClient::ConnectRequest(const APPConnectRequestOrIndication& Parameters)
+    bool COSEMClient::OpenRequest(const APPOpenRequestOrIndication& Parameters)
     {
         bool bAllowed = false;
         BEGIN_TRANSITION_MAP
@@ -27,7 +27,7 @@ namespace EPRI
         return bAllowed;
     }
     
-    void COSEMClient::RegisterConnectConfirm(CallbackFunction Callback)
+    void COSEMClient::RegisterOpenConfirm(CallbackFunction Callback)
     {
     }
 	//
@@ -53,25 +53,44 @@ namespace EPRI
     
     void COSEMClient::ST_Association_Pending_Handler(EventData * pData)
     {
-        AARQ Request;
-        
-        ASNObjectIdentifier ApplicationContext({ 2, 16, 756, 5, 8, 1, 1 });
-        ASNBitString        ACSERequirements(Request.sender_acse_requirements.GetCurrentSchemaTypeSize(), 1);
-        ASNObjectIdentifier MechanismName({ 2, 16, 756, 5, 8, 2, 1 });
-        ASNType             AuthenticationValue(ASN::GraphicString, std::string("33333333"));
-        ASNType             UserInformation(ASN::OCTET_STRING, 
-                                DLMSVector({ 0x01, 0x00, 0x00, 0x00, 0x06, 0x5F, 
-                                              0x1F, 0x04, 0x00, 0x00, 0x7E, 0x1F, 0x00, 0x00 }));
-
-        Request.application_context_name.Append(&ApplicationContext);
-        Request.sender_acse_requirements.Append(&ACSERequirements);
-        Request.mechanism_name.Append(&MechanismName);
-        Request.calling_authentication_value.Append(&AuthenticationValue);
-        Request.user_information.Append(&UserInformation);
-        Transport * pTransport = GetTransport();
-        if (nullptr != pTransport)
+        ConnectRequestEventData * pEventData;
+        if ((pEventData = dynamic_cast<ConnectRequestEventData *>(pData)) != nullptr)
         {
-            pTransport->DataRequest(Transport::DataRequestParameter(Request.GetBytes()));
+            AARQ                        Request;
+            APPOpenRequestOrIndication& Parameters = pEventData->Data;
+            if (Parameters.m_LogicalNameReferencing && !Parameters.m_WithCiphering)
+            {
+                Request.application_context_name.Append(ContextLNRNoCipher);
+            }
+            else if (!Parameters.m_LogicalNameReferencing && !Parameters.m_WithCiphering)
+            {
+                Request.application_context_name.Append(ContextSNRNoCipher);
+            }
+            
+            Request.sender_acse_requirements.Append(ASNBitString(1, 1));
+            
+            if (COSEM::SECURITY_LOW_LEVEL == Parameters.m_SecurityLevel)
+            {
+                Request.mechanism_name.Append(MechanismNameLowLevelSecurity);
+                Request.calling_authentication_value.Append(Parameters.m_Password);
+            }
+            else if (COSEM::SECURITY_HIGH_LEVEL == Parameters.m_SecurityLevel)
+            {
+                Request.mechanism_name.Append(MechanismNameHighLevelSecurity);
+                //
+                // TODO - HLS
+                //
+            }
+            //
+            // TODO - xDLMS
+            //
+            Request.user_information.Append(DLMSVector({ 0x01, 0x00, 0x00, 0x00, 0x06, 0x5F, 
+                                                         0x1F, 0x04, 0x00, 0x00, 0x7E, 0x1F, 0x00, 0x00 }));
+            Transport * pTransport = GetTransport();
+            if (nullptr != pTransport)
+            {
+                pTransport->DataRequest(Transport::DataRequestParameter(Request.GetBytes()));
+            }
         }
         
     }
