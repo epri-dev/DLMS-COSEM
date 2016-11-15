@@ -3,14 +3,14 @@
 #include <functional>
 #include "Callback.h"
 #include "Transport.h"
-#include "APDU/APDUFactory.h"
 
 namespace EPRI
 {
-    class Wrapper : public Callback<bool, uint16_t>, public Transport
+    class Wrapper : public Transport
     {
     public:
         typedef std::pair<uint16_t, uint16_t> WrapperPorts;
+        const uint16_t                        CURRENT_VERSION = 0x0001;
             
         Wrapper() = delete;
         Wrapper(const WrapperPorts& Ports);
@@ -23,14 +23,11 @@ namespace EPRI
         // Transport
         //
         virtual bool DataRequest(const DataRequestParameter& Parameters);
-        virtual void RegisterDataIndication(CallbackFunction Callback);
         
     protected:
         virtual bool Send(const DLMSVector& Data) = 0;
         virtual bool Receive(DLMSVector * pData) = 0;
         virtual bool ProcessReception(DLMSVector * pData);        
-        
-        APDUFactory     m_APDUFactory;
 	
     private:
         WrapperPorts    m_Ports = {};

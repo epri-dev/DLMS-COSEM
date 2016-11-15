@@ -1,4 +1,5 @@
 #include "APDU/APDUFactory.h"
+#include "APDU/AARE.h"
 
 namespace EPRI
 {
@@ -10,9 +11,22 @@ namespace EPRI
     {
     }
 
-    IAPDU * APDUFactory::Parse(DLMSVector * pData)
+    IAPDUPtr APDUFactory::Parse(DLMSVector * pData)
     {
-        return nullptr;
+        IAPDUPtr pRetVal = nullptr;
+        switch (pData->PeekByte())
+        {
+        case AARE::Tag:
+            pRetVal.reset(new AARE());
+            if (!pRetVal->Parse(pData))
+            {
+                pRetVal.release();
+            }
+            break;
+        default:
+            break;
+        }
+        return pRetVal;
     }
     
 }

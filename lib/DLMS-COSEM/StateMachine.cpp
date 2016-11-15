@@ -36,7 +36,7 @@ namespace EPRI
     }
  
     void StateMachine::InternalEvent(uint8_t NewState, 
-        EventData* pData)
+        EventData * pData)
     {
         m_pEventData = pData;
         m_EventGenerated = true;

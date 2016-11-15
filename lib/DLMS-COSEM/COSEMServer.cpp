@@ -41,5 +41,27 @@ namespace EPRI
     void COSEMServer::ST_Associated_Handler(EventData * pData)
     {
     }
+    //
+    // APDU Handlers
+    //
+    bool COSEMServer::AARE_Handler(const IAPDUPtr& pAPDU)
+    {
+        return false;
+    }
+    
+    bool COSEMServer::AARQ_Handler(const IAPDUPtr& pAPDU)
+    {
+        return false;
+    }
+    
+    bool COSEMServer::GET_Request_Handler(const IAPDUPtr& pAPDU)
+    {
+        return false;
+    }
+    
+    bool COSEMServer::GET_Response_Handler(const IAPDUPtr& pAPDU)
+    {
+        return false;
+    }
 
 }

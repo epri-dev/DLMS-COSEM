@@ -63,6 +63,7 @@ namespace EPRI
         bool IsAtEnd() const;
         bool Skip(size_t Count);
         bool Zero(size_t Position = 0, size_t Count = 0);
+        void RemoveReadBytes();
         
         template <typename _VariantType, uint8_t BitsToAppend = 0>
             size_t Append(_VariantType Value, bool BigEndian = true)

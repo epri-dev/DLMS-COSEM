@@ -80,6 +80,12 @@ int main(int argc, char *argv[])
         HDLCClientLLC               DLClient(HDLCAddress(SourceAddress), 
                                         pSerial, HDLCOptions({ StartWithIEC, 3, 500 }));
         SerialWrapper               DLWrapper(pSerial, SerialWrapper::WrapperPorts(SourceAddress, DestinationAddress));
+        COSEMClient::CallbackFunction 
+                                   OpenConfirm = [&](const BaseCallbackParameter& _) -> bool
+        {
+            std::cout << "Association Established\n";
+            return true;
+        };
         
         std::cout << "Operating as a Client (0x" << hex << uint16_t(SourceAddress) << ")... Opening " << pCOMPortName << "\n";
         if (pSerial->Open(pCOMPortName) != SUCCESS ||
@@ -92,17 +98,40 @@ int main(int argc, char *argv[])
         std::cout << "Connecting to Server (0x" << std::hex << uint16_t(DestinationAddress) << ")\n";
         if (IsSerialWrapper)
         {
+            std::string Command;
             bool bProcessed = false;
             
             APClient.RegisterTransport(&DLWrapper);
-            while (DLWrapper.Process())
+            APClient.RegisterOpenConfirm(OpenConfirm);
+            
+            enum States
             {
-                if (!bProcessed)
+                ST_OPEN,
+                ST_OPEN_WAIT,
+                ST_OPENED
+            } CurrentState = ST_OPEN;
+            bool NeedToProcess = true;
+            while (true)
+            {
+                if (NeedToProcess)
                 {
-                    APClient.OpenRequest(APPOpenRequestOrIndication(Security, pPassword == nullptr ? "" : pPassword));
-                    bProcessed = true;                   
+                    DLWrapper.Process();
                 }
-            }    
+                switch (CurrentState)
+                {
+                case ST_OPEN:
+                    APClient.OpenRequest(APPOpenRequestOrIndication(Security, pPassword == nullptr ? "" : pPassword));
+                    CurrentState = ST_OPEN_WAIT;
+                    break;
+                case ST_OPEN_WAIT:
+                    if (APClient.IsOpen())
+                        CurrentState = ST_OPENED;
+                    break;
+                case ST_OPENED:
+                    NeedToProcess = false;
+                    break;
+                }
+            }
         }
         else
         {

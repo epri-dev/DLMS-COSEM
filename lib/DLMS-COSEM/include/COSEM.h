@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <map>
+#include <memory>
 #include "Callback.h"
 #include "Transport.h"
 #include "StateMachine.h"
@@ -9,6 +10,8 @@
 
 namespace EPRI
 {
+    class IAPDU;
+    
     enum COSEMRunResult : uint16_t
     {
         COSEM_RUN_WAIT
@@ -54,8 +57,9 @@ namespace EPRI
         COSEM();
         virtual ~COSEM();
     	
-        virtual COSEMRunResult Process();
+        virtual COSEMRunResult Process() = 0;
         virtual TRANSPORT_HANDLE RegisterTransport(Transport * pTransport);
+        virtual bool IsOpen() const;
 
     protected:
         //
@@ -71,6 +75,7 @@ namespace EPRI
             ST_MAX_STATES
         };
         
+        virtual size_t MaxTransports();
         virtual bool TransportEventHandler(const Transport::TransportEvent& Event);
 
         virtual void ST_Inactive_Handler(EventData * pData) = 0;
@@ -78,7 +83,13 @@ namespace EPRI
         virtual void ST_Association_Pending_Handler(EventData * pData) = 0;
         virtual void ST_Association_Release_Pending_Handler(EventData * pData) = 0;
         virtual void ST_Associated_Handler(EventData * pData) = 0;
-        virtual size_t MaxTransports();
+        //
+        // APDU Handlers
+        //
+        virtual bool AARQ_Handler(const IAPDUPtr& pAPDU) = 0;
+        virtual bool AARE_Handler(const IAPDUPtr& pAPDU) = 0;
+        virtual bool GET_Request_Handler(const IAPDUPtr& pAPDU) = 0;
+        virtual bool GET_Response_Handler(const IAPDUPtr& pAPDU) = 0;
         
         std::map<TRANSPORT_HANDLE, Transport *> m_Transports;
         
@@ -86,7 +97,7 @@ namespace EPRI
     //
     // OPEN
     //
-    struct APPOpenConfirmOrResponse
+    struct APPOpenConfirmOrResponse : public BaseCallbackParameter
     {
         static const uint16_t ID = 0x2001;
         APPOpenConfirmOrResponse(bool LogicalNameReferencing = true, bool WithCiphering = false)
@@ -100,7 +111,7 @@ namespace EPRI
         bool m_WithCiphering;
     };
     
-    struct APPOpenRequestOrIndication
+    struct APPOpenRequestOrIndication : public BaseCallbackParameter
     {
         static const uint16_t ID = 0x2002;
         APPOpenRequestOrIndication(COSEM::SecurityLevel Security = COSEM::SECURITY_NONE, std::string Password = "", 
@@ -123,12 +134,17 @@ namespace EPRI
     };
 
     using ConnectRequestEventData = COSEMEventData<APPOpenRequestOrIndication>;
-    
+    using ConnectResponseEventData = COSEMEventData<APPOpenConfirmOrResponse>;
+   
     class COSEMClient : public COSEM
     {
     public:
         COSEMClient();
         virtual ~COSEMClient();
+        //
+        // COSEM
+        //
+        virtual COSEMRunResult Process();
         //
         // COSEM-OPEN Service
         //
@@ -144,6 +160,13 @@ namespace EPRI
         void ST_Association_Pending_Handler(EventData * pData);
         void ST_Association_Release_Pending_Handler(EventData * pData);
         void ST_Associated_Handler(EventData * pData);
+        //
+        // APDU Handlers
+        //
+        virtual bool AARQ_Handler(const IAPDUPtr& pAPDU);
+        virtual bool AARE_Handler(const IAPDUPtr& pAPDU);
+        virtual bool GET_Request_Handler(const IAPDUPtr& pAPDU);
+        virtual bool GET_Response_Handler(const IAPDUPtr& pAPDU);
         //
         // Helpers
         //
@@ -168,6 +191,13 @@ namespace EPRI
         void ST_Association_Pending_Handler(EventData * pData);
         void ST_Association_Release_Pending_Handler(EventData * pData);
         void ST_Associated_Handler(EventData * pData);
+        //
+        // APDU Handlers
+        //
+        virtual bool AARQ_Handler(const IAPDUPtr& pAPDU);
+        virtual bool AARE_Handler(const IAPDUPtr& pAPDU);
+        virtual bool GET_Request_Handler(const IAPDUPtr& pAPDU);
+        virtual bool GET_Response_Handler(const IAPDUPtr& pAPDU);
        
     };
     

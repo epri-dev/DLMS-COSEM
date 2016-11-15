@@ -9,7 +9,7 @@
 
 namespace EPRI
 {
-    class HDLCLLC : public Callback<bool, uint16_t>, public Transport
+    class HDLCLLC : public Transport
 	{
 	public:
     	HDLCLLC() = delete;

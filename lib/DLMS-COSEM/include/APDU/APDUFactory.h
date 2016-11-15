@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "DLMSVector.h"
 #include "APDU.h"
 
@@ -14,7 +16,7 @@ namespace EPRI
         APDUFactory();
         virtual ~APDUFactory();
         
-        virtual IAPDU * Parse(DLMSVector * pData);
+        virtual IAPDUPtr Parse(DLMSVector * pData);
         
     };
 

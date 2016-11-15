@@ -1,5 +1,6 @@
 #include "COSEM.h"
 #include "APDU/AARQ.h"
+#include "APDU/AARE.h"
 
 namespace EPRI
 {
@@ -10,6 +11,13 @@ namespace EPRI
     
     COSEMClient::~COSEMClient()
     {
+    }
+    //
+    // COSEM
+    //
+    COSEMRunResult COSEMClient::Process()
+    {
+
     }
     //
     // COSEM-OPEN Service
@@ -29,6 +37,7 @@ namespace EPRI
     
     void COSEMClient::RegisterOpenConfirm(CallbackFunction Callback)
     {
+        RegisterCallback(APPOpenConfirmOrResponse::ID, Callback);
     }
 	//
 	// State Machine Handlers
@@ -72,6 +81,7 @@ namespace EPRI
             if (COSEM::SECURITY_LOW_LEVEL == Parameters.m_SecurityLevel)
             {
                 Request.mechanism_name.Append(MechanismNameLowLevelSecurity);
+                Request.calling_authentication_value.SelectChoice(APDUConstants::AuthenticationValueChoice::charstring);
                 Request.calling_authentication_value.Append(Parameters.m_Password);
             }
             else if (COSEM::SECURITY_HIGH_LEVEL == Parameters.m_SecurityLevel)
@@ -101,8 +111,60 @@ namespace EPRI
     
     void COSEMClient::ST_Associated_Handler(EventData * pData)
     {
+        bool                       RetVal = false;
+        ConnectResponseEventData * pEvent = dynamic_cast<ConnectResponseEventData *>(pData);
+        if (!pEvent || !FireCallback(APPOpenConfirmOrResponse::ID, pEvent->Data, &RetVal) || !RetVal)
+        {
+            // Denied by upper layers.  Go back to ST_IDLE.
+            //
+            InternalEvent(ST_IDLE);
+        }
+        printf("ASSOCIATED\n");
+    }
+    //
+    // APDU Handlers
+    //
+    bool COSEMClient::AARE_Handler(const IAPDUPtr& pAPDU)
+    {
+        AARE * pAARE = dynamic_cast<AARE *>(pAPDU.get());
+        if (pAARE)
+        {
+            DLMSValue AssociationResult;
+            if (ASNType::GetNextResult::VALUE_RETRIEVED == pAARE->result.GetNextValue(&AssociationResult) &&
+                DLMSValueGet<int8_t>(AssociationResult) == AARE::AssociationResult::accepted)
+            {
+                //
+                // TODO - Fill Parameter
+                //
+                ExternalEvent(ST_ASSOCIATED, 
+                    new ConnectResponseEventData(APPOpenConfirmOrResponse()));
+            }
+            else
+            {
+                InternalEvent(ST_IDLE);
+            }
+            return true;    
+        }
+        return false;
+    }
+
+    bool COSEMClient::AARQ_Handler(const IAPDUPtr& pAPDU)
+    {
+        return false;
     }
     
+    bool COSEMClient::GET_Request_Handler(const IAPDUPtr& pAPDU)
+    {
+        return false;
+    }
+    
+    bool COSEMClient::GET_Response_Handler(const IAPDUPtr& pAPDU)
+    {
+        return false;
+    }
+    //
+    // HELPERS
+    //
     Transport * COSEMClient::GetTransport() const
     {
         if (m_Transports.empty())

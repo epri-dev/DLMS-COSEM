@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <memory>
 
 #include "APDUComponent.h"
 
@@ -21,13 +22,15 @@ namespace EPRI
 
     };
     
+    typedef std::unique_ptr<IAPDU> IAPDUPtr;
+    
     template <ASN::TagIDType TAG>
     class APDU : public IAPDU
     {
         using ComponentVector = std::vector<IAPDUComponent *>;
         
     public:
-        const ASN::TagIDType Tag = TAG;
+        static const ASN::TagIDType Tag = TAG;
         
         virtual ~APDU()
         {
@@ -113,7 +116,7 @@ namespace EPRI
     class APDUSingleType : public IAPDU
     {
     public:
-        const ASN::TagIDType Tag = TAG;
+        static const ASN::TagIDType Tag = TAG;
         
         APDUSingleType() = delete;
         virtual ~APDUSingleType()

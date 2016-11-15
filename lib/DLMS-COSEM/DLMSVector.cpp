@@ -106,6 +106,15 @@ namespace EPRI
         return SetReadPosition(m_ReadPosition + Count);
     }
     
+    void DLMSVector::RemoveReadBytes()
+    {
+        if (m_ReadPosition < m_Data.size())
+        {
+            std::vector<uint8_t>(m_Data.begin() + m_ReadPosition, m_Data.end()).swap(m_Data);
+            m_ReadPosition = 0;
+        }
+    }
+    
     bool DLMSVector::IsAtEnd() const
     {
         return m_ReadPosition >= m_Data.size();

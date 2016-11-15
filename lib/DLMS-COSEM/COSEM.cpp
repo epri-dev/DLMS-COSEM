@@ -1,4 +1,8 @@
 #include "COSEM.h"
+#include "APDU/AARQ.h"
+#include "APDU/AARE.h"
+#include "APDU/GET-Request.h"
+#include "APDU/GET-Response.h"
 
 namespace EPRI
 {
@@ -29,11 +33,6 @@ namespace EPRI
     {
     }
     	
-    COSEMRunResult COSEM::Process()
-    {
-        return COSEM_RUN_WAIT;
-    }
-     
     COSEM::TRANSPORT_HANDLE COSEM::RegisterTransport(Transport * pXPort)
     {
         static TRANSPORT_HANDLE HANDLE_COUNTER = 0;
@@ -43,9 +42,27 @@ namespace EPRI
         }
         ++HANDLE_COUNTER;
         m_Transports[HANDLE_COUNTER] = pXPort;
+        
         pXPort->RegisterTransportEventHandler(
             std::bind(&COSEM::TransportEventHandler, this, std::placeholders::_1));
+        //
+        // APDU Handler Registration
+        //
+        pXPort->RegisterAPDUHandler(AARQ::Tag,
+            std::bind(&COSEM::AARQ_Handler, this, std::placeholders::_1));
+        pXPort->RegisterAPDUHandler(AARE::Tag,
+            std::bind(&COSEM::AARE_Handler, this, std::placeholders::_1));
+        pXPort->RegisterAPDUHandler(Get_Request_Base::Tag,
+            std::bind(&COSEM::GET_Request_Handler, this, std::placeholders::_1));
+        pXPort->RegisterAPDUHandler(Get_Response_Base::Tag,
+            std::bind(&COSEM::GET_Response_Handler, this, std::placeholders::_1));
+        
         return HANDLE_COUNTER;
+    }
+    
+    bool COSEM::IsOpen() const
+    {
+        return m_CurrentState == ST_ASSOCIATED;
     }
     
     size_t COSEM::MaxTransports()

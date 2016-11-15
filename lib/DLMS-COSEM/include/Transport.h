@@ -4,11 +4,14 @@
 
 #include "Callback.h"
 #include "DLMSVector.h"
+#include "APDU/APDUFactory.h"
 
 namespace EPRI
 {
-    class Transport
+    class Transport : public Callback<bool, uint16_t>
     {
+        using APDUCallback = Callback<bool, ASN::TagIDType, IAPDUPtr>;
+
     public:
         enum TransportEvent : uint8_t
         {
@@ -16,7 +19,7 @@ namespace EPRI
             TRANSPORT_DISCONNECTED
         };
         
-        struct DataRequestParameter
+        struct DataRequestParameter : public BaseCallbackParameter
         {
             static const uint16_t ID = 0x7000;
             DataRequestParameter(const DLMSVector& D) :
@@ -37,7 +40,15 @@ namespace EPRI
             m_Callbacker.RegisterCallback(ID,
                 Callback);
         }
-
+        
+        void RegisterAPDUHandler(ASN::TagIDType Tag, APDUCallback::CallbackFunction Callback)
+        {
+            m_APDUCallback.RegisterCallback(Tag, 
+                Callback);
+        }
+        //
+        // DATA Service
+        //
         virtual bool DataRequest(const DataRequestParameter& Parameters) = 0;
         
         bool FireTransportEvent(TransportEvent Event)
@@ -48,9 +59,20 @@ namespace EPRI
         }
         
     protected:
+        virtual bool ProcessReception(DLMSVector * pData)
+        {
+            IAPDUPtr    pAPDU = APDUFactory().Parse(pData);
+            if (pAPDU)
+            {
+                bool CallbackRetVal = false;
+                return (m_APDUCallback.FireCallback(pAPDU->GetTag(), pAPDU, &CallbackRetVal) && !CallbackRetVal);
+            }
+            return false;
+        }
+        
         static const uint16_t ID = 0x1742;
         CallBacker            m_Callbacker;
-
+        APDUCallback          m_APDUCallback;
     };
     
 }
