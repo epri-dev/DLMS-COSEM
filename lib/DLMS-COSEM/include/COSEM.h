@@ -3,6 +3,8 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <tuple>
+
 #include "Callback.h"
 #include "Transport.h"
 #include "StateMachine.h"
@@ -34,6 +36,14 @@ namespace EPRI
             TInternal Data;
         
         };
+    
+    typedef uint16_t            ClassIdType;
+    typedef DLMSVector          ObjectInstanceIdType;
+    typedef int8_t              ObjectAttributeIdType;
+    
+    typedef std::tuple<ClassIdType, 
+        ObjectInstanceIdType, 
+        ObjectAttributeIdType> COSEMAttributeDescriptor;
         
     using TransportEventData = COSEMEventData<Transport::TransportEvent>;
     
@@ -95,7 +105,7 @@ namespace EPRI
         
     };
     //
-    // OPEN
+    // OPEN Service
     //
     struct APPOpenConfirmOrResponse : public BaseCallbackParameter
     {
@@ -135,6 +145,30 @@ namespace EPRI
 
     using ConnectRequestEventData = COSEMEventData<APPOpenRequestOrIndication>;
     using ConnectResponseEventData = COSEMEventData<APPOpenConfirmOrResponse>;
+    //
+    // GET Service
+    //
+    struct APPGetRequestOrIndication : public BaseCallbackParameter
+    {
+        static const uint16_t ID = 0x2003;
+        APPGetRequestOrIndication(const COSEMAttributeDescriptor& AttributeDescriptor)
+            : m_AttributeDescriptor(AttributeDescriptor)
+        {
+        }
+        COSEMAttributeDescriptor    m_AttributeDescriptor;
+    };
+
+    struct APPGetConfirmOrResponse : public BaseCallbackParameter
+    {
+        static const uint16_t ID = 0x2004;
+        APPGetConfirmOrResponse(const DLMSVector& Data)
+            : m_Data(Data)
+        {
+        }
+        DLMSVector m_Data;
+    };
+    using GetRequestEventData = COSEMEventData<APPGetRequestOrIndication>;
+    using GetResponseEventData = COSEMEventData<APPGetConfirmOrResponse>;
    
     class COSEMClient : public COSEM
     {
@@ -150,6 +184,11 @@ namespace EPRI
         //
         bool OpenRequest(const APPOpenRequestOrIndication& Parameters);
         void RegisterOpenConfirm(CallbackFunction Callback);
+        //
+        // COSEM-GET Service
+        //
+        bool GetRequest(const APPGetRequestOrIndication& Parameters);
+        void RegisterGetConfirm(CallbackFunction Callback);
 
     protected:
         //

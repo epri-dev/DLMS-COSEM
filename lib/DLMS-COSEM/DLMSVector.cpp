@@ -458,7 +458,7 @@ namespace EPRI
         return false;
     }
     
-    std::string DLMSVector::ToString()
+    std::string DLMSVector::ToString() const
     {
         std::ostringstream Output;
         std::for_each(m_Data.begin(), m_Data.end(),

@@ -247,7 +247,7 @@ namespace EPRI
                 throw std::out_of_range("Peek failed.");
             }
         
-        std::string ToString();
+        std::string ToString() const;
 
         DLMSVector& operator=(DLMSVector& lval);
         uint8_t& operator[](size_t Index);

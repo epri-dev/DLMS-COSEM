@@ -73,6 +73,15 @@ int main(int argc, char *argv[])
              nullptr != pSourceAddress &&
              nullptr != pDestinationAddress)
     {
+        enum States
+        {
+            ST_OPEN,
+            ST_OPEN_WAIT,
+            ST_OPENED,
+            ST_GET_WAIT,
+            ST_GET_DONE
+        }                           CurrentState = ST_OPEN;
+
         uint8_t                     SourceAddress = uint8_t(strtol(pSourceAddress, nullptr, 16));
         uint8_t                     DestinationAddress = uint8_t(strtol(pDestinationAddress, nullptr, 16));
         ISerial::Options::BaudRate  BR = LinuxSerial::Options::BAUD_9600;
@@ -84,6 +93,14 @@ int main(int argc, char *argv[])
                                    OpenConfirm = [&](const BaseCallbackParameter& _) -> bool
         {
             std::cout << "Association Established\n";
+            return true;
+        };
+        COSEMClient::CallbackFunction 
+                                   GetConfirm = [&](const BaseCallbackParameter& Param) -> bool
+        {
+            std::cout << "Data Retrieved\n";
+            std::cout << dynamic_cast<const APPGetConfirmOrResponse&>(Param).m_Data.ToString() << std::endl;
+            CurrentState = ST_GET_DONE;
             return true;
         };
         
@@ -103,13 +120,8 @@ int main(int argc, char *argv[])
             
             APClient.RegisterTransport(&DLWrapper);
             APClient.RegisterOpenConfirm(OpenConfirm);
+            APClient.RegisterGetConfirm(GetConfirm);
             
-            enum States
-            {
-                ST_OPEN,
-                ST_OPEN_WAIT,
-                ST_OPENED
-            } CurrentState = ST_OPEN;
             bool NeedToProcess = true;
             while (true)
             {
@@ -128,6 +140,12 @@ int main(int argc, char *argv[])
                         CurrentState = ST_OPENED;
                     break;
                 case ST_OPENED:
+                    APClient.GetRequest(APPGetRequestOrIndication(COSEMAttributeDescriptor(8, { 0, 0, 1, 0, 0, 255 }, 2)));
+                    CurrentState = ST_GET_WAIT;
+                    break;
+                case ST_GET_WAIT:
+                    break;
+                case ST_GET_DONE:
                     NeedToProcess = false;
                     break;
                 }

@@ -1,5 +1,8 @@
 #include "APDU/APDUFactory.h"
 #include "APDU/AARE.h"
+#include "APDU/AARQ.h"
+#include "APDU/GET-Request.h"
+#include "APDU/GET-Response.h"
 
 namespace EPRI
 {
@@ -16,15 +19,27 @@ namespace EPRI
         IAPDUPtr pRetVal = nullptr;
         switch (pData->PeekByte())
         {
+        case AARQ::Tag:
+            pRetVal.reset(new AARQ());
+            break;
         case AARE::Tag:
             pRetVal.reset(new AARE());
-            if (!pRetVal->Parse(pData))
-            {
-                pRetVal.release();
-            }
+            break;
+        case Get_Request_Base::Tag:
+            //
+            // TODO - Appropriate GET types...
+            //
+            pRetVal.reset(new Get_Request_Normal());
+            break;
+        case Get_Response_Base::Tag:
+            pRetVal.reset(new Get_Response_Normal());
             break;
         default:
             break;
+        }
+        if (pRetVal && !pRetVal->Parse(pData))
+        {
+            pRetVal.release();
         }
         return pRetVal;
     }

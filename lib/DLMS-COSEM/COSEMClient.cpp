@@ -1,6 +1,10 @@
+#include <cstring>
+
 #include "COSEM.h"
 #include "APDU/AARQ.h"
 #include "APDU/AARE.h"
+#include "APDU/GET-Request.h"
+#include "APDU/GET-Response.h"
 
 namespace EPRI
 {
@@ -39,7 +43,27 @@ namespace EPRI
     {
         RegisterCallback(APPOpenConfirmOrResponse::ID, Callback);
     }
-	//
+    //
+    // COSEM-GET Service
+    //
+    bool COSEMClient::GetRequest(const APPGetRequestOrIndication& Parameters)
+    {
+        bool bAllowed = false;
+        BEGIN_TRANSITION_MAP
+            TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_IDLE, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATED)
+        END_TRANSITION_MAP(bAllowed, new GetRequestEventData(Parameters));
+        return bAllowed;
+    }
+    
+    void COSEMClient::RegisterGetConfirm(CallbackFunction Callback)
+    {
+        RegisterCallback(APPGetConfirmOrResponse::ID, Callback);
+    }
+    //
 	// State Machine Handlers
     //
     void COSEMClient::ST_Inactive_Handler(EventData * pData)
@@ -112,14 +136,40 @@ namespace EPRI
     void COSEMClient::ST_Associated_Handler(EventData * pData)
     {
         bool                       RetVal = false;
-        ConnectResponseEventData * pEvent = dynamic_cast<ConnectResponseEventData *>(pData);
-        if (!pEvent || !FireCallback(APPOpenConfirmOrResponse::ID, pEvent->Data, &RetVal) || !RetVal)
+        //
+        // OPEN Response
+        //
+        ConnectResponseEventData * pConnectResponse = dynamic_cast<ConnectResponseEventData *>(pData);
+        if (pConnectResponse && (!FireCallback(APPOpenConfirmOrResponse::ID, pConnectResponse->Data, &RetVal) || !RetVal))
         {
             // Denied by upper layers.  Go back to ST_IDLE.
             //
             InternalEvent(ST_IDLE);
+            return;            
         }
-        printf("ASSOCIATED\n");
+        // 
+        // GET Request
+        //
+        if (!RetVal)
+        {
+            GetRequestEventData * pGetRequest = dynamic_cast<GetRequestEventData *>(pData);
+            if (pGetRequest)
+            {
+                Get_Request_Normal Request;
+                //
+                // TODO
+                //
+                Request.invoke_id_and_priority = 0x45;
+                Request.cosem_attribute_descriptor.class_id = std::get<0>(pGetRequest->Data.m_AttributeDescriptor);
+                Request.cosem_attribute_descriptor.instance_id = std::get<1>(pGetRequest->Data.m_AttributeDescriptor);
+                Request.cosem_attribute_descriptor.attribute_id = std::get<2>(pGetRequest->Data.m_AttributeDescriptor);
+                Transport * pTransport = GetTransport();
+                if (nullptr != pTransport)
+                {
+                    pTransport->DataRequest(Transport::DataRequestParameter(Request.GetBytes()));
+                }
+            }
+        }
     }
     //
     // APDU Handlers
@@ -160,7 +210,15 @@ namespace EPRI
     
     bool COSEMClient::GET_Response_Handler(const IAPDUPtr& pAPDU)
     {
-        return false;
+        bool                  RetVal = false;
+        Get_Response_Normal * pGetResponse = dynamic_cast<Get_Response_Normal *>(pAPDU.get());
+        if (pGetResponse && (Get_Response::data == pGetResponse->result.which()))
+        {
+            RetVal = FireCallback(APPGetConfirmOrResponse::ID, 
+                                    APPGetConfirmOrResponse(pGetResponse->result.get<DLMSVector>()),
+                                    &RetVal);
+        }
+        return RetVal;
     }
     //
     // HELPERS
