@@ -11,6 +11,10 @@ namespace EPRI
                     ASN_BASE_TYPE(ASN::DT_Unsigned16)
                     ASN_FIXED_OCTET_STRING_TYPE(ASN::IMPLICIT, 6)
                     ASN_BASE_TYPE(ASN::DT_Integer8)
+                    //
+                    // TODO - Selective Access
+                    //
+                    ASN_BASE_TYPE(ASN::DT_Unsigned8)
                 ASN_END_SEQUENCE
             ASN_END_CHOICE_ENTRY
             //
@@ -88,6 +92,10 @@ namespace EPRI
             m_Type.Append(cosem_attribute_descriptor.class_id);
             m_Type.Append(cosem_attribute_descriptor.instance_id);
             m_Type.Append(cosem_attribute_descriptor.attribute_id);
+            //
+            // TODO - Selective Access
+            //
+            m_Type.Append(uint8_t(0x00));
             return Get_Request::GetBytes();
         }
         return std::vector<uint8_t>();
