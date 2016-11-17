@@ -83,7 +83,7 @@ int main(void)
 	/* Start scheduler */
 	osKernelStart();
     
-#ifdef DEBUG    
+#ifndef DEBUG    
     RunClient();
 #endif
     
