@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{B931A0A3-A3AB-45C8-BE32-BBE77E649F1E}</ProjectGuid>
+    <ProjectGuid>{E4D564B7-BA69-4183-A519-51C6CC543841}</ProjectGuid>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -37,49 +37,70 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\c++\4.8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\x86_64-linux-gnu\c++\4.8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\c++\4.8\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0001\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0002\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include;./include;C:\Users\Gregory\Documents\VisualGDB\DLMS-COSEM\lib\asio-1.10.6\include;C:\Users\Gregory\Documents\VisualGDB\DLMS-COSEM\lib\DLMS-COSEM\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
-    <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
+    <NMakeIncludeSearchPath>.;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\include\c++\6.2.0;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\include\c++\6.2.0\arm-eabi\thumb\cortex_m3;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\include\c++\6.2.0\backward;$(ARM_TOOLCHAIN_ROOT)\lib\gcc\arm-eabi\6.2.0\include;$(ARM_TOOLCHAIN_ROOT)\lib\gcc\arm-eabi\6.2.0\include-fixed;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\sys-include;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\include;../DLMS-COSEM/include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug.h;$(VISUALGDB_DIR)\gcc_compat.h;$(LOCALAPPDATA)\VisualGDB\EmbeddedBSPs\arm-eabi\com.sysprogs.arm.stm32\stm32_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
     <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
-    <NMakeOutput>$(ProjectDir)Linux-Debug.vgdbsettings</NMakeOutput>
+    <NMakeOutput>$(ProjectDir)STM32-DLMS-COSEM-Debug.vgdbsettings</NMakeOutput>
     <IncludePath />
     <ReferencePath />
     <LibraryPath />
     <NMakePreprocessorDefinitions>__VisualGDB_CFG_Debug;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <NMakeIncludeSearchPath>$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\c++\4.8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\x86_64-linux-gnu\c++\4.8;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\c++\4.8\backward;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0001\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0003\include;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0002\include-fixed;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include\x86_64-linux-gnu;$(LOCALAPPDATA)\VisualGDB\RemoteSourceCache\192.168.11.128\0000\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
-    <NMakeForcedIncludes>$(ProjectDir)\gcc_Release.h;$(VISUALGDB_DIR)\gcc_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
-    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeIncludeSearchPath>.;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\include\c++\6.2.0;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\include\c++\6.2.0\arm-eabi\thumb\cortex_m3;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\include\c++\6.2.0\backward;$(ARM_TOOLCHAIN_ROOT)\lib\gcc\arm-eabi\6.2.0\include;$(ARM_TOOLCHAIN_ROOT)\lib\gcc\arm-eabi\6.2.0\include-fixed;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\sys-include;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\include;../DLMS-COSEM/include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>$(ProjectDir)\gcc_Release.h;$(VISUALGDB_DIR)\gcc_compat.h;$(LOCALAPPDATA)\VisualGDB\EmbeddedBSPs\arm-eabi\com.sysprogs.arm.stm32\stm32_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
     <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
-    <NMakeOutput>$(ProjectDir)Linux-Release.vgdbsettings</NMakeOutput>
+    <NMakeOutput>$(ProjectDir)STM32-DLMS-COSEM-Release.vgdbsettings</NMakeOutput>
     <IncludePath />
     <ReferencePath />
     <LibraryPath />
+    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Linux.cpp" />
-    <ClCompile Include="LinuxBaseLibrary.cpp" />
-    <ClCompile Include="LinuxCore.cpp" />
-    <ClCompile Include="LinuxMemory.cpp" />
-    <ClCompile Include="LinuxSerial.cpp" />
-    <ClCompile Include="LinuxSimpleTimer.cpp" />
+    <None Include="debug.mak" />
+    <None Include="Makefile" />
+    <None Include="release.mak" />
+    <None Include="STM32-DLMS-COSEM-Debug.vgdbsettings" />
+    <None Include="STM32-DLMS-COSEM-Release.vgdbsettings" />
+    <None Include="stm32.mak" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="CMakeLists.txt" />
+    <Xml Include="stm32.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\LinuxBaseLibrary.h" />
-    <ClInclude Include="include\LinuxCore.h" />
-    <ClInclude Include="include\LinuxMemory.h" />
-    <ClInclude Include="include\LinuxSerial.h" />
-    <ClInclude Include="include\LinuxSimpleTimer.h" />
-    <ClInclude Include="include\optional.h" />
+    <ClCompile Include="..\DLMS-COSEM\APDU\AARE.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\APDU\AARQ.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\APDU\APDUConstants.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\APDU\APDUFactory.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\APDU\ASNType.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\APDU\GET-Request.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\APDU\GET-Response.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\COSEM.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\COSEMClient.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\COSEMServer.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\DLMS-COSEM.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\DLMSVector.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\hdlc\HDLCAddress.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\hdlc\HDLCClient.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\hdlc\HDLCHelpers.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\hdlc\HDLCLLC.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\hdlc\HDLCMAC.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\hdlc\HDLCServer.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\hdlc\HDLCStatistics.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\hdlc\modcnt.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\hdlc\packet.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\serialwrapper\SerialWrapper.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\StateMachine.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\Wrapper.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\DLMS-COSEM\include\StateMachine.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

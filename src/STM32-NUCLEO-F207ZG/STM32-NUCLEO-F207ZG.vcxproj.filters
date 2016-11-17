@@ -203,6 +203,24 @@
     <ClCompile Include="BSP\STM32F2xxxx\STM32F2xx_HAL_Driver\Src\stm32f2xx_ll_usb.c">
       <Filter>Source files\Device-specific files</Filter>
     </ClCompile>
+    <ClCompile Include="STM32-Client.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="STM32BaseLibrary.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="STM32Core.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="STM32Memory.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="STM32Serial.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="STM32SimpleTimer.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FreeRTOSConfig.h">
@@ -456,6 +474,33 @@
     </ClInclude>
     <ClInclude Include="BSP\STM32F2xxxx\CMSIS_HAL\Include\core_sc300.h">
       <Filter>Header files\Device-specific files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\STM32BaseLibrary.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\STM32Core.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\STM32Memory.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\STM32Serial.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\STM32SimpleTimer.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Debug.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="gcc_Release.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="BSP\stm32_compat.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\STM32-Client.h">
+      <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

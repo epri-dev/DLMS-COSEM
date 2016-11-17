@@ -229,7 +229,7 @@ namespace EPRI
         return RetVal;
     }
     
-    class AppendVisitor : public static_visitor<>
+    class AppendVisitor //: public static_visitor<>
     {
     public:
         AppendVisitor() = delete;

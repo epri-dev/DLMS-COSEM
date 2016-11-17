@@ -234,7 +234,10 @@ namespace EPRI
                             Buffer);
                         m_pSerial->Write(MODE_E_9600,
                             sizeof(MODE_E_9600));
+#ifdef __linux__
                         ::sleep(1);
+#else    #warning "Need to implement sleep for embedded!"
+#endif
                         m_pSerial->SetOptions(
                             ISerial::Options(ISerial::Options::BAUD_9600, 8, 
                                 ISerial::Options::PARITY_NONE, ISerial::Options::STOPBITS_ONE));

@@ -144,31 +144,7 @@
     <ReloadFirmwareOnReset>false</ReloadFirmwareOnReset>
     <ValidateEndOfStackAddress>true</ValidateEndOfStackAddress>
     <StopAtEntryPoint>false</StopAtEntryPoint>
-    <DynamicAnalysisSettings>
-      <StackVerifier>
-        <VerifyStackBounds>false</VerifyStackBounds>
-        <AutoStepOutOfHook>true</AutoStepOutOfHook>
-        <StackLimitControlledByUser>false</StackLimitControlledByUser>
-        <ExplicitSizeLimit>0</ExplicitSizeLimit>
-        <ExplicitStackBase>0</ExplicitStackBase>
-        <Mode>Auto</Mode>
-      </StackVerifier>
-      <RealTimeWatch>
-        <SupportRTOSAnalysis>false</SupportRTOSAnalysis>
-        <SupportFunctionInstrumentation>false</SupportFunctionInstrumentation>
-        <MeasureOverhead>true</MeasureOverhead>
-      </RealTimeWatch>
-      <RTOSFeatures>
-        <RTOSFeatureSetting>
-          <FeatureID>com.sysprogs.analysis.thread.timing</FeatureID>
-          <Enabled>true</Enabled>
-        </RTOSFeatureSetting>
-        <RTOSFeatureSetting>
-          <FeatureID>com.sysprogs.analysis.freertos.queues</FeatureID>
-          <Enabled>true</Enabled>
-        </RTOSFeatureSetting>
-      </RTOSFeatures>
-    </DynamicAnalysisSettings>
+    <DynamicAnalysisSettings />
     <EndOfStackSymbol>_estack</EndOfStackSymbol>
   </Debug>
   <CustomBuild>

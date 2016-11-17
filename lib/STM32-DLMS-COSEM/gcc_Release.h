@@ -200,6 +200,9 @@
 #ifndef __DEC32_EPSILON__
 #define __DEC32_EPSILON__ 1E-6DF
 #endif
+#ifndef __OPTIMIZE__
+#define __OPTIMIZE__ 1
+#endif
 #ifndef __CHAR_UNSIGNED__
 #define __CHAR_UNSIGNED__ 1
 #endif
@@ -247,6 +250,9 @@
 #endif
 #ifndef __SIZEOF_POINTER__
 #define __SIZEOF_POINTER__ 4
+#endif
+#ifndef NDEBUG
+#define NDEBUG 1
 #endif
 #ifndef __GCC_ATOMIC_CHAR16_T_LOCK_FREE
 #define __GCC_ATOMIC_CHAR16_T_LOCK_FREE 2
@@ -319,6 +325,9 @@
 #endif
 #ifndef __ULFRACT_MIN__
 #define __ULFRACT_MIN__ 0.0ULR
+#endif
+#ifndef RELEASE
+#define RELEASE 1
 #endif
 #ifndef __LDBL_HAS_QUIET_NAN__
 #define __LDBL_HAS_QUIET_NAN__ 1
@@ -525,9 +534,6 @@
 #ifndef __DBL_MIN__
 #define __DBL_MIN__ double(2.2250738585072014e-308L)
 #endif
-#ifndef STM32F207xx
-#define STM32F207xx 1
-#endif
 #ifndef __FLT_MIN_10_EXP__
 #define __FLT_MIN_10_EXP__ (-37)
 #endif
@@ -570,9 +576,6 @@
 #ifndef __UHA_FBIT__
 #define __UHA_FBIT__ 8
 #endif
-#ifndef __NO_INLINE__
-#define __NO_INLINE__ 1
-#endif
 #ifndef __SFRACT_MIN__
 #define __SFRACT_MIN__ (-0.5HR-0.5HR)
 #endif
@@ -605,9 +608,6 @@
 #endif
 #ifndef __GCC_ATOMIC_INT_LOCK_FREE
 #define __GCC_ATOMIC_INT_LOCK_FREE 2
-#endif
-#ifndef USE_FREERTOS
-#define USE_FREERTOS 1
 #endif
 #ifndef __FLOAT_WORD_ORDER__
 #define __FLOAT_WORD_ORDER__ __ORDER_LITTLE_ENDIAN__
@@ -657,9 +657,6 @@
 #ifndef __UDQ_FBIT__
 #define __UDQ_FBIT__ 64
 #endif
-#ifndef DEBUG
-#define DEBUG 1
-#endif
 #ifndef __INT8_TYPE__
 #define __INT8_TYPE__ signed char
 #endif
@@ -701,9 +698,6 @@
 #endif
 #ifndef __SIZEOF_PTRDIFF_T__
 #define __SIZEOF_PTRDIFF_T__ 4
-#endif
-#ifndef stm32_flash_layout
-#define stm32_flash_layout 1
 #endif
 #ifndef __LACCUM_EPSILON__
 #define __LACCUM_EPSILON__ 0x1P-31LK
@@ -1017,6 +1011,9 @@
 #ifndef __INT8_MAX__
 #define __INT8_MAX__ 0x7f
 #endif
+#ifndef __OPTIMIZE_SIZE__
+#define __OPTIMIZE_SIZE__ 1
+#endif
 #ifndef __UINT_FAST32_TYPE__
 #define __UINT_FAST32_TYPE__ unsigned int
 #endif
@@ -1169,15 +1166,7 @@
 //$(ARM_TOOLCHAIN_ROOT)\bin\../lib/gcc/arm-eabi/6.2.0/include-fixed
 //$(ARM_TOOLCHAIN_ROOT)\bin\../lib/gcc/arm-eabi/6.2.0/../../../../arm-eabi/sys-include
 //$(ARM_TOOLCHAIN_ROOT)\bin\../lib/gcc/arm-eabi/6.2.0/../../../../arm-eabi/include
-//include
-//../../lib/DLMS-COSEM/include
-//./BSP/FreeRTOS/Source/CMSIS_RTOS
-//./BSP/FreeRTOS/Source/Include
-//./BSP/FreeRTOS/Source/Portable/gcc/ARM_CM3
-//./BSP/STM32F2xxxx/STM32F2xx_HAL_Driver/Inc
-//./BSP/STM32F2xxxx/STM32F2xx_HAL_Driver/Inc/Legacy
-//./BSP/STM32F2xxxx/CMSIS_HAL/Device/ST/STM32F2xx/Include
-//./BSP/STM32F2xxxx/CMSIS_HAL/Include
+//../DLMS-COSEM/include
 // --- Include directories end --- //
 
 

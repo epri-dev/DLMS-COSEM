@@ -6,15 +6,15 @@ BINARYDIR := Debug
 
 #Additional flags
 PREPROCESSOR_MACROS := DEBUG=1
-INCLUDE_DIRS := 
-LIBRARY_DIRS := 
-LIBRARY_NAMES := 
+INCLUDE_DIRS := include ../../lib/DLMS-COSEM/include
+LIBRARY_DIRS := ../../lib/STM32-DLMS-COSEM/Debug
+LIBRARY_NAMES := STM32-DLMS-COSEM
 ADDITIONAL_LINKER_INPUTS := 
 MACOS_FRAMEWORKS := 
 LINUX_PACKAGES := 
 
 CFLAGS := -ggdb -ffunction-sections -O0
-CXXFLAGS := -ggdb -ffunction-sections -fno-exceptions -fno-rtti -O0
+CXXFLAGS := -ggdb -ffunction-sections -O0 -std=c++11
 ASFLAGS := 
 LDFLAGS := -Wl,-gc-sections
 COMMONFLAGS := 
@@ -30,3 +30,4 @@ CP_NOT_AVAILABLE := 1
 ADDITIONAL_MAKE_FILES := stm32.mak
 GENERATE_BIN_FILE := 1
 GENERATE_IHEX_FILE := 0
+GENERATE_MAP_FILE :=1

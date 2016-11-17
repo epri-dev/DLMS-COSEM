@@ -29,6 +29,8 @@
 #include <stm32f2xx_hal.h>
 #include <../CMSIS_RTOS/cmsis_os.h>
 
+#include "STM32-Client.h"
+
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -80,7 +82,11 @@ int main(void)
   
 	/* Start scheduler */
 	osKernelStart();
-
+    
+#ifdef DEBUG    
+    RunClient();
+#endif
+    
 	  /* We should never get here as control is now taken by the scheduler */
 	for (;;)
 		;

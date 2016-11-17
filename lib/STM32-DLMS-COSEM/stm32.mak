@@ -4,7 +4,7 @@
 #Use VisualGDB Project Properties dialog or modify Makefile or per-configuration .mak files instead.
 
 #VisualGDB provides BSP_ROOT and TOOLCHAIN_ROOT via environment when running Make. The line below will only be active if GNU Make is started manually.
-BSP_ROOT ?= BSP
+BSP_ROOT ?= $(LOCALAPPDATA)/VisualGDB/EmbeddedBSPs/arm-eabi/com.sysprogs.arm.stm32
 EFP_BASE ?= $(LOCALAPPDATA)/VisualGDB/EmbeddedEFPs
 TESTFW_BASE ?= $(LOCALAPPDATA)/VisualGDB/TestFrameworks
 TOOLCHAIN_ROOT ?= $(ARM_TOOLCHAIN_ROOT)
@@ -16,8 +16,8 @@ AR := $(TOOLCHAIN_ROOT)/bin/arm-eabi-ar.exe
 OBJCOPY := $(TOOLCHAIN_ROOT)/bin/arm-eabi-objcopy.exe
 
 #Additional flags
-PREPROCESSOR_MACROS += ARM_MATH_CM3 STM32F207ZG USE_FREERTOS stm32_flash_layout STM32F207xx
-INCLUDE_DIRS += . ./BSP/FreeRTOS/Source/CMSIS_RTOS ./BSP/FreeRTOS/Source/Include ./BSP/FreeRTOS/Source/Portable/gcc/ARM_CM3 ./BSP/STM32F2xxxx/STM32F2xx_HAL_Driver/Inc ./BSP/STM32F2xxxx/STM32F2xx_HAL_Driver/Inc/Legacy ./BSP/STM32F2xxxx/CMSIS_HAL/Device/ST/STM32F2xx/Include ./BSP/STM32F2xxxx/CMSIS_HAL/Include
+PREPROCESSOR_MACROS += ARM_MATH_CM3 STM32F207ZG
+INCLUDE_DIRS += .
 LIBRARY_DIRS += 
 LIBRARY_NAMES += 
 ADDITIONAL_LINKER_INPUTS += 
@@ -27,7 +27,7 @@ LINUX_PACKAGES +=
 CFLAGS += 
 CXXFLAGS += 
 ASFLAGS += 
-LDFLAGS += --specs=nano.specs --specs=nosys.specs
+LDFLAGS += --specs=nano.specs 
 COMMONFLAGS += -mcpu=cortex-m3 -mthumb
-LINKER_SCRIPT := ./BSP/STM32F207ZG_flash.lds
+LINKER_SCRIPT := $(BSP_ROOT)/STM32F2xxxx/LinkerScripts/STM32F207ZG_flash.lds
 

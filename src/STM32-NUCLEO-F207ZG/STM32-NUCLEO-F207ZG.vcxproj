@@ -37,7 +37,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <NMakeIncludeSearchPath>.;c:\sysgcc\arm-eabi\arm-eabi\include\c++\5.3.0;c:\sysgcc\arm-eabi\arm-eabi\include\c++\5.3.0\arm-eabi\thumb\cortex_m3;c:\sysgcc\arm-eabi\arm-eabi\include\c++\5.3.0\backward;c:\sysgcc\arm-eabi\lib\gcc\arm-eabi\5.3.0\include;c:\sysgcc\arm-eabi\lib\gcc\arm-eabi\5.3.0\include-fixed;c:\sysgcc\arm-eabi\arm-eabi\sys-include;c:\sysgcc\arm-eabi\arm-eabi\include;./BSP/FreeRTOS/Source/CMSIS_RTOS;./BSP/FreeRTOS/Source/Include;./BSP/FreeRTOS/Source/Portable/gcc/ARM_CM3;./BSP/STM32F2xxxx/STM32F2xx_HAL_Driver/Inc;./BSP/STM32F2xxxx/STM32F2xx_HAL_Driver/Inc/Legacy;./BSP/STM32F2xxxx/CMSIS_HAL/Device/ST/STM32F2xx/Include;./BSP/STM32F2xxxx/CMSIS_HAL/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>.;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\include\c++\6.2.0;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\include\c++\6.2.0\arm-eabi\thumb\cortex_m3;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\include\c++\6.2.0\backward;$(ARM_TOOLCHAIN_ROOT)\lib\gcc\arm-eabi\6.2.0\include;$(ARM_TOOLCHAIN_ROOT)\lib\gcc\arm-eabi\6.2.0\include-fixed;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\sys-include;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\include;include;../../lib/DLMS-COSEM/include;./BSP/FreeRTOS/Source/CMSIS_RTOS;./BSP/FreeRTOS/Source/Include;./BSP/FreeRTOS/Source/Portable/gcc/ARM_CM3;./BSP/STM32F2xxxx/STM32F2xx_HAL_Driver/Inc;./BSP/STM32F2xxxx/STM32F2xx_HAL_Driver/Inc/Legacy;./BSP/STM32F2xxxx/CMSIS_HAL/Device/ST/STM32F2xx/Include;./BSP/STM32F2xxxx/CMSIS_HAL/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Debug.h;$(VISUALGDB_DIR)\gcc_compat.h;BSP\stm32_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
     <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
@@ -49,9 +49,8 @@
     <NMakePreprocessorDefinitions>__VisualGDB_CFG_Debug;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <NMakeIncludeSearchPath>.;c:\sysgcc\arm-eabi\arm-eabi\include\c++\5.3.0;c:\sysgcc\arm-eabi\arm-eabi\include\c++\5.3.0\arm-eabi\thumb\cortex_m3;c:\sysgcc\arm-eabi\arm-eabi\include\c++\5.3.0\backward;c:\sysgcc\arm-eabi\lib\gcc\arm-eabi\5.3.0\include;c:\sysgcc\arm-eabi\lib\gcc\arm-eabi\5.3.0\include-fixed;c:\sysgcc\arm-eabi\arm-eabi\sys-include;c:\sysgcc\arm-eabi\arm-eabi\include;BSP\STM32F2xxxx\STM32F2xx_HAL_Driver\Inc;BSP\STM32F2xxxx\STM32F2xx_HAL_Driver\Inc\Legacy;BSP\STM32F2xxxx\CMSIS_HAL\Device\ST\STM32F2xx\Include;BSP\STM32F2xxxx\CMSIS_HAL\Include;BSP\FreeRTOS\Source\CMSIS_RTOS;BSP\FreeRTOS\Source\Include;BSP\FreeRTOS\Source\Portable\gcc\ARM_CM3;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath>.;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\include\c++\6.2.0;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\include\c++\6.2.0\arm-eabi\thumb\cortex_m3;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\include\c++\6.2.0\backward;$(ARM_TOOLCHAIN_ROOT)\lib\gcc\arm-eabi\6.2.0\include;$(ARM_TOOLCHAIN_ROOT)\lib\gcc\arm-eabi\6.2.0\include-fixed;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\sys-include;$(ARM_TOOLCHAIN_ROOT)\arm-eabi\include;include;../../lib/DLMS-COSEM/include;./BSP/FreeRTOS/Source/CMSIS_RTOS;./BSP/FreeRTOS/Source/Include;./BSP/FreeRTOS/Source/Portable/gcc/ARM_CM3;./BSP/STM32F2xxxx/STM32F2xx_HAL_Driver/Inc;./BSP/STM32F2xxxx/STM32F2xx_HAL_Driver/Inc/Legacy;./BSP/STM32F2xxxx/CMSIS_HAL/Device/ST/STM32F2xx/Include;./BSP/STM32F2xxxx/CMSIS_HAL/Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>$(ProjectDir)\gcc_Release.h;$(VISUALGDB_DIR)\gcc_compat.h;BSP\stm32_compat.h;$(NMakeForcedIncludes)</NMakeForcedIncludes>
-    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /build "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeBuildCommandLine>
     <NMakeCleanCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /clean "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>"$(VISUALGDB_DIR)\VisualGDB.exe" /rebuild "$(ProjectPath)" "/solution:$(SolutionPath)" "/config:$(Configuration)" "/platform:$(Platform)"</NMakeReBuildCommandLine>
@@ -59,6 +58,7 @@
     <IncludePath />
     <ReferencePath />
     <LibraryPath />
+    <NMakePreprocessorDefinitions>__VisualGDB_CFG_Release;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
@@ -119,7 +119,13 @@
     <ClCompile Include="BSP\STM32F2xxxx\STM32F2xx_HAL_Driver\Src\stm32f2xx_ll_fsmc.c" />
     <ClCompile Include="BSP\STM32F2xxxx\STM32F2xx_HAL_Driver\Src\stm32f2xx_ll_sdmmc.c" />
     <ClCompile Include="BSP\STM32F2xxxx\STM32F2xx_HAL_Driver\Src\stm32f2xx_ll_usb.c" />
+    <ClCompile Include="STM32-Client.cpp" />
     <ClCompile Include="STM32-NUCLEO-F207ZG.c" />
+    <ClCompile Include="STM32BaseLibrary.cpp" />
+    <ClCompile Include="STM32Core.cpp" />
+    <ClCompile Include="STM32Memory.cpp" />
+    <ClCompile Include="STM32Serial.cpp" />
+    <ClCompile Include="STM32SimpleTimer.cpp" />
     <ClCompile Include="system_stm32f2xx.c" />
   </ItemGroup>
   <ItemGroup>
@@ -205,7 +211,16 @@
     <ClInclude Include="BSP\STM32F2xxxx\STM32F2xx_HAL_Driver\Inc\stm32f2xx_ll_fsmc.h" />
     <ClInclude Include="BSP\STM32F2xxxx\STM32F2xx_HAL_Driver\Inc\stm32f2xx_ll_sdmmc.h" />
     <ClInclude Include="BSP\STM32F2xxxx\STM32F2xx_HAL_Driver\Inc\stm32f2xx_ll_usb.h" />
+    <ClInclude Include="BSP\stm32_compat.h" />
     <ClInclude Include="FreeRTOSConfig.h" />
+    <ClInclude Include="gcc_Debug.h" />
+    <ClInclude Include="gcc_Release.h" />
+    <ClInclude Include="include\STM32-Client.h" />
+    <ClInclude Include="include\STM32BaseLibrary.h" />
+    <ClInclude Include="include\STM32Core.h" />
+    <ClInclude Include="include\STM32Memory.h" />
+    <ClInclude Include="include\STM32Serial.h" />
+    <ClInclude Include="include\STM32SimpleTimer.h" />
     <ClInclude Include="stm32f2xx_hal_conf.h" />
   </ItemGroup>
   <ItemGroup>

@@ -525,9 +525,6 @@
 #ifndef __DBL_MIN__
 #define __DBL_MIN__ double(2.2250738585072014e-308L)
 #endif
-#ifndef STM32F207xx
-#define STM32F207xx 1
-#endif
 #ifndef __FLT_MIN_10_EXP__
 #define __FLT_MIN_10_EXP__ (-37)
 #endif
@@ -605,9 +602,6 @@
 #endif
 #ifndef __GCC_ATOMIC_INT_LOCK_FREE
 #define __GCC_ATOMIC_INT_LOCK_FREE 2
-#endif
-#ifndef USE_FREERTOS
-#define USE_FREERTOS 1
 #endif
 #ifndef __FLOAT_WORD_ORDER__
 #define __FLOAT_WORD_ORDER__ __ORDER_LITTLE_ENDIAN__
@@ -701,9 +695,6 @@
 #endif
 #ifndef __SIZEOF_PTRDIFF_T__
 #define __SIZEOF_PTRDIFF_T__ 4
-#endif
-#ifndef stm32_flash_layout
-#define stm32_flash_layout 1
 #endif
 #ifndef __LACCUM_EPSILON__
 #define __LACCUM_EPSILON__ 0x1P-31LK
@@ -1169,15 +1160,7 @@
 //$(ARM_TOOLCHAIN_ROOT)\bin\../lib/gcc/arm-eabi/6.2.0/include-fixed
 //$(ARM_TOOLCHAIN_ROOT)\bin\../lib/gcc/arm-eabi/6.2.0/../../../../arm-eabi/sys-include
 //$(ARM_TOOLCHAIN_ROOT)\bin\../lib/gcc/arm-eabi/6.2.0/../../../../arm-eabi/include
-//include
-//../../lib/DLMS-COSEM/include
-//./BSP/FreeRTOS/Source/CMSIS_RTOS
-//./BSP/FreeRTOS/Source/Include
-//./BSP/FreeRTOS/Source/Portable/gcc/ARM_CM3
-//./BSP/STM32F2xxxx/STM32F2xx_HAL_Driver/Inc
-//./BSP/STM32F2xxxx/STM32F2xx_HAL_Driver/Inc/Legacy
-//./BSP/STM32F2xxxx/CMSIS_HAL/Device/ST/STM32F2xx/Include
-//./BSP/STM32F2xxxx/CMSIS_HAL/Include
+//../DLMS-COSEM/include
 // --- Include directories end --- //
 
 

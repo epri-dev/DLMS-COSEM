@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <VisualGDBProjectSettings2 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <ConfigurationName>Debug</ConfigurationName>
+  <ConfigurationName>Release</ConfigurationName>
   <Project xsi:type="com.visualgdb.project.embedded">
     <CustomSourceDirectories>
       <Directories />
@@ -11,7 +11,7 @@
   </Project>
   <Build xsi:type="com.visualgdb.build.embedded">
     <MakeFilePathRelativeToSourceDir>Makefile</MakeFilePathRelativeToSourceDir>
-    <MakeConfigurationName>Debug</MakeConfigurationName>
+    <MakeConfigurationName>Release</MakeConfigurationName>
     <AdditionalMakeArguments>$(LocalMultiThreadedBuildFlags)</AdditionalMakeArguments>
     <MakeCommandTemplate>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
@@ -69,106 +69,13 @@
       <EnableAsyncExecutionMode>false</EnableAsyncExecutionMode>
       <EnableNonStopMode>false</EnableNonStopMode>
     </AdditionalGDBSettings>
-    <DebugMethodID>com.sysprogs.arm.openocd</DebugMethodID>
-    <DebugMethodProperties>
-      <Entries>
-        <KeyValue>
-          <Key>com.sysprogs.arm.openocd.interface</Key>
-          <Value>interface/stlink-v2-1.cfg</Value>
-        </KeyValue>
-        <KeyValue>
-          <Key>com.sysprogs.arm.openocd.cpu</Key>
-          <Value />
-        </KeyValue>
-        <KeyValue>
-          <Key>com.sysprogs.arm.openocd.chip</Key>
-          <Value />
-        </KeyValue>
-        <KeyValue>
-          <Key>com.sysprogs.arm.openocd.board</Key>
-          <Value />
-        </KeyValue>
-        <KeyValue>
-          <Key>com.sysprogs.arm.openocd.target</Key>
-          <Value>target/stm32f2x.cfg</Value>
-        </KeyValue>
-        <KeyValue>
-          <Key>com.sysprogs.arm.openocd.extraargs</Key>
-          <Value>-c init -c "reset init"</Value>
-        </KeyValue>
-        <KeyValue>
-          <Key>com.sysprogs.arm.openocd.initargs</Key>
-          <Value />
-        </KeyValue>
-        <KeyValue>
-          <Key>com.sysprogs.arm.openocd.commands.halt</Key>
-          <Value>mon halt</Value>
-        </KeyValue>
-        <KeyValue>
-          <Key>com.sysprogs.arm.openocd.commands.program</Key>
-          <Value>load</Value>
-        </KeyValue>
-        <KeyValue>
-          <Key>com.sysprogs.arm.openocd.commands.autoprogram</Key>
-          <Value />
-        </KeyValue>
-        <KeyValue>
-          <Key>com.sysprogs.arm.openocd.commands.reset</Key>
-          <Value>mon reset init</Value>
-        </KeyValue>
-        <KeyValue>
-          <Key>com.sysprogs.arm.openocd.commands.resetafter</Key>
-          <Value />
-        </KeyValue>
-        <KeyValue>
-          <Key>com.sysprogs.arm.openocd.quicksetup.enabled</Key>
-          <Value>1</Value>
-        </KeyValue>
-        <KeyValue>
-          <Key>com.sysprogs.arm.openocd.delay</Key>
-          <Value>0</Value>
-        </KeyValue>
-        <KeyValue>
-          <Key>com.sysprogs.arm.openocd.transport</Key>
-          <Value />
-        </KeyValue>
-        <KeyValue>
-          <Key>com.sysprogs.arm.openocd.quicksetup.interface</Key>
-          <Value>stlink-v2-1</Value>
-        </KeyValue>
-      </Entries>
-    </DebugMethodProperties>
     <AutoDetectRTOS>true</AutoDetectRTOS>
     <SemihostingSupport>Auto</SemihostingSupport>
     <StepIntoEntryPoint>false</StepIntoEntryPoint>
     <ReloadFirmwareOnReset>false</ReloadFirmwareOnReset>
     <ValidateEndOfStackAddress>true</ValidateEndOfStackAddress>
     <StopAtEntryPoint>false</StopAtEntryPoint>
-    <DynamicAnalysisSettings>
-      <StackVerifier>
-        <VerifyStackBounds>false</VerifyStackBounds>
-        <AutoStepOutOfHook>true</AutoStepOutOfHook>
-        <StackLimitControlledByUser>false</StackLimitControlledByUser>
-        <ExplicitSizeLimit>0</ExplicitSizeLimit>
-        <ExplicitStackBase>0</ExplicitStackBase>
-        <Mode>Auto</Mode>
-      </StackVerifier>
-      <RealTimeWatch>
-        <SupportRTOSAnalysis>false</SupportRTOSAnalysis>
-        <SupportFunctionInstrumentation>false</SupportFunctionInstrumentation>
-        <MeasureOverhead>true</MeasureOverhead>
-      </RealTimeWatch>
-      <RTOSFeatures>
-        <RTOSFeatureSetting>
-          <FeatureID>com.sysprogs.analysis.thread.timing</FeatureID>
-          <Enabled>true</Enabled>
-        </RTOSFeatureSetting>
-        <RTOSFeatureSetting>
-          <FeatureID>com.sysprogs.analysis.freertos.queues</FeatureID>
-          <Enabled>true</Enabled>
-        </RTOSFeatureSetting>
-      </RTOSFeatures>
-    </DynamicAnalysisSettings>
+    <DynamicAnalysisSettings />
     <EndOfStackSymbol>_estack</EndOfStackSymbol>
   </Debug>
   <CustomBuild>

@@ -29,6 +29,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "STM32-NUCLEO-F207ZG", "src\STM32-NUCLEO-F207ZG\STM32-NUCLEO-F207ZG.vcxproj", "{B5774B7F-7C31-47EA-8257-A1886F8271C0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E4D564B7-BA69-4183-A519-51C6CC543841} = {E4D564B7-BA69-4183-A519-51C6CC543841}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "STM32-DLMS-COSEM", "lib\STM32-DLMS-COSEM\STM32-DLMS-COSEM.vcxproj", "{E4D564B7-BA69-4183-A519-51C6CC543841}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -74,6 +79,12 @@ Global
 		{B5774B7F-7C31-47EA-8257-A1886F8271C0}.Release|x64.ActiveCfg = Release|Win32
 		{B5774B7F-7C31-47EA-8257-A1886F8271C0}.Release|x86.ActiveCfg = Release|Win32
 		{B5774B7F-7C31-47EA-8257-A1886F8271C0}.Release|x86.Build.0 = Release|Win32
+		{E4D564B7-BA69-4183-A519-51C6CC543841}.Debug|x64.ActiveCfg = Debug|Win32
+		{E4D564B7-BA69-4183-A519-51C6CC543841}.Debug|x86.ActiveCfg = Debug|Win32
+		{E4D564B7-BA69-4183-A519-51C6CC543841}.Debug|x86.Build.0 = Debug|Win32
+		{E4D564B7-BA69-4183-A519-51C6CC543841}.Release|x64.ActiveCfg = Release|Win32
+		{E4D564B7-BA69-4183-A519-51C6CC543841}.Release|x86.ActiveCfg = Release|Win32
+		{E4D564B7-BA69-4183-A519-51C6CC543841}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
