@@ -248,8 +248,11 @@ namespace EPRI
             }
         
         std::string ToString() const;
-
+        //
+        // Operators
+        //
         DLMSVector& operator=(DLMSVector& lval);
+        DLMSVector& operator=(const DLMSVector& lval);
         uint8_t& operator[](size_t Index);
         const uint8_t& operator[](size_t Index) const;
         bool operator==(const DLMSVector& rhs) const;

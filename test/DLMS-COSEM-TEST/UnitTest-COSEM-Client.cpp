@@ -12,6 +12,7 @@ namespace EPRI
     {
     public:
         COSEMClientFixture() : 
+            COSEMClient(0x02),
             m_MyClient(HDLCAddress(0x02), &TestSerial, HDLCOptions({ false, 3, 500 })),
             m_MyServer(HDLCAddress(0x03), &TestSerial, HDLCOptions({ false, 3, 500 }))
         {
@@ -35,7 +36,7 @@ namespace EPRI
         // We should not be able to perform a COSEM-CONNECT until
         // we are connected at the transport.
         //
-        ASSERT_FALSE(OpenRequest(APPOpenRequestOrIndication()));
+        ASSERT_FALSE(OpenRequest(APPOpenRequestOrIndication(0x02, 0x03)));
     }
     
     TEST_F(COSEMClientFixture, ConnectRequest)
@@ -68,7 +69,7 @@ namespace EPRI
         //
         // We are DL connected, we can now issue an APP Connect
         //
-        ASSERT_TRUE(OpenRequest(APPOpenRequestOrIndication()));
+        ASSERT_TRUE(OpenRequest(APPOpenRequestOrIndication(0x02, 0x03)));
     }
 
 }

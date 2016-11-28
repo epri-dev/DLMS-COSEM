@@ -42,9 +42,6 @@
     <ClCompile Include="UnitTest-StateMachine.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="UnitTest-IDLMSInterface.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="UnitTest-COSEM-Client.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
@@ -61,6 +58,15 @@
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="UnitTest-APDU-GET-Response.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnitTest-ICOSEMInterface.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnitTest-COSEMObjectInstanceID.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnitTest-Interfaces-COSEMData.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>

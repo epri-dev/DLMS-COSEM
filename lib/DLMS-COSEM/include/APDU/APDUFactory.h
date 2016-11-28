@@ -4,6 +4,7 @@
 
 #include "DLMSVector.h"
 #include "APDU.h"
+#include "COSEMAddress.h"
 
 namespace EPRI
 {
@@ -16,7 +17,8 @@ namespace EPRI
         APDUFactory();
         virtual ~APDUFactory();
         
-        virtual IAPDUPtr Parse(DLMSVector * pData);
+        virtual IAPDUPtr Parse(COSEMAddressType SourceAddress,
+            COSEMAddressType DestinationAddress, DLMSVector * pData);
         
     };
 

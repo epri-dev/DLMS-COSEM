@@ -15,6 +15,11 @@ namespace EPRI
 	{
 		return &m_Serial;
 	}
+
+    ISocket * LinuxCore::GetSocket()
+    {
+        return &m_Socket;
+    }
 	
 	std::shared_ptr<ISimpleTimer> LinuxCore::CreateSimpleTimer(bool bUseHeap /* = true*/)
 	{

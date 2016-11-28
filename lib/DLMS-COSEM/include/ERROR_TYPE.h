@@ -22,7 +22,9 @@ namespace EPRI
 		SRC_SCHEDULER,
 		SRC_SYNCHRONIZATION,
 		SRC_DEBUG,
-		SRC_HDLC
+		SRC_HDLC,
+    	SRC_SOCKET,
+    	SRC_SERIAL
 	};
 
 	enum ErrorLevel : uint8_t

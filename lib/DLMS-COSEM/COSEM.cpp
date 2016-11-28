@@ -14,8 +14,9 @@ namespace EPRI
     const ASNObjectIdentifier COSEM::MechanismNameHighLevelSecurity({ 2, 16, 756, 5, 8, 2, 5 }, 
                                                                     ASN::IMPLICIT);
 
-    COSEM::COSEM() :
-        StateMachine(ST_MAX_STATES)
+    COSEM::COSEM(COSEMAddressType Address) :
+        StateMachine(ST_MAX_STATES),
+        m_Address(Address)
     {
         //
         // State Machine
@@ -43,18 +44,18 @@ namespace EPRI
         ++HANDLE_COUNTER;
         m_Transports[HANDLE_COUNTER] = pXPort;
         
-        pXPort->RegisterTransportEventHandler(
+        pXPort->RegisterTransportEventHandler(m_Address,
             std::bind(&COSEM::TransportEventHandler, this, std::placeholders::_1));
         //
         // APDU Handler Registration
         //
-        pXPort->RegisterAPDUHandler(AARQ::Tag,
+        pXPort->RegisterAPDUHandler(m_Address, AARQ::Tag,
             std::bind(&COSEM::AARQ_Handler, this, std::placeholders::_1));
-        pXPort->RegisterAPDUHandler(AARE::Tag,
+        pXPort->RegisterAPDUHandler(m_Address, AARE::Tag,
             std::bind(&COSEM::AARE_Handler, this, std::placeholders::_1));
-        pXPort->RegisterAPDUHandler(Get_Request_Base::Tag,
+        pXPort->RegisterAPDUHandler(m_Address, Get_Request_Base::Tag,
             std::bind(&COSEM::GET_Request_Handler, this, std::placeholders::_1));
-        pXPort->RegisterAPDUHandler(Get_Response_Base::Tag,
+        pXPort->RegisterAPDUHandler(m_Address, Get_Response_Base::Tag,
             std::bind(&COSEM::GET_Response_Handler, this, std::placeholders::_1));
         
         return HANDLE_COUNTER;
@@ -65,6 +66,11 @@ namespace EPRI
         return m_CurrentState == ST_ASSOCIATED;
     }
     
+    COSEMAddressType COSEM::GetAddress() const
+    {
+        return m_Address;
+    }
+
     size_t COSEM::MaxTransports()
     {
         return 1;
@@ -81,6 +87,17 @@ namespace EPRI
             TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_INACTIVE)
         END_TRANSITION_MAP(bAllowed, new TransportEventData(Event));
         return bAllowed;
+    }
+    //
+    // HELPERS
+    //
+    Transport * COSEM::GetTransport() const
+    {
+        if (m_Transports.empty())
+        {
+            return nullptr;
+        }
+        return m_Transports.begin()->second;
     }
 
 }

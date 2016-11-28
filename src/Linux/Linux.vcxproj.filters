@@ -33,6 +33,15 @@
     <ClCompile Include="LinuxSimpleTimer.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="LinuxCOSEMServer.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="LinuxSocket.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="LinuxDebug.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt">
@@ -56,6 +65,15 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="include\LinuxSimpleTimer.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\LinuxSocket.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\LinuxDebug.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\LinuxCOSEMServer.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

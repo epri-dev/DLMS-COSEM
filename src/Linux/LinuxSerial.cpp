@@ -5,6 +5,8 @@
 
 #include "optional.h"
 #include "LinuxSerial.h"
+#include "IBaseLibrary.h"
+#include "IDebug.h"
 
 namespace EPRI
 {
@@ -76,22 +78,9 @@ namespace EPRI
     }
 	
 
-    void DUMP(const char * szMarker, const uint8_t * pBuffer, size_t BufferSize, bool AddLF = true)
-    {
-        if (AddLF)
-            printf("%s: ", szMarker);
-        const uint8_t * p = pBuffer;
-        while (p != (pBuffer + BufferSize))
-        {
-            printf("%02X ", uint16_t(*p++));
-        }
-        if (AddLF)
-            printf("\n");
-
-    }
 	ERROR_TYPE LinuxSerial::Write(const uint8_t * pBuffer, size_t BufferSize)
 	{
-    	DUMP("WRITE", pBuffer, BufferSize);
+    	Base()->GetDebug()->TRACE_BUFFER("Serial Write", pBuffer, BufferSize);
 		asio::write(m_Port, asio::buffer(pBuffer, BufferSize));
 		return 0; //TODO
 	}
@@ -132,7 +121,7 @@ namespace EPRI
 		}
     	if (ActualBytes)
     	{
-        	DUMP("READ", pBuffer, ActualBytes, false);
+        	Base()->GetDebug()->TRACE_BUFFER("Serial Read", pBuffer, ActualBytes);
     	}
     	return RetVal;
 	}

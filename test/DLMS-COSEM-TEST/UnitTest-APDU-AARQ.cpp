@@ -56,7 +56,7 @@ TEST(AARQ, Parse)
     AARQ        a1;
     DLMSVector  Data(FINAL);
     
-    ASSERT_TRUE(a1.Parse(&Data));
+    ASSERT_TRUE(a1.Parse(1, 1, &Data));
 
     ASNObjectIdentifier ApplicationContext({ 2, 16, 756, 5, 8, 1, 1 });
     ASNObjectIdentifier MechanismName({ 2, 16, 756, 5, 8, 2, 1 }, ASN::IMPLICIT);

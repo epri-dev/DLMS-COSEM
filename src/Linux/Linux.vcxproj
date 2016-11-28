@@ -66,9 +66,12 @@
     <ClCompile Include="Linux.cpp" />
     <ClCompile Include="LinuxBaseLibrary.cpp" />
     <ClCompile Include="LinuxCore.cpp" />
+    <ClCompile Include="LinuxCOSEMServer.cpp" />
+    <ClCompile Include="LinuxDebug.cpp" />
     <ClCompile Include="LinuxMemory.cpp" />
     <ClCompile Include="LinuxSerial.cpp" />
     <ClCompile Include="LinuxSimpleTimer.cpp" />
+    <ClCompile Include="LinuxSocket.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
@@ -80,6 +83,9 @@
     <ClInclude Include="include\LinuxSerial.h" />
     <ClInclude Include="include\LinuxSimpleTimer.h" />
     <ClInclude Include="include\optional.h" />
+    <ClInclude Include="include\LinuxCOSEMServer.h" />
+    <ClInclude Include="include\LinuxDebug.h" />
+    <ClInclude Include="include\LinuxSocket.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

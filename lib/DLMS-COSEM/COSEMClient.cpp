@@ -9,7 +9,8 @@
 namespace EPRI
 {
     
-    COSEMClient::COSEMClient()
+    COSEMClient::COSEMClient(COSEMAddressType ClientAddress) :
+        COSEM(ClientAddress)
     {
     }
     
@@ -35,7 +36,7 @@ namespace EPRI
             TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
             TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
             TRANSITION_MAP_ENTRY(ST_ASSOCIATED, EVENT_IGNORED)
-        END_TRANSITION_MAP(bAllowed, new ConnectRequestEventData(Parameters));
+        END_TRANSITION_MAP(bAllowed, new OpenRequestEventData(Parameters));
         return bAllowed;
     }
     
@@ -86,8 +87,8 @@ namespace EPRI
     
     void COSEMClient::ST_Association_Pending_Handler(EventData * pData)
     {
-        ConnectRequestEventData * pEventData;
-        if ((pEventData = dynamic_cast<ConnectRequestEventData *>(pData)) != nullptr)
+        OpenRequestEventData * pEventData;
+        if ((pEventData = dynamic_cast<OpenRequestEventData *>(pData)) != nullptr)
         {
             AARQ                        Request;
             APPOpenRequestOrIndication& Parameters = pEventData->Data;
@@ -123,7 +124,9 @@ namespace EPRI
             Transport * pTransport = GetTransport();
             if (nullptr != pTransport)
             {
-                pTransport->DataRequest(Transport::DataRequestParameter(Request.GetBytes()));
+                pTransport->DataRequest(Transport::DataRequestParameter(GetAddress(),
+                                                                        Parameters.m_DestinationAddress,
+                                                                        Request.GetBytes()));
             }
         }
         
@@ -135,11 +138,11 @@ namespace EPRI
     
     void COSEMClient::ST_Associated_Handler(EventData * pData)
     {
-        bool                       RetVal = false;
+        bool                    RetVal = false;
         //
         // OPEN Response
         //
-        ConnectResponseEventData * pConnectResponse = dynamic_cast<ConnectResponseEventData *>(pData);
+        OpenResponseEventData * pConnectResponse = dynamic_cast<OpenResponseEventData *>(pData);
         if (pConnectResponse && (!FireCallback(APPOpenConfirmOrResponse::ID, pConnectResponse->Data, &RetVal) || !RetVal))
         {
             // Denied by upper layers.  Go back to ST_IDLE.
@@ -152,22 +155,35 @@ namespace EPRI
         //
         if (!RetVal)
         {
+            Transport *           pTransport = GetTransport();
             GetRequestEventData * pGetRequest = dynamic_cast<GetRequestEventData *>(pData);
-            if (pGetRequest)
+            if (pTransport && pGetRequest)
             {
-                Get_Request_Normal Request;
-                //
-                // TODO
-                //
-                Request.invoke_id_and_priority = 0x45;
-                Request.cosem_attribute_descriptor.class_id = std::get<0>(pGetRequest->Data.m_AttributeDescriptor);
-                Request.cosem_attribute_descriptor.instance_id = std::get<1>(pGetRequest->Data.m_AttributeDescriptor);
-                Request.cosem_attribute_descriptor.attribute_id = std::get<2>(pGetRequest->Data.m_AttributeDescriptor);
-                Transport * pTransport = GetTransport();
-                if (nullptr != pTransport)
+                Transport::DataRequestParameter TransportParam;
+                
+                switch (pGetRequest->Data.m_Type)
                 {
-                    pTransport->DataRequest(Transport::DataRequestParameter(Request.GetBytes()));
+                case APPGetRequestOrIndication::get_request_normal:
+                    {
+                        Get_Request_Normal Request;
+                        Request.invoke_id_and_priority = pGetRequest->Data.m_InvokeIDAndPriority;
+                        Request.cosem_attribute_descriptor = 
+                            pGetRequest->Data.m_Parameter.get<Cosem_Attribute_Descriptor>();
+                        TransportParam.SourceAddress = GetAddress();
+                        TransportParam.DestinationAddress = pGetRequest->Data.m_SourceAddress;
+                        TransportParam.Data = Request.GetBytes();
+                    }
+                    break;
+                    
+                case APPGetRequestOrIndication::get_request_next:
+                    throw std::logic_error("get_request_next Not Implemented!");
+
+                case APPGetRequestOrIndication::get_request_with_list:
+                    throw std::logic_error("get_request_with_list Not Implemented!");
+
                 }
+                
+                pTransport->DataRequest(TransportParam);
             }
         }
     }
@@ -187,11 +203,12 @@ namespace EPRI
                 // TODO - Fill Parameter
                 //
                 ExternalEvent(ST_ASSOCIATED, 
-                    new ConnectResponseEventData(APPOpenConfirmOrResponse()));
+                    new OpenResponseEventData(APPOpenConfirmOrResponse(pAARE->GetSourceAddress(),
+                                                                       pAARE->GetDestinationAddress())));
             }
             else
             {
-                InternalEvent(ST_IDLE);
+                ExternalEvent(ST_IDLE);
             }
             return true;    
         }
@@ -215,21 +232,13 @@ namespace EPRI
         if (pGetResponse && (Get_Response::data == pGetResponse->result.which()))
         {
             RetVal = FireCallback(APPGetConfirmOrResponse::ID, 
-                                    APPGetConfirmOrResponse(pGetResponse->result.get<DLMSVector>()),
-                                    &RetVal);
+                                  APPGetConfirmOrResponse(pGetResponse->GetSourceAddress(),
+                                                          pGetResponse->GetDestinationAddress(),
+                                                          pGetResponse->invoke_id_and_priority,
+                                                          pGetResponse->result.get<DLMSVector>()),
+                                  &RetVal);
         }
         return RetVal;
-    }
-    //
-    // HELPERS
-    //
-    Transport * COSEMClient::GetTransport() const
-    {
-        if (m_Transports.empty())
-        {
-            return nullptr;
-        }
-        return m_Transports.begin()->second;
     }
 
 }

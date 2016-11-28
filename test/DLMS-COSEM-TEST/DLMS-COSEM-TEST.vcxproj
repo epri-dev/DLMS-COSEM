@@ -69,6 +69,7 @@
     <ClCompile Include="UnitTest-APDU-GET-Request.cpp" />
     <ClCompile Include="UnitTest-APDU-GET-Response.cpp" />
     <ClCompile Include="UnitTest-COSEM-Client.cpp" />
+    <ClCompile Include="UnitTest-COSEMObjectInstanceID.cpp" />
     <ClCompile Include="UnitTest-DLMSVector.cpp" />
     <ClCompile Include="UnitTest-HDLC-Address.cpp" />
     <ClCompile Include="UnitTest-HDLC-Client.cpp" />
@@ -76,7 +77,8 @@
     <ClCompile Include="UnitTest-HDLC-MAC.cpp" />
     <ClCompile Include="UnitTest-HDLC-Packet.cpp" />
     <ClCompile Include="UnitTest-HDLC-Server.cpp" />
-    <ClCompile Include="UnitTest-IDLMSInterface.cpp" />
+    <ClCompile Include="UnitTest-ICOSEMInterface.cpp" />
+    <ClCompile Include="UnitTest-Interfaces-COSEMData.cpp" />
     <ClCompile Include="UnitTest-LinuxMemory.cpp" />
     <ClCompile Include="UnitTest-StateMachine.cpp" />
   </ItemGroup>

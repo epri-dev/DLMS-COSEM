@@ -9,7 +9,7 @@ namespace EPRI
     {
     public:
         SerialWrapper() = delete;
-        SerialWrapper(ISerial * pSerial, const WrapperPorts& Ports);
+        SerialWrapper(ISerial * pSerial);
         virtual ~SerialWrapper();
     	
         virtual bool Process();

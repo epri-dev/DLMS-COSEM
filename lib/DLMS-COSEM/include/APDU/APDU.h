@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "APDUComponent.h"
+#include "COSEMAddress.h"
 
 namespace EPRI
 {
@@ -16,9 +17,24 @@ namespace EPRI
         }
         virtual void RegisterComponent(IAPDUComponent * pComponent) = 0;
         virtual std::vector<uint8_t> GetBytes() = 0;
-        virtual bool Parse(DLMSVector * pData) = 0;
+        virtual bool Parse(COSEMAddressType SourceAddress,
+            COSEMAddressType DestinationAddress,
+            DLMSVector * pData) = 0;
         virtual bool IsValid() const = 0;
         virtual ASN::TagIDType GetTag() = 0;
+        virtual COSEMAddressType GetSourceAddress()
+        {
+            return m_SourceAddress;
+        }
+        
+        virtual COSEMAddressType GetDestinationAddress()
+        {
+            return m_DestinationAddress;
+        }
+
+    protected:
+        COSEMAddressType m_SourceAddress = ReservedAddresses::NO_STATION;
+        COSEMAddressType m_DestinationAddress = ReservedAddresses::NO_STATION;
 
     };
     
@@ -35,12 +51,14 @@ namespace EPRI
         virtual ~APDU()
         {
         }
-        
+        //
+        // IAPDU
+        //
         virtual ASN::TagIDType GetTag()
         {
             return Tag;
         }
-        
+
         virtual void RegisterComponent(IAPDUComponent * pComponent)
         {
             m_Components.push_back(pComponent);
@@ -78,7 +96,9 @@ namespace EPRI
             return RetVal;
         }
         
-        virtual bool Parse(DLMSVector * pData)
+        virtual bool Parse(COSEMAddressType SourceAddress,
+            COSEMAddressType DestinationAddress,
+            DLMSVector * pData)
         {
             bool   RetVal = false;
             size_t Length = 0;
@@ -100,6 +120,11 @@ namespace EPRI
                 }
                 RetVal = ComponentsProcessed;
             }
+            if (RetVal)
+            {
+                m_SourceAddress = SourceAddress;
+                m_DestinationAddress = DestinationAddress;
+            }
             return RetVal;
         }
 
@@ -108,7 +133,7 @@ namespace EPRI
         {
         }
         
-        ComponentVector m_Components;
+        ComponentVector  m_Components;
         
     };
     
@@ -122,7 +147,9 @@ namespace EPRI
         virtual ~APDUSingleType()
         {
         }
-        
+        //
+        // IAPDU
+        //
         virtual ASN::TagIDType GetTag()
         {
             return Tag;
@@ -136,12 +163,19 @@ namespace EPRI
             return RetVal.GetBytes();            
         }
         
-        virtual bool Parse(DLMSVector * pData)
+        virtual bool Parse(COSEMAddressType SourceAddress,
+            COSEMAddressType DestinationAddress,
+            DLMSVector * pData)
         {
             if (Tag == pData->Peek<uint8_t>() &&
                 pData->Skip(sizeof(uint8_t)))
             {
-                return m_Type.Parse(pData);
+                if (m_Type.Parse(pData))
+                {
+                    m_SourceAddress = SourceAddress;
+                    m_DestinationAddress = DestinationAddress;
+                    return true;
+                }
             }
             return false;            
         }
@@ -154,10 +188,10 @@ namespace EPRI
         {
         }
         
-        ASNType         m_Type;
-        
+        ASNType          m_Type;
+       
     private:
-        void RegisterComponent(IAPDUComponent * pComponent) final
+        virtual void RegisterComponent(IAPDUComponent * /*pComponent*/) final
         {
             // NOT IMPLEMENTED AND VISIBILITY CHANGE
         }

@@ -474,7 +474,13 @@ namespace EPRI
         m_Data = lval.m_Data;
         return *this;
     }
-    
+
+    DLMSVector& DLMSVector::operator=(const DLMSVector& lval)
+    {
+        m_Data = lval.m_Data;
+        return *this;
+    }
+   
     uint8_t& DLMSVector::operator[](size_t Index)
     {
         return m_Data[Index];

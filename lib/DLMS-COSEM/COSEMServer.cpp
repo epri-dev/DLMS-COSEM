@@ -1,8 +1,16 @@
+#include <algorithm>
+
 #include "COSEM.h"
+#include "APDU/AARQ.h"
+#include "APDU/AARE.h"
+#include "APDU/GET-Request.h"
+#include "APDU/GET-Response.h"
 
 namespace EPRI
 {
-    COSEMServer::COSEMServer()
+    COSEMServer::COSEMServer(COSEMAddressType SAP) :
+        COSEM(SAP),
+        LogicalDevice(this)
     {
     }
     
@@ -10,14 +18,50 @@ namespace EPRI
     {
     }
     //
+    // COSEM
+    //
+    COSEMRunResult COSEMServer::Process()
+    {
+        return COSEMRunResult::COSEM_RUN_WAIT;
+    }
+    //
     // COSEM-OPEN Service
     //
-    void COSEMServer::RegisterConnectIndication(CallbackFunction Callback)
+    void COSEMServer::RegisterOpenIndication(CallbackFunction Callback)
+    {
+        RegisterCallback(APPOpenRequestOrIndication::ID, Callback);
+    }
+    
+    bool COSEMServer::OpenResponse(const APPOpenConfirmOrResponse& Parameters)
+    {
+        bool bAllowed = false;
+        BEGIN_TRANSITION_MAP
+            TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_IDLE, ST_ASSOCIATION_PENDING)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATED, EVENT_IGNORED)
+        END_TRANSITION_MAP(bAllowed, new OpenResponseEventData(Parameters));
+        return bAllowed;
+    }
+    //
+    // COSEM-GET Service
+    //
+    void COSEMServer::RegisterGetIndication(LogicalDevice * pLogicalDevice)
     {
     }
     
-    bool COSEMServer::ConnectResponse(const APPOpenConfirmOrResponse& Parameters)
+    bool COSEMServer::GetResponse(const APPGetConfirmOrResponse& Parameters)
     {
+        bool bAllowed = false;
+        BEGIN_TRANSITION_MAP
+            TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_IDLE, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATED)
+        END_TRANSITION_MAP(bAllowed, new GetResponseEventData(Parameters));
+        return bAllowed;
     }
     //
 	// State Machine Handlers
@@ -32,6 +76,42 @@ namespace EPRI
     
     void COSEMServer::ST_Association_Pending_Handler(EventData * pData)
     {
+        OpenRequestEventData * pEventData;
+        if ((pEventData = dynamic_cast<OpenRequestEventData *>(pData)) != nullptr)
+        {
+            AARE                        Response;
+            APPOpenRequestOrIndication& Parameters = pEventData->Data;
+            if (Parameters.m_LogicalNameReferencing && !Parameters.m_WithCiphering)
+            {
+                Response.application_context_name.Append(ContextLNRNoCipher);
+            }
+            else if (!Parameters.m_LogicalNameReferencing && !Parameters.m_WithCiphering)
+            {
+                Response.application_context_name.Append(ContextSNRNoCipher);
+            }
+            //
+            // TODO - Actually make this work!
+            //
+            Response.responder_acse_requirements.Append(ASNBitString(1, 1));
+            Response.result.Append(int8_t(AARE::AssociationResult::accepted));
+            Response.result_source_diagnostic.SelectChoice(AARE::AssociateDiagnosticChoice::acse_service_user);
+            Response.result_source_diagnostic.Append(int8_t(AARE::AssociateDiagnosticUser::user_null));
+            Response.user_information.Append(DLMSVector({ 0x08, 0x00, 0x06, 0x5F, 0x1F, 0x04, 
+                                                                0x00, 0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07 }));
+            Transport * pTransport = GetTransport();
+            if (nullptr != pTransport &&
+                pTransport->DataRequest(Transport::DataRequestParameter(GetAddress(),
+                                                                        Parameters.m_SourceAddress,
+                                                                        Response.GetBytes())))
+            {
+                InternalEvent(ST_ASSOCIATED);
+            }
+            else
+            {
+                InternalEvent(ST_IDLE);
+            }
+        }
+        
     }
     
     void COSEMServer::ST_Association_Release_Pending_Handler(EventData * pData)
@@ -40,6 +120,48 @@ namespace EPRI
     
     void COSEMServer::ST_Associated_Handler(EventData * pData)
     {
+        // 
+        // GET Request
+        //
+        GetRequestEventData * pGetRequest = dynamic_cast<GetRequestEventData *>(pData);
+        if (pGetRequest)
+        {
+            InitiateGet(pGetRequest->Data);
+            return;
+        }    
+        // 
+        // GET Response
+        //
+        Transport *            pTransport = GetTransport();
+        GetResponseEventData * pGetResponse = dynamic_cast<GetResponseEventData *>(pData);
+        if (pTransport && pGetResponse)
+        {
+            Transport::DataRequestParameter TransportParam;
+
+            switch (pGetResponse->Data.m_Type)
+            {
+            case APPGetConfirmOrResponse::get_response_normal:
+                {
+                    Get_Response_Normal Response;
+                    Response.invoke_id_and_priority = pGetResponse->Data.m_InvokeIDAndPriority;
+                    Response.result.set<DLMSVector>(pGetResponse->Data.m_Data);
+                    TransportParam.SourceAddress = GetAddress();
+                    TransportParam.DestinationAddress = pGetResponse->Data.m_SourceAddress;
+                    TransportParam.Data = Response.GetBytes();
+                }
+                break;
+                
+            case APPGetConfirmOrResponse::get_response_next:
+                throw std::logic_error("get_response_next Not Implemented!");
+                
+            case APPGetConfirmOrResponse::get_response_with_list:
+                throw std::logic_error("get_response_with_list Not Implemented!");
+            }
+                
+            pTransport->DataRequest(TransportParam);
+            
+        }        
+        
     }
     //
     // APDU Handlers
@@ -51,11 +173,51 @@ namespace EPRI
     
     bool COSEMServer::AARQ_Handler(const IAPDUPtr& pAPDU)
     {
+        AARQ *  pAARQ = dynamic_cast<AARQ *>(pAPDU.get());
+        if (pAARQ)
+        {
+            bool bAllowed = false;
+            BEGIN_TRANSITION_MAP
+                TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_IDLE, ST_ASSOCIATION_PENDING)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATED, EVENT_IGNORED)
+            //
+            // TODO - Really parse
+            //
+            END_TRANSITION_MAP(bAllowed, 
+                new OpenRequestEventData(APPOpenRequestOrIndication(pAARQ->GetSourceAddress(),
+                                                                    pAARQ->GetDestinationAddress())));
+            return bAllowed;
+        }
         return false;
     }
     
     bool COSEMServer::GET_Request_Handler(const IAPDUPtr& pAPDU)
     {
+        GetRequestEventData * pEvent = nullptr;
+        Get_Request_Normal *  pNormalRequest = dynamic_cast<Get_Request_Normal *>(pAPDU.get());
+        if (pNormalRequest)
+        {
+            pEvent = new GetRequestEventData(APPGetRequestOrIndication(
+                pAPDU->GetSourceAddress(),
+                pAPDU->GetDestinationAddress(),
+                pNormalRequest->invoke_id_and_priority,
+                pNormalRequest->cosem_attribute_descriptor));
+        }
+        if (pEvent)
+        {
+            bool bAllowed = false;
+            BEGIN_TRANSITION_MAP
+                TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_IDLE, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATED)
+            END_TRANSITION_MAP(bAllowed, pEvent);
+            return bAllowed;
+        }
         return false;
     }
     

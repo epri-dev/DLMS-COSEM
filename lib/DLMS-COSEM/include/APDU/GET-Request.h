@@ -2,6 +2,7 @@
 
 #include "APDU.h"
 #include "APDUConstants.h"
+#include "COSEMTypes.h"
 
 namespace EPRI
 {
@@ -21,6 +22,10 @@ namespace EPRI
             get_request_next      = 2,
             get_request_with_list = 3
         };
+        //
+        // Attributes
+        //
+        InvokeIdAndPriorityType invoke_id_and_priority;
         
         virtual bool IsValid() const;
         
@@ -31,18 +36,14 @@ namespace EPRI
     public:
         Get_Request_Normal();
         virtual ~Get_Request_Normal();
-        
-        struct Cosem_Attribute_Descriptor
-        {
-            uint16_t    class_id;
-            DLMSVector  instance_id;
-            int8_t      attribute_id;
-        };
-       
-        uint8_t                     invoke_id_and_priority;
+        //
+        // Attributes
+        //
         Cosem_Attribute_Descriptor  cosem_attribute_descriptor;
         
-        virtual bool Parse(DLMSVector * pData);
+        virtual bool Parse(COSEMAddressType SourceAddress,
+            COSEMAddressType DestinationAddress,
+            DLMSVector * pData);
         virtual std::vector<uint8_t> GetBytes();
         
     };

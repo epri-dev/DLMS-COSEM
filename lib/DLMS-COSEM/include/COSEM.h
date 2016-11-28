@@ -3,16 +3,18 @@
 #include <functional>
 #include <map>
 #include <memory>
-#include <tuple>
 
+#include "interfaces/COSEMAttribute.h"
 #include "Callback.h"
 #include "Transport.h"
 #include "StateMachine.h"
 #include "APDU/ASNType.h"
+#include "LogicalDevice.h"
 
 namespace EPRI
 {
     class IAPDU;
+    class LogicalDevice;    
     
     enum COSEMRunResult : uint16_t
     {
@@ -36,14 +38,6 @@ namespace EPRI
             TInternal Data;
         
         };
-    
-    typedef uint16_t            ClassIdType;
-    typedef DLMSVector          ObjectInstanceIdType;
-    typedef int8_t              ObjectAttributeIdType;
-    
-    typedef std::tuple<ClassIdType, 
-        ObjectInstanceIdType, 
-        ObjectAttributeIdType> COSEMAttributeDescriptor;
         
     using TransportEventData = COSEMEventData<Transport::TransportEvent>;
     
@@ -64,12 +58,14 @@ namespace EPRI
         
         typedef int TRANSPORT_HANDLE;
         
-        COSEM();
+        COSEM() = delete;
+        COSEM(COSEMAddressType Address);
         virtual ~COSEM();
     	
         virtual COSEMRunResult Process() = 0;
         virtual TRANSPORT_HANDLE RegisterTransport(Transport * pTransport);
         virtual bool IsOpen() const;
+        virtual COSEMAddressType GetAddress() const;
 
     protected:
         //
@@ -100,19 +96,40 @@ namespace EPRI
         virtual bool AARE_Handler(const IAPDUPtr& pAPDU) = 0;
         virtual bool GET_Request_Handler(const IAPDUPtr& pAPDU) = 0;
         virtual bool GET_Response_Handler(const IAPDUPtr& pAPDU) = 0;
+        //
+        // Helpers
+        //
+        virtual Transport * GetTransport() const;
         
         std::map<TRANSPORT_HANDLE, Transport *> m_Transports;
+        COSEMAddressType                        m_Address;
         
+    };
+    //
+    // BaseCallbackParameter for COSEM
+    //
+    struct APPBaseCallbackParameter : public BaseCallbackParameter
+    {
+        APPBaseCallbackParameter(COSEMAddressType SourceAddress,
+            COSEMAddressType DestinationAddress) :
+            m_SourceAddress(SourceAddress), m_DestinationAddress(DestinationAddress)
+        {
+        }
+        COSEMAddressType  m_SourceAddress;
+        COSEMAddressType  m_DestinationAddress;
     };
     //
     // OPEN Service
     //
-    struct APPOpenConfirmOrResponse : public BaseCallbackParameter
+    struct APPOpenConfirmOrResponse : public APPBaseCallbackParameter
     {
         static const uint16_t ID = 0x2001;
-        APPOpenConfirmOrResponse(bool LogicalNameReferencing = true, bool WithCiphering = false)
-            : m_LogicalNameReferencing(LogicalNameReferencing)
-            , m_WithCiphering(WithCiphering)
+        APPOpenConfirmOrResponse(COSEMAddressType SourceAddress,
+                                 COSEMAddressType DestinationAddress,
+                                 bool LogicalNameReferencing = true, 
+                                 bool WithCiphering = false) : 
+            APPBaseCallbackParameter(SourceAddress, DestinationAddress),
+            m_LogicalNameReferencing(LogicalNameReferencing), m_WithCiphering(WithCiphering)
         {
         }
         // Application Context Name Building
@@ -121,11 +138,15 @@ namespace EPRI
         bool m_WithCiphering;
     };
     
-    struct APPOpenRequestOrIndication : public BaseCallbackParameter
+    struct APPOpenRequestOrIndication : public APPBaseCallbackParameter
     {
         static const uint16_t ID = 0x2002;
-        APPOpenRequestOrIndication(COSEM::SecurityLevel Security = COSEM::SECURITY_NONE, std::string Password = "", 
+        APPOpenRequestOrIndication(COSEMAddressType SourceAddress,
+                                   COSEMAddressType DestinationAddress,
+                                   COSEM::SecurityLevel Security = COSEM::SECURITY_NONE, 
+                                   std::string Password = "", 
                                    bool LogicalNameReferencing = true, bool WithCiphering = false) : 
+            APPBaseCallbackParameter(SourceAddress, DestinationAddress),
             m_LogicalNameReferencing(LogicalNameReferencing), 
             m_WithCiphering(WithCiphering),
             m_SecurityLevel(Security),
@@ -143,37 +164,90 @@ namespace EPRI
         std::string          m_Password;
     };
 
-    using ConnectRequestEventData = COSEMEventData<APPOpenRequestOrIndication>;
-    using ConnectResponseEventData = COSEMEventData<APPOpenConfirmOrResponse>;
+    using OpenRequestEventData = COSEMEventData<APPOpenRequestOrIndication>;
+    using OpenResponseEventData = COSEMEventData<APPOpenConfirmOrResponse>;
     //
     // GET Service
     //
-    struct APPGetRequestOrIndication : public BaseCallbackParameter
+    struct APPGetRequestOrIndication : public APPBaseCallbackParameter
     {
         static const uint16_t ID = 0x2003;
-        APPGetRequestOrIndication(const COSEMAttributeDescriptor& AttributeDescriptor)
-            : m_AttributeDescriptor(AttributeDescriptor)
+        typedef variant<Cosem_Attribute_Descriptor, uint32_t> RequestParameter;
+
+        APPGetRequestOrIndication(COSEMAddressType SourceAddress,
+                                  COSEMAddressType DestinationAddress,
+                                  InvokeIdAndPriorityType InvokeID,
+                                  COSEMPriority Priority,
+                                  COSEMServiceClass ServiceClass,
+                                  const Cosem_Attribute_Descriptor& AttributeDescriptor) : 
+            APPBaseCallbackParameter(SourceAddress, DestinationAddress),
+            m_Type(get_request_normal),
+            m_InvokeIDAndPriority(InvokeID | Priority | ServiceClass)
         {
+            m_Parameter = AttributeDescriptor;
         }
-        COSEMAttributeDescriptor    m_AttributeDescriptor;
+        APPGetRequestOrIndication(COSEMAddressType SourceAddress,
+                                  COSEMAddressType DestinationAddress,
+                                  InvokeIdAndPriorityType InvokeIDAndPriority,
+                                  const Cosem_Attribute_Descriptor& AttributeDescriptor) : 
+            APPBaseCallbackParameter(SourceAddress, DestinationAddress),
+            m_Type(get_request_normal), 
+            m_InvokeIDAndPriority(InvokeIDAndPriority)
+        {
+            m_Parameter = AttributeDescriptor;
+        }
+        APPGetRequestOrIndication(COSEMAddressType SourceAddress,
+                                  COSEMAddressType DestinationAddress,
+                                  InvokeIdAndPriorityType InvokeID,
+                                  uint32_t BlockNumber) : 
+            APPBaseCallbackParameter(SourceAddress, DestinationAddress),
+            m_Type(get_request_next), 
+            m_InvokeIDAndPriority(InvokeID)
+        {
+            m_Parameter = BlockNumber;
+        }
+
+        enum GetRequestType : int8_t
+        {
+            get_request_normal    = 1,
+            get_request_next      = 2,
+            get_request_with_list = 3
+        }                              m_Type;        
+        InvokeIdAndPriorityType        m_InvokeIDAndPriority;
+        RequestParameter               m_Parameter;
     };
 
-    struct APPGetConfirmOrResponse : public BaseCallbackParameter
+    struct APPGetConfirmOrResponse : public APPBaseCallbackParameter
     {
         static const uint16_t ID = 0x2004;
-        APPGetConfirmOrResponse(const DLMSVector& Data)
-            : m_Data(Data)
+        APPGetConfirmOrResponse(COSEMAddressType SourceAddress,
+                                COSEMAddressType DestinationAddress,
+                                InvokeIdAndPriorityType InvokeID,
+                                const DLMSVector& Data) : 
+            APPBaseCallbackParameter(SourceAddress, DestinationAddress),
+            m_Type(get_response_normal),
+            m_InvokeIDAndPriority(InvokeID), 
+            m_Data(Data)
         {
         }
-        DLMSVector m_Data;
+        enum GetResponseType : int8_t
+        {
+            get_response_normal    = 1,
+            get_response_next      = 2,
+            get_response_with_list = 3
+        }                               m_Type;        
+        InvokeIdAndPriorityType         m_InvokeIDAndPriority;
+        DLMSVector                      m_Data;
     };
+    
     using GetRequestEventData = COSEMEventData<APPGetRequestOrIndication>;
     using GetResponseEventData = COSEMEventData<APPGetConfirmOrResponse>;
    
     class COSEMClient : public COSEM
     {
     public:
-        COSEMClient();
+        COSEMClient() = delete;
+        COSEMClient(COSEMAddressType ClientAddress);
         virtual ~COSEMClient();
         //
         // COSEM
@@ -206,25 +280,37 @@ namespace EPRI
         virtual bool AARE_Handler(const IAPDUPtr& pAPDU);
         virtual bool GET_Request_Handler(const IAPDUPtr& pAPDU);
         virtual bool GET_Response_Handler(const IAPDUPtr& pAPDU);
-        //
-        // Helpers
-        //
-        Transport * GetTransport() const;
-
+        
     };
     
-    class COSEMServer : public COSEM
+    class COSEMServer : public COSEM, public LogicalDevice
     {
     public:
-        COSEMServer();
+        COSEMServer() = delete;
+        COSEMServer(COSEMAddressType SAP);
         virtual ~COSEMServer();
         //
-        // COSEM-CONNECT Service
+        // COSEM
         //
-        void RegisterConnectIndication(CallbackFunction Callback);
-        bool ConnectResponse(const APPOpenConfirmOrResponse& Parameters);
+        virtual COSEMRunResult Process();
+        //
+        // COSEM-OPEN Service
+        //
+        void RegisterOpenIndication(CallbackFunction Callback);
+        bool OpenResponse(const APPOpenConfirmOrResponse& Parameters);
+        //
+        // COSEM-GET Service
+        //
+        void RegisterGetIndication(LogicalDevice * pLogicalDevice);
+        bool GetResponse(const APPGetConfirmOrResponse& Parameters);
 
     protected:
+        //
+        // Server Overrides
+        //
+        //
+        // State Machine
+        //
         void ST_Inactive_Handler(EventData * pData);
         void ST_Idle_Handler(EventData * pData);
         void ST_Association_Pending_Handler(EventData * pData);

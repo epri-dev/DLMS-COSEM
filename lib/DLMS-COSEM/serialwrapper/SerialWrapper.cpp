@@ -3,8 +3,7 @@
 namespace EPRI
 {
 
-    SerialWrapper::SerialWrapper(ISerial * pSerial, const WrapperPorts& Ports) :
-        Wrapper(Ports),
+    SerialWrapper::SerialWrapper(ISerial * pSerial) :
         m_pSerial(pSerial)
     {
     }
@@ -24,7 +23,6 @@ namespace EPRI
         DLMSVector RxData;
         if (Receive(&RxData))
         {
-            printf("\n");
             ProcessReception(&RxData);
         }
         return RetVal;

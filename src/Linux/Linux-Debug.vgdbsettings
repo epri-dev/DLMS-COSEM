@@ -7,14 +7,14 @@
       <PathStyle>RemoteUnix</PathStyle>
     </CustomSourceDirectories>
     <BuildHost>
-      <HostName>192.168.11.132</HostName>
+      <HostName>192.168.11.133</HostName>
       <Transport>SSH</Transport>
       <UserName>gbarrett</UserName>
     </BuildHost>
     <MainSourceTransferCommand>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
-        <HostName>192.168.11.132</HostName>
+        <HostName>192.168.11.133</HostName>
         <Transport>SSH</Transport>
         <UserName>gbarrett</UserName>
       </RemoteHost>
@@ -83,7 +83,7 @@
     <MakeCommandTemplate>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
-        <HostName>192.168.11.128</HostName>
+        <HostName>192.168.11.133</HostName>
         <Transport>SSH</Transport>
         <UserName>gbarrett</UserName>
       </RemoteHost>
@@ -102,7 +102,7 @@
     <CMakeCommand>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
-        <HostName>192.168.11.128</HostName>
+        <HostName>192.168.11.133</HostName>
         <Transport>SSH</Transport>
         <UserName>gbarrett</UserName>
       </RemoteHost>
@@ -155,7 +155,7 @@
     <LaunchGDBSettings xsi:type="GDBLaunchParametersNewInstance">
       <DebuggedProgram>$(TargetPath)</DebuggedProgram>
       <GDBServerPort>2000</GDBServerPort>
-      <ProgramArguments>-s 1 -d 1 -C /dev/ttyUSB0 -W -p 33333333</ProgramArguments>
+      <ProgramArguments>-s 1 -d 1 -C localhost -T -p 33333333 -S</ProgramArguments>
     </LaunchGDBSettings>
     <GenerateCtrlBreakInsteadOfCtrlC>false</GenerateCtrlBreakInsteadOfCtrlC>
     <DeploymentTargetPath />

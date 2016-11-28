@@ -44,12 +44,14 @@ namespace EPRI
     {
     }
         
-    bool Get_Response_Normal::Parse(DLMSVector * pData)
+    bool Get_Response_Normal::Parse(COSEMAddressType SourceAddress,
+        COSEMAddressType DestinationAddress,
+        DLMSVector * pData)
     {
         // Perform the base parse, which just loads
         // the stream.
         //
-        if (Get_Response::Parse(pData))
+        if (Get_Response::Parse(SourceAddress, DestinationAddress, pData))
         {
             int8_t       Choice;
             DLMSValue    InvokeIDAndPriority;

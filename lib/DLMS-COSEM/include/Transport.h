@@ -1,17 +1,21 @@
 #pragma once
 
 #include <cstdint>
+#include <map>
+#include <algorithm>
 
+#include "COSEMTypes.h"
 #include "Callback.h"
 #include "DLMSVector.h"
 #include "APDU/APDUFactory.h"
+#include "COSEMAddress.h"
 
 namespace EPRI
 {
     class Transport : public Callback<bool, uint16_t>
     {
         using APDUCallback = Callback<bool, ASN::TagIDType, IAPDUPtr>;
-
+        
     public:
         enum TransportEvent : uint8_t
         {
@@ -22,29 +26,34 @@ namespace EPRI
         struct DataRequestParameter : public BaseCallbackParameter
         {
             static const uint16_t ID = 0x7000;
-            DataRequestParameter(const DLMSVector& D) :
-                Data(D)
+            DataRequestParameter()
             {
             }
-            DLMSVector Data;
+            DataRequestParameter(COSEMAddressType Src, COSEMAddressType Dest, const DLMSVector& D) :
+                SourceAddress(Src), DestinationAddress(Dest), Data(D)
+            {
+            }
+            COSEMAddressType    SourceAddress;
+            COSEMAddressType    DestinationAddress;
+            DLMSVector          Data;
         };
-        
-        typedef Callback<bool, uint16_t, TransportEvent> CallBacker;
+
+        typedef Callback<bool, uint16_t, TransportEvent> TransportCallback;
 
         virtual ~Transport()
         {
         }
         
-        void RegisterTransportEventHandler(CallBacker::CallbackFunction Callback)
+        void RegisterTransportEventHandler(COSEMAddressType Address, TransportCallback::CallbackFunction Callback)
         {
-            m_Callbacker.RegisterCallback(ID,
-                Callback);
+            m_Callbacks[Address].m_TransportCallback.RegisterCallback(ID,
+                                                                      Callback);
         }
         
-        void RegisterAPDUHandler(ASN::TagIDType Tag, APDUCallback::CallbackFunction Callback)
+        void RegisterAPDUHandler(COSEMAddressType Address, ASN::TagIDType Tag, APDUCallback::CallbackFunction Callback)
         {
-            m_APDUCallback.RegisterCallback(Tag, 
-                Callback);
+            m_Callbacks[Address].m_APDUCallback.RegisterCallback(Tag,
+                                                                 Callback);
         }
         //
         // DATA Service
@@ -53,26 +62,46 @@ namespace EPRI
         
         bool FireTransportEvent(TransportEvent Event)
         {
-            bool bRetVal = false;
-            return m_Callbacker.FireCallback(ID, Event, &bRetVal);
-            return bRetVal;
+            std::for_each(m_Callbacks.begin(),
+                m_Callbacks.end(), 
+                [&Event](TransportCallbackType::value_type& Value)
+                {
+                    bool RetVal;
+                    Value.second.m_TransportCallback.FireCallback(ID, Event, &RetVal);
+                }
+            );
+            return true;
         }
         
     protected:
-        virtual bool ProcessReception(DLMSVector * pData)
+        virtual bool ProcessReception(COSEMAddressType SourceAddress, 
+            COSEMAddressType DestinationAddress, DLMSVector * pAPDUData)
         {
-            IAPDUPtr    pAPDU = APDUFactory().Parse(pData);
+            IAPDUPtr    pAPDU = APDUFactory().Parse(SourceAddress, DestinationAddress, pAPDUData);
             if (pAPDU)
             {
-                bool CallbackRetVal = false;
-                return (m_APDUCallback.FireCallback(pAPDU->GetTag(), pAPDU, &CallbackRetVal) && !CallbackRetVal);
+                std::for_each(m_Callbacks.begin(),
+                    m_Callbacks.end(), 
+                    [&pAPDU](TransportCallbackType::value_type& Value)
+                    {
+                        bool RetVal;
+                        Value.second.m_APDUCallback.FireCallback(pAPDU->GetTag(),
+                            pAPDU,
+                            &RetVal);
+                    });
+                return true;
             }
             return false;
         }
         
         static const uint16_t ID = 0x1742;
-        CallBacker            m_Callbacker;
-        APDUCallback          m_APDUCallback;
+        struct TransportCallbacks
+        {
+            TransportCallback     m_TransportCallback;
+            APDUCallback          m_APDUCallback;
+        };
+        typedef std::map<COSEMAddressType, TransportCallbacks> TransportCallbackType;
+        TransportCallbackType                                  m_Callbacks;
     };
     
 }

@@ -37,7 +37,7 @@ namespace EPRI
 
 	IDebug * LinuxBaseLibrary::GetDebug()
 	{
-		return nullptr;
+		return &m_Debug;
 	}
 	
 }

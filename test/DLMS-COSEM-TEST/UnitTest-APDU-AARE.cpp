@@ -51,7 +51,7 @@ TEST(AARE, Parse)
     AARE        a1;
     DLMSVector  Data(FINAL);
     
-    ASSERT_TRUE(a1.Parse(&Data));
+    ASSERT_TRUE(a1.Parse(1, 1, &Data));
     //
     // Let's validate what we have!
     //

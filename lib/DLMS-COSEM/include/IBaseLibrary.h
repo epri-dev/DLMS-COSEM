@@ -5,7 +5,6 @@
 
 namespace EPRI
 {
-
 	class IMemory;
 	class ICore;
 	class IScheduler;
@@ -14,7 +13,6 @@ namespace EPRI
 
 	class IBaseLibrary
 	{
-
 	public:
 		virtual ~IBaseLibrary()
 		{
@@ -24,8 +22,8 @@ namespace EPRI
 		virtual IScheduler * GetScheduler() = 0;
 		virtual ISynchronization * GetSynchronization() = 0;		
 		virtual IDebug * GetDebug() = 0;
-
 	};
-
+    
+    IBaseLibrary * Base();
 }
 

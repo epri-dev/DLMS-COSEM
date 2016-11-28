@@ -5,6 +5,7 @@
 #include <cstring>
 
 #include "HDLCHelpers.h"
+#include "COSEMAddress.h"
 
 namespace EPRI
 {
@@ -14,16 +15,16 @@ namespace EPRI
         const uint16_t INVALID_ADDRESS = 0xFFFF;
         enum ShortReservedAddress : uint8_t
         {
-            SHORT_NO_STATION = 0x00,
-            SHORT_PUBLIC_CLIENT = 0x01,
-            SHORT_MANAGEMENT = 0x10,
-            SHORT_BROADCAST = 0x7F,
-            SHORT_CALLING = 0x7E
+            SHORT_NO_STATION = ReservedAddresses::NO_STATION,
+            SHORT_MANAGEMENT = ReservedAddresses::MANAGEMENT,
+            SHORT_PUBLIC_CLIENT = ReservedAddresses::PUBLIC_CLIENT,
+            SHORT_BROADCAST = ReservedAddresses::BROADCAST,
+            SHORT_CALLING = ReservedAddresses::CALLING
         };
         enum LongReservedAddress : uint16_t
         {
-            LONG_NO_STATION    = 0x0000,
-            LONG_MANAGEMENT    = 0x0001,
+            LONG_NO_STATION    = ReservedAddresses::NO_STATION,
+            LONG_MANAGEMENT    = ReservedAddresses::MANAGEMENT,
             LONG_BROADCAST     = 0x3FFF,
             LONG_CALLING       = 0x3FFE
         };

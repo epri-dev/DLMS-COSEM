@@ -4,18 +4,12 @@
 namespace EPRI
 {
 
-    Wrapper::Wrapper(const WrapperPorts& Ports)
-        : m_Ports(Ports)
+    Wrapper::Wrapper()
     {
     }
     
     Wrapper::~Wrapper()
     {
-    }
-    	
-    Wrapper::WrapperPorts Wrapper::GetPorts() const
-    {
-        return m_Ports;
     }
 
     bool Wrapper::DataRequest(const DataRequestParameter& Parameters)
@@ -25,8 +19,8 @@ namespace EPRI
         //
         DLMSVector  Request;
         Request.Append<uint16_t>(CURRENT_VERSION);
-        Request.Append<uint16_t>(m_Ports.first);
-        Request.Append<uint16_t>(m_Ports.second);
+        Request.Append<COSEMAddressType>(Parameters.SourceAddress);
+        Request.Append<COSEMAddressType>(Parameters.DestinationAddress);
         Request.Append<uint16_t>(Parameters.Data.Size());
         Request.Append(Parameters.Data);
         return (Send(Request));
@@ -34,21 +28,23 @@ namespace EPRI
 
     bool Wrapper::ProcessReception(DLMSVector * pData)
     {
-        bool RetVal = false;
+        bool             RetVal = false;
+        COSEMAddressType SourceAddress;
+        COSEMAddressType DestinationAddress;
         try
         {
             //
             // Remove the wrapper header and validate.
             //
-            if (pData->Get<uint16_t>() == CURRENT_VERSION &&
-                pData->Get<uint16_t>() == m_Ports.first &&
-                pData->Get<uint16_t>() == m_Ports.second)
+            if (pData->Get<uint16_t>() == CURRENT_VERSION)
             {
+                SourceAddress = pData->Get<COSEMAddressType>();
+                DestinationAddress = pData->Get<COSEMAddressType>();                
                 size_t Length = pData->Get<uint16_t>();
                 if (Length)
                 {
                     pData->RemoveReadBytes();
-                    RetVal = Transport::ProcessReception(pData);
+                    RetVal = Transport::ProcessReception(SourceAddress, DestinationAddress, pData);
                 }
             }
         }

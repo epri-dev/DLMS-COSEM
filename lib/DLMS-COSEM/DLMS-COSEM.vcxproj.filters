@@ -88,6 +88,30 @@
     <ClCompile Include="APDU\GET-Response.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="COSEMObjectInstanceID.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="LogicalDevice.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="interfaces\ICOSEMInterface.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="interfaces\IData.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="interfaces\COSEMData.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="interfaces\IClock.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="tcpwrapper\TCPWrapper.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="COSEMDevice.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ERROR_TYPE.h">
@@ -159,22 +183,7 @@
     <ClInclude Include="include\interfaces\IData.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="include\interfaces\IDLMSInterface.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="include\interfaces\IClock.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\interfaces\DLMSAttribute.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\interfaces\DLMSMethod.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\interfaces\DLMSDataTypes.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\interfaces\DLMSData.h">
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="include\COSEM.h">
@@ -229,6 +238,42 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="include\APDU\GET-Response.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interfaces\COSEMAttribute.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interfaces\COSEMData.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interfaces\COSEMMethod.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interfaces\ICOSEMInterface.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\LogicalDevice.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\COSEMAddress.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\COSEMObjectInstanceID.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\COSEMTypes.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tcpwrapper\TCPWrapper.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ISocket.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IDebug.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\COSEMDevice.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

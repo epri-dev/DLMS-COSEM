@@ -14,7 +14,9 @@ namespace EPRI
     {
     }
 
-    IAPDUPtr APDUFactory::Parse(DLMSVector * pData)
+    IAPDUPtr APDUFactory::Parse(COSEMAddressType SourceAddress,
+        COSEMAddressType DestinationAddress,
+        DLMSVector * pData)
     {
         IAPDUPtr pRetVal = nullptr;
         switch (pData->PeekByte())
@@ -37,7 +39,8 @@ namespace EPRI
         default:
             break;
         }
-        if (pRetVal && !pRetVal->Parse(pData))
+        if (pRetVal && 
+            !pRetVal->Parse(SourceAddress, DestinationAddress, pData))
         {
             pRetVal.release();
         }

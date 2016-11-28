@@ -3,6 +3,7 @@
 #include "IBaseLibrary.h"
 #include "LinuxMemory.h"
 #include "LinuxCore.h"
+#include "LinuxDebug.h"
 
 namespace EPRI
 {
@@ -23,6 +24,7 @@ namespace EPRI
 	private:
 		LinuxMemory	 m_Memory;
 		LinuxCore    m_Core;
+    	LinuxDebug   m_Debug;
 		
 	};
 	

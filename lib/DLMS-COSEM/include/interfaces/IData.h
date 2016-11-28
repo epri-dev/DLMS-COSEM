@@ -1,36 +1,33 @@
 #pragma once
 
-#include "IDLMSInterface.h"
+#include "ICOSEMInterface.h"
 
 namespace EPRI
 {
-    class IData_0 : public IDLMSInterface<1, 0>
+    class IData_0 : public ICOSEMInterface
     {
-    public:
-        BEGIN_SCHEMA(DataValueSchema)
-	        BEGIN_CHOICE
-		        NULL_DATA_TYPE
-		        BOOLEAN_TYPE
-	        END_CHOICE
-        END_SCHEMA
+        COSEM_DEFINE_SCHEMA(Data_Schema)
             
-        virtual ~IData_0()
-        {
-        }
+    public:
+        IData_0();
+        virtual ~IData_0();
         
-        enum Attributes
+        enum Attributes : ObjectAttributeIdType
         {
             ATTR_VALUE = 2
         };
         
-        DLMSAttribute<ATTR_VALUE, DataValueSchema, 0x08> value;
+        COSEMAttribute<ATTR_VALUE, Data_Schema, 0x08> value;
         
     };
     
-    template <uint32_t OID>
-        class IDataObject : public IData_0, public IDLMSObject<OID>
-        {
-        
-        };
+    class IDataObject : public IData_0, public ICOSEMObject
+    {
+    public:
+        IDataObject(const COSEMObjectInstanceCriteria& OIDCriteria, 
+            uint16_t ShortNameBase = std::numeric_limits<uint16_t>::max());
+        virtual ~IDataObject();
+
+    };
 
 }
