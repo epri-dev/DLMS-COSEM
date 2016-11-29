@@ -38,6 +38,18 @@ namespace EPRI
         TIME                 = 27,
         DONT_CARE            = 255
     };
+    
+    typedef int32_t DOUBLE_LONG_CType;
+    typedef uint32_t DOUBLE_LONG_UNSIGNED_CType;
+    typedef DLMSVector OCTET_STRING_CType;
+    typedef std::string VISIBLE_STRING_CType;
+    typedef int8_t INTEGER_CType;
+    typedef int16_t LONG_CType;
+    typedef uint8_t UNSIGNED_CType;
+    typedef uint16_t LONG_UNSIGNED_CType;
+    typedef int64_t LONG64_CType;
+    typedef uint64_t LONG64_UNSIGNED_CType;
+    typedef DLMSBitSet BIT_STRING_CType;
 
     enum COSEMSchemaOptions : uint32_t
     {
@@ -73,20 +85,20 @@ namespace EPRI
         (EPRI::COSEMInternalDataType::END_SCHEMA_T == COSEM_SCHEMA_INTERNAL_DATA_TYPE(SCH))
 
 #define COSEM_IS_ARRAY_BEGIN(SCH)\
-        ((EPRI::COSEMInternalDataType::BEGIN_SPECIAL_T | EPRI::COSEMDataType::ARRAY) & \
-         (SCH)->m_SchemaType)
+        (((EPRI::COSEMInternalDataType::BEGIN_SPECIAL_T | EPRI::COSEMDataType::ARRAY) & \
+         (SCH)->m_SchemaType) == (EPRI::COSEMInternalDataType::BEGIN_SPECIAL_T | EPRI::COSEMDataType::ARRAY))
         
 #define COSEM_IS_ARRAY_END(SCH)\
-        ((EPRI::COSEMInternalDataType::END_SPECIAL_T | EPRI::COSEMDataType::ARRAY) & \
-         (SCH)->m_SchemaType)
+        (((EPRI::COSEMInternalDataType::END_SPECIAL_T | EPRI::COSEMDataType::ARRAY) & \
+         (SCH)->m_SchemaType) == (EPRI::COSEMInternalDataType::END_SPECIAL_T | EPRI::COSEMDataType::ARRAY))
 
 #define COSEM_IS_STRUCTURE_BEGIN(SCH)\
-        ((EPRI::COSEMInternalDataType::BEGIN_SPECIAL_T | EPRI::COSEMDataType::STRUCTURE) & \
-         (SCH)->m_SchemaType)
+        (((EPRI::COSEMInternalDataType::BEGIN_SPECIAL_T | EPRI::COSEMDataType::STRUCTURE) & \
+         (SCH)->m_SchemaType) == (EPRI::COSEMInternalDataType::BEGIN_SPECIAL_T | EPRI::COSEMDataType::STRUCTURE))
         
 #define COSEM_IS_STRUCTURE_END(SCH)\
-        ((EPRI::COSEMInternalDataType::END_SPECIAL_T | EPRI::COSEMDataType::STRUCTURE) & \
-         (SCH)->m_SchemaType)
+        (((EPRI::COSEMInternalDataType::END_SPECIAL_T | EPRI::COSEMDataType::STRUCTURE) & \
+         (SCH)->m_SchemaType) == (EPRI::COSEMInternalDataType::END_SPECIAL_T | EPRI::COSEMDataType::STRUCTURE))
         
 #define COSEM_SCHEMA_OPTIONS(SCH)\
         COSEMSchemaOptions((SCH)->m_SchemaType & 0x0F000000)
@@ -175,8 +187,12 @@ namespace EPRI
     extern const SchemaEntry IntegerSchema[];
     extern const SchemaEntry BooleanSchema[];
     
+    class COSEMBitString;
+    
     class COSEMType
     {
+        friend class COSEMBitString;
+        
     public:
         COSEMType();
         COSEMType(SchemaEntryPtr Schema);
@@ -280,10 +296,16 @@ namespace EPRI
         virtual ~COSEMBitString();
         COSEMBitString(size_t BitsExpected, const DLMSBitSet& Value);
         COSEMBitString(size_t BitsExpected);
-         //
+        size_t GetBitLength() const;
+        //
         // Operators
         //
         operator DLMSVariant() const;
+        //
+        // Helpers
+        //
+        static bool Peek(SchemaEntryPtr SchemaEntry, const COSEMType& Value, DLMSVariant * pVariant, size_t * pBytes = nullptr);
+        static bool Get(SchemaEntryPtr SchemaEntry, COSEMType * pValue, DLMSVariant * pVariant);
         
     protected:
         size_t m_BitsExpected;

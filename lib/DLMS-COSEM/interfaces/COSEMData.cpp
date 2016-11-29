@@ -129,259 +129,199 @@ namespace EPRI
     COSEMType::GetNextResult COSEMType::InternalSimpleGet(SchemaEntryPtr SchemaEntry, DLMSVariant * pValue)
     {
         GetNextResult RetVal = INVALID_CONDITION;
-//        if (INTEGER_LIST_T == 
-//           ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
-//        {
-//            RetVal = GetINTEGER(SchemaEntry, pValue);
-//        }
-//        else
-//        {
-//            switch (ASN_SCHEMA_DATA_TYPE(SchemaEntry))
-//            {
-//            case INTEGER:
-//                RetVal = GetINTEGER(SchemaEntry, pValue);
-//                break;
-//            case OBJECT_IDENTIFIER:
-//                RetVal = ASNObjectIdentifier::Get(SchemaEntry, this, pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
-//                break;
-//            case GraphicString:
-//            case OCTET_STRING:
-//                RetVal = GetSTRING(SchemaEntry, pValue);
-//                break;
-//            case BIT_STRING:
-//                RetVal = ASNBitString::Get(SchemaEntry, this, pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
-//                break;
-//                //
-//                // TODO - Make Smarter and Smaller
-//                //
-//            case DT_Integer8:
-//                RetVal = m_Data.Get<int8_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
-//                break;
-//            case DT_Unsigned8:
-//                RetVal = m_Data.Get<uint8_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
-//                break;
-//            case DT_Integer16:
-//                RetVal = m_Data.Get<int16_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
-//                break;
-//            case DT_Unsigned16:
-//                RetVal = m_Data.Get<uint16_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
-//                break;
-//            case DT_Integer32:
-//                RetVal = m_Data.Get<int32_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
-//                break;
-//            case DT_Unsigned32:
-//                RetVal = m_Data.Get<uint32_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
-//                break;
-//            case DT_Integer64:
-//                RetVal = m_Data.Get<int64_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
-//                break;
-//            case DT_Unsigned64:
-//                RetVal = m_Data.Get<uint64_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
-//                break;
-//            case DT_Data:
-//                {
-//                    DLMSVector Vector;
-//                    if (m_Data.GetVector(&Vector, m_Data.Size() - m_Data.GetReadPosition()))
-//                    {
-//                        pValue->set<DLMSVector>(Vector);
-//                        RetVal = VALUE_RETRIEVED;
-//                    }
-//                }
-//                break;
-//            default:
-//                throw std::out_of_range("InternalSimpleGet: Type not implemented.");
-//            }
-//        }
+        COSEMDataType DT = COSEMDataType(m_Data.Get<uint8_t>());
+        if (DT != COSEM_SCHEMA_DATA_TYPE(SchemaEntry))
+        {
+            return INVALID_STREAM;
+        }
+        switch (DT)
+        {
+        case NULL_DATA:
+            return VALUE_RETRIEVED;
+        case BOOLEAN:    
+            RetVal = m_Data.Get<bool>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
+            break;
+        case BIT_STRING:     
+            RetVal = COSEMBitString::Get(SchemaEntry, this, pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
+            break;
+        case DOUBLE_LONG: 
+            RetVal = m_Data.Get<int32_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
+            break;
+        case DOUBLE_LONG_UNSIGNED:
+            RetVal = m_Data.Get<uint32_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
+            break;
+        case OCTET_STRING:   
+            {
+                size_t     Length = 0;
+                DLMSVector Vector;
+                if (ASNType::GetLength(&m_Data, &Length) &&
+                    m_Data.GetVector(&Vector, Length))
+                {
+                    *pValue = Vector;
+                    RetVal = VALUE_RETRIEVED;
+                }
+                else
+                {
+                    RetVal = INVALID_CONDITION;
+                }
+            }
+            break;
+        case VISIBLE_STRING: 
+            {
+                size_t      Length = 0;
+                std::string String;
+                if (ASNType::GetLength(&m_Data, &Length) &&
+                    m_Data.Get(&String, Length))
+                {
+                    *pValue = String;
+                    RetVal = VALUE_RETRIEVED;
+                }
+                else
+                {
+                    RetVal = INVALID_CONDITION;
+                }
+            }
+            break;
+        case UTF8_STRING:    
+
+        case INTEGER:        
+            RetVal = m_Data.Get<int8_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
+            break;
+        case ENUM:    
+        case UNSIGNED:       
+            RetVal = m_Data.Get<uint8_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
+            break;
+        case LONG:           
+            RetVal = m_Data.Get<int16_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
+            break;
+        case LONG_UNSIGNED:  
+            RetVal = m_Data.Get<uint16_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
+            break;
+        case LONG64:         
+            RetVal = m_Data.Get<int64_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
+            break;
+        case LONG64_UNSIGNED:
+            RetVal = m_Data.Get<uint64_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
+            break;
+        case BCD:            
+        case FLOATING_POINT: 
+        case FLOAT32:        
+        case FLOAT64:        
+        case DATE_TIME:      
+        case DATE:           
+        case TIME:           
+        case DONT_CARE:      
+        default:
+            throw std::out_of_range("InternalSimpleGet: Type not implemented.");
+        }
         return RetVal;
     }
     
     COSEMType::GetNextResult COSEMType::GetNextValue(DLMSValue * pValue)
     {
         GetNextResult       GetNextRetVal = INVALID_CONDITION;
-//        DLMSSequence        Sequence;
-//        //
-//        // PRECONDITIONS
-//        //
-//        if (m_Data.Size() == 0)
-//        {
-//            return INVALID_CONDITION;
-//        }
-//        if (m_Data.IsAtEnd())
-//        {
-//            return END_OF_SCHEMA;
-//        }
-//        if (m_GetStates.empty())
-//        {
-//            m_GetStates.emplace(nullptr, ST_SIMPLE, INVALID_CHOICE);
-//        }
-//        while (VALUE_RETRIEVED == (GetNextRetVal = GetNextSchemaEntry(&CURRENT_GET_STATE.m_SchemaEntry)))
-//        {
-//            switch (CURRENT_GET_STATE.m_State)
-//            {
-//            case ST_SIMPLE:
-//                if (BEGIN_CHOICE_T == 
-//                    ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
-//                {
-//                    m_GetStates.emplace(nullptr, ST_CHOICE, INVALID_CHOICE);
-//                    break;
-//                }
-//                else if (BEGIN_SEQUENCE_T == 
-//                         ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
-//                {
-//                    m_GetStates.emplace(nullptr, ST_SEQUENCE, INVALID_CHOICE);
-//                    break;
-//                }
-//                else
-//                {
-//                    DLMSVariant Value;
-//                    GetNextRetVal = InternalSimpleGet(CURRENT_GET_STATE.m_SchemaEntry, &Value);
-//                    if (VALUE_RETRIEVED == GetNextRetVal)
-//                    {
-//                        *pValue = Value;
-//                    }
-//                    return GetNextRetVal;
-//                }
-//                return SCHEMA_MISMATCH;
-//            case ST_CHOICE:
-//                if (END_CHOICE_T ==  
-//                    ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
-//                {
-//                    m_GetStates.pop();
-//                    break;
-//                }
-//                else if (BEGIN_CHOICE_ENTRY_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry) &&
-//                         (ASN_IS_IMPLICIT(CURRENT_GET_STATE.m_SchemaEntry) || (m_Data.PeekByte() & 0x80)))
-//                {
-//                    int8_t Choice = m_Data.Get<uint8_t>() & 0b00011111;
-//                    if (ASN_SCHEMA_DATA_TYPE_SIZE(CURRENT_GET_STATE.m_SchemaEntry) == Choice)
-//                    {
-//                        m_GetStates.emplace(nullptr, ST_CHOICE_ENTRY, Choice);
-//                        break;
-//                    }
-//                }
-//                return SCHEMA_MISMATCH;
-//            case ST_CHOICE_ENTRY:
-//                if (END_CHOICE_ENTRY_T == 
-//                    ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
-//                {
-//                    m_GetStates.pop();
-//                    break;
-//                }
-//                else if (BEGIN_CHOICE_T == 
-//                         ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
-//                {
-//                    m_GetStates.emplace(nullptr, ST_CHOICE, INVALID_CHOICE);
-//                    break;
-//                }
-//                else if (BEGIN_SEQUENCE_T == 
-//                         ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
-//                {
-//                    m_GetStates.emplace(nullptr, ST_SEQUENCE, INVALID_CHOICE);
-//                    break;
-//                }
-//                else
-//                {
-//                    DLMSVariant Value;
-//                    if (ASN_SCHEMA_OPTIONS(CURRENT_GET_STATE.m_SchemaEntry) & CONSTRUCTED)
-//                    {
-//                        // TODO
-//                        m_Data.Skip(sizeof(uint8_t));
-//                    }
-//                    GetNextRetVal = InternalSimpleGet(CURRENT_GET_STATE.m_SchemaEntry, &Value);
-//                    if (VALUE_RETRIEVED == GetNextRetVal)
-//                    {
-//                        *pValue = Value;
-//                    }
-//                    return GetNextRetVal;
-//                }
-//                return SCHEMA_MISMATCH;
-//            case ST_SEQUENCE:
-//                if (END_SEQUENCE_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
-//                {
-//                    m_GetStates.pop();
-//                    *pValue = Sequence;
-//                    if (Sequence.size())
-//                    {
-//                        return VALUE_RETRIEVED; 
-//                    }
-//                    return NO_VALUE_FOUND;
-//                }
-//                else if (BEGIN_CHOICE_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
-//                {
-//                    m_GetStates.emplace(nullptr, ST_CHOICE, INVALID_CHOICE);
-//                    break;
-//                }
-//                else
-//                {
-//                    DLMSVariant Value;
-//                    if (ASN_SCHEMA_OPTIONS(CURRENT_GET_STATE.m_SchemaEntry) & CONSTRUCTED)
-//                    {
-//                        // TODO
-//                        m_Data.Skip(sizeof(uint8_t));
-//                    }
-//                    GetNextRetVal = InternalSimpleGet(CURRENT_GET_STATE.m_SchemaEntry, &Value);
-//                    if (VALUE_RETRIEVED == GetNextRetVal)
-//                    {
-//                        Sequence.push_back(Value);
-//                        break;
-//                    }
-//                }
-//                return SCHEMA_MISMATCH;
-//            default:
-//                throw std::out_of_range("GetNextValue Not implemented.");
-//            }
-//        }
+        DLMSSequence        Sequence;
+        //
+        // PRECONDITIONS
+        //
+        if (m_Data.Size() == 0)
+        {
+            return INVALID_CONDITION;
+        }
+        if (m_Data.IsAtEnd())
+        {
+            return END_OF_SCHEMA;
+        }
+        if (m_GetStates.empty())
+        {
+            m_GetStates.emplace(nullptr, ST_SIMPLE, INVALID_CHOICE);
+        }
+        while (VALUE_RETRIEVED == (GetNextRetVal = GetNextSchemaEntry(&CURRENT_GET_STATE.m_SchemaEntry)))
+        {
+            switch (CURRENT_GET_STATE.m_State)
+            {
+            case ST_SIMPLE:
+                if (BEGIN_CHOICE_T == 
+                    COSEM_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
+                {
+                    m_GetStates.emplace(nullptr, ST_CHOICE, INVALID_CHOICE);
+                    break;
+                }
+                else if (COSEM_IS_STRUCTURE_BEGIN(CURRENT_GET_STATE.m_SchemaEntry))
+                {
+                    m_GetStates.emplace(nullptr, ST_STRUCTURE, INVALID_CHOICE);
+                    break;
+                }
+                else 
+                {
+                    DLMSVariant Value;
+                    GetNextRetVal = InternalSimpleGet(CURRENT_GET_STATE.m_SchemaEntry, &Value);
+                    if (VALUE_RETRIEVED == GetNextRetVal)
+                    {
+                        *pValue = Value;
+                    }
+                    return GetNextRetVal;
+                }
+                return SCHEMA_MISMATCH;
+            case ST_CHOICE:
+                if (END_CHOICE_T ==  
+                    COSEM_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
+                {
+                    m_GetStates.pop();
+                }
+                else if (COSEMDataType(m_Data.PeekByte()) == COSEM_SCHEMA_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
+                {
+                    CURRENT_GET_STATE.m_Choice = COSEM_SCHEMA_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry);
+                    if (COSEM_IS_STRUCTURE_BEGIN(CURRENT_GET_STATE.m_SchemaEntry))
+                    {
+                        m_GetStates.emplace(nullptr, ST_STRUCTURE, CURRENT_GET_STATE.m_Choice);
+                        break;
+                    }
+                    else
+                    {
+                        DLMSVariant Value;
+                        GetNextRetVal = InternalSimpleGet(CURRENT_GET_STATE.m_SchemaEntry, &Value);
+                        if (VALUE_RETRIEVED == GetNextRetVal)
+                        {
+                            *pValue = Value;
+                        }
+                        return GetNextRetVal;
+                    }
+                }
+                break;
+            case ST_STRUCTURE:
+                if (COSEM_IS_STRUCTURE_END(CURRENT_GET_STATE.m_SchemaEntry))
+                {
+                    m_GetStates.pop();
+                    *pValue = Sequence;
+                    if (Sequence.size())
+                    {
+                        return VALUE_RETRIEVED; 
+                    }
+                    return NO_VALUE_FOUND;
+                }
+                else if (BEGIN_CHOICE_T == COSEM_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
+                {
+                    m_GetStates.emplace(nullptr, ST_CHOICE, INVALID_CHOICE);
+                    break;
+                }
+                else
+                {
+                    DLMSVariant Value;
+                    GetNextRetVal = InternalSimpleGet(CURRENT_GET_STATE.m_SchemaEntry, &Value);
+                    if (VALUE_RETRIEVED == GetNextRetVal)
+                    {
+                        Sequence.push_back(Value);
+                        break;
+                    }
+                }
+                return SCHEMA_MISMATCH;
+            default:
+                throw std::out_of_range("GetNextValue Not implemented.");
+            }
+        }
         return GetNextRetVal;
     }
-    
-//    COSEMType::GetNextResult COSEMType::GetNextValue(COSEMType * pValue)
-//    {
-//        GetNextResult  RetVal = INVALID_CONDITION;
-//        DLMSValue      Value;
-//        //
-//        // PRECONDITIONS
-//        //
-//        if (m_Data.Size() == 0)
-//        {
-//            return RetVal;
-//        }
-//        
-//        SchemaEntryPtr SchemaEntry = GetCurrentSchemaEntry();
-//        switch (ASN_SCHEMA_DATA_TYPE(SchemaEntry))
-//        {
-//        case OBJECT_IDENTIFIER:
-//        case INTEGER:
-//        case OCTET_STRING:
-//        case BIT_STRING:
-//        case GraphicString:
-//        case DT_Integer8:
-//        case DT_Unsigned8:
-//        case DT_Integer16:
-//        case DT_Unsigned16:
-//        case DT_Integer32:
-//        case DT_Unsigned32:
-//        case DT_Integer64:
-//        case DT_Unsigned64:
-//            RetVal = GetNextValue(&Value);
-//            if (VALUE_RETRIEVED == RetVal)
-//            {
-//                pValue->SetSchemaType(SchemaEntry->m_SchemaType);
-//                if (!pValue->Append(Value.get<DLMSVariant>()))
-//                {
-//                    RetVal = INVALID_CONDITION;
-//                }
-//                else
-//                {
-//                    pValue->Rewind();
-//                }
-//            }
-//            break;
-//        default:
-//            throw std::out_of_range("GetNextValue Not Implemented");
-//            break;
-//        }
-//        return RetVal;
-//    }
     
     bool COSEMType::Append(const DLMSValue& Value)
     {
@@ -530,12 +470,9 @@ namespace EPRI
                 break;
             case BIT_STRING:
                 {
-                    size_t LengthIndex = 0;
-                    LengthIndex = m_pVector->Append<uint8_t>(0);
-                    ASNBitString Conversion(COSEM_SCHEMA_DATA_TYPE_SIZE(m_SchemaEntry), 
-                        Value);
-                    m_pVector->Append(Conversion.GetBytes());
-                    (*m_pVector)[LengthIndex] = m_pVector->Size() - LengthIndex - 1;
+                    COSEMBitString Conversion(COSEM_SCHEMA_DATA_TYPE_SIZE(m_SchemaEntry), 
+                                             Value);
+                    Conversion.GetBytes(m_pVector);
                 }
                 break;
             default:
@@ -674,20 +611,21 @@ namespace EPRI
                 {
                     if (IsSequence(Value))
                     {
+                        size_t AppendCount = 0;
                         const DLMSSequence& Sequence = DLMSValueGetSequence(Value);
                         for (DLMSSequence::const_iterator it = Sequence.begin();
                              it != Sequence.end(); ++it)
                         {
-                            //Appended = InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, *it);
+                            if (InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, *it))
+                            {
+                                ++AppendCount;
+                            }
                         }
+                        return (AppendCount == Sequence.size());
                     }
                     else
                     {
-//                        Appended = InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, Value.get<DLMSVariant>());
-//                        if (Appended)
-//                        {
-//                            return true;
-//                        }
+                        return InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, Value.get<DLMSVariant>());
                     }
                 }
                 return false;
@@ -724,6 +662,11 @@ namespace EPRI
         }
     }
     
+    size_t COSEMBitString::GetBitLength() const
+    {
+        return m_BitsExpected;
+    }
+
     COSEMBitString::COSEMBitString(size_t BitsExpected, const DLMSBitSet& Value)
         : COSEMType(BIT_STRING), m_BitsExpected(BitsExpected)
     {
@@ -731,21 +674,23 @@ namespace EPRI
         {
             throw std::invalid_argument("BitsExpected must be > 0");
         }
-        uint8_t ByteOffset = BitsExpected / 8;
+        uint8_t ByteLength = BitsExpected / 8;
         uint8_t ValueBitIndex = 0;
-        if (0 == ByteOffset)
+        if (BitsExpected % 8)
         {
-            ++ByteOffset;
+            ++ByteLength;
         }
-        m_Data.Append<uint8_t>(8 - (BitsExpected % 8));
-        for (uint8_t ByteIndex = 0; ByteIndex < ByteOffset; ++ByteIndex)
+        ASNType::AppendLength(BitsExpected, &m_Data);
+        size_t Offset = m_Data.AppendExtra(ByteLength);
+        for (uint8_t ByteIndex = Offset + ByteLength - 1; 
+             ByteIndex >= Offset; --ByteIndex)
         {
             uint8_t CurrentByte = 0;
-            for (int BitShift = 7; BitShift >= 0; BitShift--)
+            for (int BitShift = 0; BitShift < 8; BitShift++)
             {
                 CurrentByte |= (Value[ValueBitIndex++] << BitShift);
             }
-            m_Data.Append<uint8_t>(CurrentByte);
+            m_Data[ByteIndex] = CurrentByte;
         }
         
     }
@@ -755,4 +700,58 @@ namespace EPRI
         return m_Data;
     }
     
+    bool COSEMBitString::Peek(SchemaEntryPtr SchemaEntry, const COSEMType& Value, DLMSVariant * pVariant, size_t * pBytes /* = nullptr */)
+    {
+        DLMSVector Output;
+        size_t     Offset = Value.m_Data.GetReadPosition();
+        size_t     Length = 0;
+        size_t     LengthBytes = 0;
+        
+        if (ASNType::PeekLength(Value.m_Data, Offset, &Length, &LengthBytes))
+        {
+            Offset += LengthBytes;
+            LengthBytes += (Length / 8);
+            if (Length % 8)
+            {
+                ++LengthBytes;
+            }
+        }
+        else
+        {
+            return false;
+        }
+        if (LengthBytes > Value.m_Data.Size())
+        {
+            return false;
+        }
+        if (pBytes)
+        {
+            *pBytes = LengthBytes;
+        }
+        DLMSBitSet Bitset;
+        for (ssize_t BitIndex = Length - 1; BitIndex >=0; --BitIndex)
+        {
+            Bitset[BitIndex] = Value.m_Data[Offset] & 
+                                    (1 << (BitIndex % 8));
+            if (BitIndex % 8 == 0)
+            {
+                ++Offset;
+            }
+        }
+        *pVariant = Bitset;
+        return true;
+    }
+    
+    bool COSEMBitString::Get(SchemaEntryPtr SchemaEntry, COSEMType * pValue, DLMSVariant * pVariant)
+    {
+        size_t Bytes = 0;
+        if (Peek(SchemaEntry, *pValue, pVariant, &Bytes))
+        {
+            pValue->m_Data.Skip(Bytes);
+            return true;
+        }
+        return false;
+        
+    }
+
 }

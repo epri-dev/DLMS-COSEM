@@ -1094,7 +1094,7 @@ namespace EPRI
         }
         uint8_t ByteOffset = BitsExpected / 8;
         uint8_t ValueBitIndex = 0;
-        if (0 == ByteOffset)
+        if (0 != (BitsExpected % 8))
         {
             ++ByteOffset;
         }
@@ -1146,7 +1146,6 @@ namespace EPRI
         {
             *pBytes = Offset + Length;
         }
-        Length = (Length - sizeof(uint8_t)) * 8 - Byte;
 
         // Bits Remaining
         Byte = Value.m_Data.PeekByte(Offset++);
@@ -1154,6 +1153,7 @@ namespace EPRI
         {
             return false;
         }
+        Length = (Length - sizeof(uint8_t)) * 8 - Byte;
             
         DLMSBitSet Bitset;
         for (size_t BitIndex = 0; BitIndex < Length; ++BitIndex)
