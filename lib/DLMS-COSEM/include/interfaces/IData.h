@@ -4,6 +4,8 @@
 
 namespace EPRI
 {
+    const ClassIDType CLSID_IData = 1;
+    
     class IData_0 : public ICOSEMInterface
     {
         COSEM_DEFINE_SCHEMA(Data_Schema)
@@ -20,6 +22,8 @@ namespace EPRI
         COSEMAttribute<ATTR_VALUE, Data_Schema, 0x08> value;
         
     };
+    
+    typedef IData_0 IData;
     
     class IDataObject : public IData_0, public ICOSEMObject
     {

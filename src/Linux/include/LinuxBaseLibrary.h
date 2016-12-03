@@ -1,5 +1,7 @@
 #pragma once
 
+#include <asio.hpp>
+
 #include "IBaseLibrary.h"
 #include "LinuxMemory.h"
 #include "LinuxCore.h"
@@ -20,12 +22,20 @@ namespace EPRI
 		IScheduler * GetScheduler();
 		ISynchronization * GetSynchronization();		
 		IDebug * GetDebug();
+    	bool Process();    	
+    	//
+    	//
+    	//
+    	inline asio::io_service& get_io_service()
+    	{
+        	return m_IO;
+    	}
 		
 	private:
-		LinuxMemory	 m_Memory;
-		LinuxCore    m_Core;
-    	LinuxDebug   m_Debug;
-		
+    	asio::io_service    m_IO;
+		LinuxMemory	        m_Memory;
+		LinuxCore           m_Core;
+    	LinuxDebug          m_Debug;
 	};
 	
 }

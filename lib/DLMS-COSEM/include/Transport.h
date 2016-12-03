@@ -22,6 +22,7 @@ namespace EPRI
             TRANSPORT_CONNECTED    = 1,
             TRANSPORT_DISCONNECTED
         };
+        typedef uint16_t ProcessResultType;
         
         struct DataRequestParameter : public BaseCallbackParameter
         {
@@ -44,6 +45,8 @@ namespace EPRI
         {
         }
         
+        virtual ProcessResultType Process() = 0;
+
         void RegisterTransportEventHandler(COSEMAddressType Address, TransportCallback::CallbackFunction Callback)
         {
             m_Callbacks[Address].m_TransportCallback.RegisterCallback(ID,

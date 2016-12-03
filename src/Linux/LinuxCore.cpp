@@ -3,7 +3,8 @@
 
 namespace EPRI
 {
-	LinuxCore::LinuxCore()
+    LinuxCore::LinuxCore(asio::io_service& IO) :
+        m_IP(IO), m_Serial(IO)
 	{
 	}
 	
@@ -16,9 +17,9 @@ namespace EPRI
 		return &m_Serial;
 	}
 
-    ISocket * LinuxCore::GetSocket()
+    IIP * LinuxCore::GetIP()
     {
-        return &m_Socket;
+        return &m_IP;
     }
 	
 	std::shared_ptr<ISimpleTimer> LinuxCore::CreateSimpleTimer(bool bUseHeap /* = true*/)

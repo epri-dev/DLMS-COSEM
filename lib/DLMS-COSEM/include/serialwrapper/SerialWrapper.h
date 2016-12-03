@@ -11,8 +11,10 @@ namespace EPRI
         SerialWrapper() = delete;
         SerialWrapper(ISerial * pSerial);
         virtual ~SerialWrapper();
-    	
-        virtual bool Process();
+    	//
+        // Transport
+        //
+        virtual ProcessResultType Process();
 	
     protected:
         bool Send(const DLMSVector& Data);

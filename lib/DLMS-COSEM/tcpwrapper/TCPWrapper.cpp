@@ -9,49 +9,79 @@ namespace EPRI
     TCPWrapper::TCPWrapper(ISocket * pSocket) :
         m_pSocket(pSocket)
     {
+        m_pSocket->RegisterConnectHandler(
+            std::bind(&TCPWrapper::Socket_Connect, this, std::placeholders::_1));
+        m_pSocket->RegisterReadHandler(
+            std::bind(&TCPWrapper::Socket_Receive, this, std::placeholders::_1, std::placeholders::_2));
     }
     
     TCPWrapper::~TCPWrapper()
     {
     }
     	
-    bool TCPWrapper::Process()
+    Transport::ProcessResultType TCPWrapper::Process()
     {
-        if (!m_bConnectionFired && m_pSocket->IsConnected())
-        {
-            FireTransportEvent(Transport::TRANSPORT_CONNECTED);
-            m_bConnectionFired = true;
-        }
-        DLMSVector RxData;
-        if (Receive(&RxData))
-        {
-            ProcessReception(&RxData);
-        }
         return true;
     }
 	
     bool TCPWrapper::Send(const DLMSVector& Data)
     {
-        return m_pSocket->Write(Data.GetData(), Data.Size()) == SUCCESSFUL;
+        return m_pSocket->Write(Data) == SUCCESSFUL;
     }
     
     bool TCPWrapper::Receive(DLMSVector * pData)
     {
-        uint8_t		   Byte;
-        uint32_t       CharacterTimeout = 400;
-        size_t         BytesReceived = 0;
         //
-        // Check to see if there is a byte available.  If so, then we can just stream 
-        // until we hit a character timeout.
+        // Not implemented
         //
-        ERROR_TYPE     RetVal = m_pSocket->Read(&Byte, sizeof(Byte), 0);
-        while (SUCCESSFUL == RetVal)
+        return false;
+    }
+    
+    void TCPWrapper::Socket_Receive(ERROR_TYPE Error, size_t BytesReceived)
+    {
+        if (SUCCESSFUL == Error || BytesReceived)
         {
-            pData->Append<uint8_t>(Byte);
-            BytesReceived++;
-            RetVal = m_pSocket->Read(&Byte, sizeof(Byte), CharacterTimeout);
+            m_pSocket->AppendAsyncReadResult(&m_RXVector, BytesReceived);
+            switch (m_ReadState)
+            {
+            case HEADER_WAIT:
+                if (m_RXVector.Size() == Wrapper::HEADER_SIZE)
+                {
+                    ArmAsyncRead(ParseMessageLength(m_RXVector));
+                    m_ReadState = BODY_WAIT;
+                }
+                break;
+            case BODY_WAIT:
+                if (m_RXVector.Size() == Wrapper::HEADER_SIZE + ParseMessageLength(m_RXVector))
+                {
+                    ProcessReception(&m_RXVector);
+                    //
+                    // Rearm Reception
+                    //
+                    m_RXVector.Clear();
+                    ArmAsyncRead();
+                    m_ReadState = HEADER_WAIT;
+                }
+                break;
+            }
         }
-        return BytesReceived;
+    }
+    
+    void TCPWrapper::Socket_Connect(ERROR_TYPE Error)
+    {
+        if (!Error)
+        {
+            FireTransportEvent(Transport::TRANSPORT_CONNECTED);
+            //
+            // Arm read to catch a header at least
+            //
+            ArmAsyncRead();
+        }
+    }
+    
+    bool TCPWrapper::ArmAsyncRead(size_t MinimumSize /* = Wrapper::HEADER_SIZE*/)
+    {
+        return SUCCESSFUL == m_pSocket->Read(nullptr, MinimumSize);
     }
     	
 }

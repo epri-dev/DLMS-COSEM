@@ -90,6 +90,7 @@ namespace EPRI
         
         bool IsEmpty() const;
         bool Parse(DLMSVector * pVector);
+        bool Parse(const std::string& String);
         std::string ToString() const;
         //
         // Operators

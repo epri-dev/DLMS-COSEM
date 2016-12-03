@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <string>
 #include <type_traits>
+#include <iostream>
 
 #include "mapbox/variant.hpp"
 
@@ -237,10 +238,10 @@ namespace EPRI
                 return false;
             }
         template <typename T, uint8_t BitsToGet = 0>
-            T Peek(bool BigEndian = true) const throw(std::out_of_range)
+            T Peek(size_t Offset = 0, bool BigEndian = true) const throw(std::out_of_range)
             {
                 DLMSVariant Value;
-                if (Peek<T, BitsToGet>(&Value, BigEndian))
+                if (Peek<T, BitsToGet>(&Value, BigEndian, Offset))
                 {
                     return Value.get<T>();
                 }

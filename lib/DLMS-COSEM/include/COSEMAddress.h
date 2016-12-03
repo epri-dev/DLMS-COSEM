@@ -13,4 +13,7 @@ namespace EPRI
         CALLING       = 0x7E
     };
     typedef uint16_t COSEMAddressType; 
+    
+    const COSEMAddressType INVALID_ADDRESS = 0xFFFF;
+
 }

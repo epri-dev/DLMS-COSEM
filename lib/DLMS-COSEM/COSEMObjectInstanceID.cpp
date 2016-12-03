@@ -10,10 +10,6 @@ namespace EPRI
     //
     // COSEMObjectInstanceCriteria
     //
-//    COSEMObjectInstanceCriteria::COSEMObjectInstanceCriteria(const ValueGroupCriteria Criteria[COSEMValueGroupElements])
-//    {
-//        std::memcpy(m_Criteria, Criteria, sizeof(m_Criteria));
-//    }
     COSEMObjectInstanceCriteria::COSEMObjectInstanceCriteria(const std::initializer_list<ValueGroupCriteria>& List)
     {
         assert(List.size() == COSEMValueGroupElements);
@@ -62,7 +58,7 @@ namespace EPRI
     //
     // COSEMObjectInstanceID
     //
-   COSEMObjectInstanceID::COSEMObjectInstanceID()
+    COSEMObjectInstanceID::COSEMObjectInstanceID()
     {
     }
     
@@ -104,7 +100,25 @@ namespace EPRI
     {
         return pVector->GetBuffer(m_OBIS, sizeof(m_OBIS));
     }
-        
+
+    bool COSEMObjectInstanceID::Parse(const std::string& String)
+    {
+        bool RetVal = 
+            std::sscanf(String.c_str(),
+                "%hhu%*[.-, :*]%hhu%*[.-, :*]%hhu%*[.-, :*]%hhu%*[.-, :*]%hhu%*[.-, :*]%hhu%*[.-, :*]",
+                &m_OBIS[ValueGroup::VALUE_GROUP_A],
+                &m_OBIS[ValueGroup::VALUE_GROUP_B],
+                &m_OBIS[ValueGroup::VALUE_GROUP_C],
+                &m_OBIS[ValueGroup::VALUE_GROUP_D],
+                &m_OBIS[ValueGroup::VALUE_GROUP_E],
+                &m_OBIS[ValueGroup::VALUE_GROUP_F]) == COSEMValueGroupElements;
+        if (!RetVal)
+        {
+            std::memset(m_OBIS, '\0', sizeof(m_OBIS));
+        }
+        return RetVal;
+    }
+
     std::string COSEMObjectInstanceID::ToString() const
     {
         char Buffer[30];

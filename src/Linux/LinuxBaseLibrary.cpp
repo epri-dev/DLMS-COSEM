@@ -3,7 +3,8 @@
 
 namespace EPRI
 {
-	LinuxBaseLibrary::LinuxBaseLibrary()
+	LinuxBaseLibrary::LinuxBaseLibrary() :
+        m_Core(m_IO), m_Debug(m_IO)
 	{
 		SetBase(this);
 	}
@@ -39,5 +40,10 @@ namespace EPRI
 	{
 		return &m_Debug;
 	}
+    
+    bool LinuxBaseLibrary::Process()
+    {
+        return m_IO.run();
+    }
 	
 }

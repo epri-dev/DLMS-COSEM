@@ -70,6 +70,7 @@
     <ClCompile Include="APDU\ASNType.cpp" />
     <ClCompile Include="APDU\GET-Request.cpp" />
     <ClCompile Include="APDU\GET-Response.cpp" />
+    <ClCompile Include="COSEMEngine.cpp" />
     <ClCompile Include="DLMS-COSEM.cpp" />
     <ClCompile Include="hdlc\HDLCAddress.cpp" />
     <ClCompile Include="hdlc\HDLCClient.cpp" />
@@ -109,7 +110,9 @@
     <ClInclude Include="include\COSEM.h" />
     <ClInclude Include="include\COSEMAddress.h" />
     <ClInclude Include="include\COSEMDevice.h" />
+    <ClInclude Include="include\COSEMEngine.h" />
     <ClInclude Include="include\COSEMObjectInstanceID.h" />
+    <ClInclude Include="include\COSEMSecurity.h" />
     <ClInclude Include="include\COSEMTypes.h" />
     <ClInclude Include="include\DLMSVector.h" />
     <ClInclude Include="include\IDebug.h" />

@@ -239,6 +239,7 @@ namespace EPRI
         //
         bool operator==(const std::vector<uint8_t>& rhs) const;
         bool operator==(const COSEMType& rhs) const;
+        COSEMType& operator=(const DLMSVector& rhs);
 
     protected:
         COSEMType(SchemaBaseType DT);

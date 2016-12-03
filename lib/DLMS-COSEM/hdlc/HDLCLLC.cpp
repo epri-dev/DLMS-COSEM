@@ -28,7 +28,7 @@ namespace EPRI
         m_pMAC->ClearStatistics(); 
     }
     	
-    HDLCRunResult HDLCLLC::Process()
+    Transport::ProcessResultType HDLCLLC::Process()
     {
         return m_pMAC->Process();
     }

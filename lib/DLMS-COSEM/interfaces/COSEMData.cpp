@@ -347,6 +347,12 @@ namespace EPRI
     {
         return rhs.m_Data == m_Data;
     }
+    
+    COSEMType& COSEMType::operator=(const DLMSVector& rhs)
+    {
+        m_Data = rhs;
+        return *this;
+    }
     //
     // Protected Methods
     //
@@ -707,7 +713,7 @@ namespace EPRI
         size_t     Length = 0;
         size_t     LengthBytes = 0;
         
-        if (ASNType::PeekLength(Value.m_Data, Offset, &Length, &LengthBytes))
+        if (ASNType::PeekLength(Value.m_Data, 0, &Length, &LengthBytes))
         {
             Offset += LengthBytes;
             LengthBytes += (Length / 8);

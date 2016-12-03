@@ -27,6 +27,16 @@ namespace EPRI
             uint16_t CardinalityMin = 0, 
             uint16_t CardinalityMax = std::numeric_limits<uint16_t>::max());
         virtual ~ICOSEMInterface();
+        
+        enum InterfaceProperties : uint8_t
+        {
+            CLASS_ID,
+            VERSION,
+            CARDINALITY_MIN,
+            CARDINALITY_MAX
+        };
+        
+        virtual uint16_t GetPropertyValue(InterfaceProperties Property) const;
             
         enum Attributes : ObjectAttributeIdType
         {

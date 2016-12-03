@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <iomanip>
+#include <asio.hpp>
 
 #include "LinuxBaseLibrary.h"
 #include "LinuxCOSEMServer.h"
@@ -15,13 +16,328 @@
 
 using namespace std;
 using namespace EPRI;
+using namespace asio;
+
+class AppBase
+{
+public:
+    typedef std::function<void(const std::string&)> ReadLineFunction;
+
+    AppBase(LinuxBaseLibrary& BL) : 
+        m_Base(BL), m_Input(BL.get_io_service(), ::dup(STDIN_FILENO)), 
+        m_Output(BL.get_io_service(), ::dup(STDOUT_FILENO))
+    {
+    }
+    
+    virtual void Run()
+    {
+        m_Base.Process();
+    }
+    
+    virtual void PrintLine(const std::string& Line)
+    {
+        asio::write(m_Output, asio::buffer(Line));
+    }
+    
+    virtual void ReadLine(ReadLineFunction Handler)
+    {
+        asio::async_read_until(m_Input,
+            m_InputBuffer,
+            '\n',
+            std::bind(&AppBase::ReadLine_Handler,
+                      this,
+                      std::placeholders::_1,
+                      std::placeholders::_2,
+                      Handler));
+        
+    }
+    
+    virtual std::string GetLine()
+    {
+        asio::read_until(m_Input, m_InputBuffer, '\n');
+        return ConsumeStream();
+    }
+    
+protected:
+    void ReadLine_Handler(const asio::error_code& Error, size_t BytesTransferred, ReadLineFunction Handler)
+    {
+        if (!Error)
+        {
+            Handler(ConsumeStream());
+        }
+    }
+    
+    std::string ConsumeStream()
+    {
+        std::istream Stream(&m_InputBuffer);
+        std::string  RetVal;
+        std::getline(Stream, RetVal);
+        return RetVal;
+    }
+
+    int GetNumericInput(const std::string& PromptText, int Default)
+    {
+        std::string RetVal;
+        do
+        {
+            PrintLine(PromptText + ": ");
+            RetVal = GetLine();
+            try
+            {
+                if (RetVal.length())
+                    return std::stoi(RetVal, nullptr, 0);	
+                else 
+                    return Default;
+            }
+            catch (const std::invalid_argument&)
+            {
+                PrintLine("Input must be numeric!\n\n");
+            }
+            catch (const std::out_of_range&)
+            {
+                PrintLine("Input is too large!\n\n");
+            }
+        
+        } while (true);
+    }
+
+    std::string GetStringInput(const std::string& PromptText, const std::string& Default)
+    {
+        std::string RetVal;
+        PrintLine(PromptText + ": ");
+        RetVal = GetLine();
+        if (RetVal.empty())
+            RetVal = Default;
+        return RetVal;
+    }
+    
+    LinuxBaseLibrary&           m_Base;
+    posix::stream_descriptor    m_Input;
+    asio::streambuf             m_InputBuffer;
+    posix::stream_descriptor    m_Output;
+    
+};
+
+class LinuxClientEngine : public COSEMClientEngine
+{
+public:
+    LinuxClientEngine() = delete;
+    LinuxClientEngine(const Options& Opt, Transport * pXPort)
+        : COSEMClientEngine(Opt, pXPort)
+    {
+    }
+    virtual ~LinuxClientEngine()
+    {
+    }
+    
+    virtual void OnOpenConfirmation(COSEMAddressType ServerAddress)
+    {
+        Base()->GetDebug()->TRACE("\n\nAssociated with Server %d...\n\n",
+            ServerAddress);
+    }
+
+    virtual void OnGetConfirmation(GetToken Token,
+                                   const DLMSVector& Data)
+    {
+        Base()->GetDebug()->TRACE("\n\nGet Confirmation for Token %d...\n\n", Token);
+        
+        IData     SerialNumbers;
+        DLMSValue Value;
+        
+        SerialNumbers.value = Data;
+            
+        if (COSEMType::VALUE_RETRIEVED == SerialNumbers.value.GetNextValue(&Value))
+        {
+            Base()->GetDebug()->TRACE("%s\n", DLMSValueGet<VISIBLE_STRING_CType>(Value).c_str());
+        }
+        
+        Base()->GetDebug()->TRACE_VECTOR("GET", Data);
+    }
+
+};
+
+class ClientApp : public AppBase
+{
+public:
+    ClientApp(LinuxBaseLibrary& BL)
+        : AppBase(BL)
+    {
+        m_Base.get_io_service().post(std::bind(&ClientApp::ClientMenu, this));
+    }
+
+protected:
+    void ClientMenu()
+    {
+        PrintLine("\nClient Menu:\n\n");
+        PrintLine("\t0 - Exit Application\n");
+        PrintLine("\t1 - TCP Connect\n");
+        PrintLine("\t2 - COSEM Open\n");
+        PrintLine("\t3 - COSEM Get\n");
+        PrintLine("\t4 - COSEM Close\n\n");
+        PrintLine("Select: ");
+        ReadLine(std::bind(&ClientApp::ClientMenu_Handler, this, std::placeholders::_1));
+    }
+    
+    void ClientMenu_Handler(const std::string& RetVal)
+    {
+        if (RetVal == "0")
+        {
+            exit(0);
+        }
+        else if (RetVal == "1")
+        {
+            int         SourceAddress = GetNumericInput("Client Address (Default: 1)", 1);
+            std::string TCPAddress = GetStringInput("Destination TCP Address (Default: localhost)", "localhost");
+    
+            m_pClientEngine = new LinuxClientEngine(COSEMClientEngine::Options(SourceAddress), 
+                new TCPWrapper((m_pSocket = Base()->GetCore()->GetIP()->CreateSocket(LinuxIP::Options(LinuxIP::Options::MODE_CLIENT)))));
+            if (SUCCESSFUL != m_pSocket->Open(TCPAddress.c_str()))
+            {
+                PrintLine("Failed to initiate connect\n");
+            }
+        }
+        else if (RetVal == "2")
+        {
+            if (m_pSocket->IsConnected())
+            {
+                int                  DestinationAddress = GetNumericInput("Server Address (Default: 1)", 1);
+                COSEM::SecurityLevel Security = (COSEM::SecurityLevel)
+                    GetNumericInput("Security Level [0 - None, 1 - Low, 2 - High] (Default: 0)", COSEM::SECURITY_NONE);
+                std::string          Password;
+                if (COSEM::SECURITY_LOW_LEVEL == Security)
+                {
+                    Password = GetStringInput("Password", "");
+                }
+                m_pClientEngine->Open(DestinationAddress, { Security, Password });
+            }
+            else
+            {
+                PrintLine("TCP Connection Not Established Yet!\n");
+            }
+        }
+        else if (RetVal == "3")
+        {
+            if (m_pSocket->IsConnected() && m_pClientEngine->IsOpen())
+            {
+                Cosem_Attribute_Descriptor Descriptor;
+                
+                Descriptor.class_id = (ClassIDType) GetNumericInput("Class ID (Default: 1)", CLSID_IData);
+                Descriptor.attribute_id = (ObjectAttributeIdType) GetNumericInput("Attribute (Default: 2)", 2);
+                if (Descriptor.instance_id.Parse(GetStringInput("OBIS Code (Default: 0-0:96.1.0*255)", "0-0:96.1.0*255")))
+                {
+                    if (m_pClientEngine->Get(Descriptor,
+                        &m_GetToken))
+                    {
+                    }
+                }
+                else
+                {
+                    PrintLine("Malformed OBIS Code!\n");
+                }
+            }
+            else
+            {
+                PrintLine("Not Connected!\n");
+            }
+            
+        }
+        else if (RetVal == "4")
+        {
+            if (m_pClientEngine->Close())
+            {
+                PrintLine("COSEM Connection Closed\n");
+            }
+        }
+        m_Base.get_io_service().post(std::bind(&ClientApp::ClientMenu, this));
+    }
+    
+    LinuxClientEngine *         m_pClientEngine = nullptr;
+    ISocket *                   m_pSocket = nullptr;
+    COSEMClientEngine::GetToken m_GetToken;
+   
+};
+
+class ServerApp : public AppBase
+{
+public:
+    ServerApp(LinuxBaseLibrary& BL) : 
+        AppBase(BL)
+    {
+        m_Base.get_io_service().post(std::bind(&ServerApp::ServerMenu, this));
+    }
+
+protected:
+    void ServerMenu()
+    {
+        PrintLine("\nServer Menu:\n\n");
+        PrintLine("\t0 - Exit Application\n");
+        PrintLine("\t1 - TCP Server\n\n");
+        PrintLine("Select: ");
+        ReadLine(std::bind(&ServerApp::ServerMenu_Handler, this, std::placeholders::_1));
+    }
+    
+    void ServerMenu_Handler(const std::string& RetVal)
+    {
+        if (RetVal == "0")
+        {
+            exit(0);
+        }
+        else if (RetVal == "1")
+        {
+            ISocket *   pSocket;
+   
+            PrintLine("\nTCP Server Mode - Listening on Port 4059\n");
+            m_pServerEngine = new LinuxCOSEMServerEngine(COSEMServerEngine::Options(),
+                new TCPWrapper((pSocket = Base()->GetCore()->GetIP()->CreateSocket(LinuxIP::Options()))));
+            if (SUCCESSFUL != pSocket->Open())
+            {
+                PrintLine("Failed to initiate listen\n");
+            }
+        }
+        m_Base.get_io_service().post(std::bind(&ServerApp::ServerMenu, this));
+    }
+    
+    LinuxCOSEMServerEngine * m_pServerEngine = nullptr;
+   
+};
 
 int main(int argc, char *argv[])
 {
+    int                  opt;
+    bool                 Server = false;
+    LinuxBaseLibrary     bl;
+    
+    while ((opt =:: getopt(argc, argv, "S")) != -1)
+    {
+        switch (opt)
+        {
+        case 'S':
+            Server = true;
+            break;
+        default:
+            break;
+        }
+    }
+    
+    std::cout << "EPRI DLMS/COSEM " << (Server ? "Server" : "Client") << "Test Harness\n";
+
+    if (Server)
+    {
+        ServerApp App(bl);
+        App.Run();
+       
+    }
+    else
+    {
+        ClientApp App(bl);
+        App.Run();
+    }
+        
+#if 0
 // -s 1 -d 1 -C /dev/ttyUSB0 -W -p 33333333
     LinuxBaseLibrary     bl;
     ISerial *		     pSerial = bl.GetCore()->GetSerial();
-    ISocket *		     pSocket = bl.GetCore()->GetSocket();
+    ISocket *		     pSocket;
     int                  opt;
     bool                 StartWithIEC = false;
     bool                 Server = false;
@@ -72,297 +388,129 @@ int main(int argc, char *argv[])
         }
     }
     
-    if (IsTCP)
+    if (Server &&
+        nullptr != pSourceAddress)
     {
-        if (Server)
-        {
-            LinuxCOSEMServer            APServer;
-            TCPWrapper                  Wrapper(pSocket);   
-
-            APServer.RegisterTransport(&Wrapper);
-
-            std::cout << "Operating as a Server... Waiting...\n";
-            if (SUCCESSFUL == pSocket->Accept())
-            {
-                std::cout << "Accepted connection...\n";
-                while (true)
-                {
-                    Wrapper.Process();        
-                }
-            }
-        }  
-        else
-        {
-            enum States
-            {
-                ST_OPEN,
-                ST_OPEN_WAIT,
-                ST_OPENED,
-                ST_GET_WAIT,
-                ST_GET_DONE
-            }                           CurrentState = ST_OPEN;
-
-            uint8_t                     SourceAddress = uint8_t(strtol(pSourceAddress, nullptr, 16));
-            uint8_t                     DestinationAddress = uint8_t(strtol(pDestinationAddress, nullptr, 16));
-            COSEMClient                 APClient(SourceAddress);
-            TCPWrapper                  Wrapper(pSocket);
-            COSEMClient::CallbackFunction 
-                                       OpenConfirm = [&](const BaseCallbackParameter& _) -> bool
-            {
-                std::cout << "Association Established\n";
-                return true;
-            };
-            COSEMClient::CallbackFunction 
-                                       GetConfirm = [&](const BaseCallbackParameter& Param) -> bool
-            {
-                std::cout << "Data Retrieved\n";
-                std::cout << dynamic_cast<const APPGetConfirmOrResponse&>(Param).m_Data.ToString() << std::endl;
-                CurrentState = ST_GET_DONE;
-                return true;
-            };
+        Transport *              pTransport = nullptr;
+        LinuxCOSEMServerEngine * pServerEngine = nullptr;
         
-            std::cout << "Operating as a Client (0x" << hex << uint16_t(SourceAddress) << ")... Opening " << pCOMPortName << "\n";
-            if (SUCCESSFUL != pSocket->Connect(pCOMPortName))
+        if (IsTCP)
+        {
+            std::cout << "TCP Server Mode\n";
+            pServerEngine = new LinuxCOSEMServerEngine(COSEMServerEngine::Options(),
+                                new TCPWrapper((pSocket = Base()->GetCore()->GetIP()->CreateSocket(LinuxIP::Options()))));
+            if (SUCCESSFUL != pSocket->Open())
             {
-                std::cout << "Failed to connect\n";
+                std::cout << "Failed to initiate listen\n";
                 exit(-1);
             }
             
-            std::cout << "Connecting to Server (0x" << std::hex << uint16_t(DestinationAddress) << ")\n";
-            std::string Command;
-            bool bProcessed = false;
-            
-            APClient.RegisterTransport(&Wrapper);
-            APClient.RegisterOpenConfirm(OpenConfirm);
-            APClient.RegisterGetConfirm(GetConfirm);
-            
-            bool NeedToProcess = true;
-            while (true)
-            {
-                if (NeedToProcess)
-                {
-                    Wrapper.Process();
-                }
-                switch (CurrentState)
-                {
-                case ST_OPEN:
-                    APClient.OpenRequest(APPOpenRequestOrIndication(SourceAddress, DestinationAddress, 
-                                                                    Security, pPassword == nullptr ? "" : pPassword));
-                    CurrentState = ST_OPEN_WAIT;
-                    break;
-                case ST_OPEN_WAIT:
-                    if (APClient.IsOpen())
-                        CurrentState = ST_OPENED;
-                    break;
-                case ST_OPENED:
-                    APClient.GetRequest(APPGetRequestOrIndication(SourceAddress,
-                        DestinationAddress, 5, 
-                        COSEMPriority::COSEM_PRIORITY_NORMAL,
-                        COSEMServiceClass::COSEM_SERVICE_CONFIRMED,
-                        { 1, { 0, 0, 96, 1, 0, 255 }, 2 }));
-                    CurrentState = ST_GET_WAIT;
-                    break;
-                case ST_GET_WAIT:
-                    break;
-                case ST_GET_DONE:
-                    NeedToProcess = false;
-                    break;
-                }
-            }
-            
         }
-    }
-    else
-    {
-        if (nullptr != pCOMPortName &&
-            nullptr != pSourceAddress &&
-            nullptr != pDestinationAddress)
+        else
         {
-            enum States
-            {
-                ST_OPEN,
-                ST_OPEN_WAIT,
-                ST_OPENED,
-                ST_GET_WAIT,
-                ST_GET_DONE
-            }                           CurrentState = ST_OPEN;
-
-            uint8_t                     SourceAddress = uint8_t(strtol(pSourceAddress, nullptr, 16));
-            uint8_t                     DestinationAddress = uint8_t(strtol(pDestinationAddress, nullptr, 16));
             ISerial::Options::BaudRate  BR = LinuxSerial::Options::BAUD_9600;
-            COSEMClient                 APClient(SourceAddress);
-            HDLCClientLLC               DLClient(HDLCAddress(SourceAddress), 
-                pSerial,
-                HDLCOptions({ StartWithIEC, 3, 500 }));
-            SerialWrapper               DLWrapper(pSerial);
-            COSEMClient::CallbackFunction 
-                                       OpenConfirm = [&](const BaseCallbackParameter& _) -> bool
-            {
-                std::cout << "Association Established\n";
-                return true;
-            };
-            COSEMClient::CallbackFunction 
-                                       GetConfirm = [&](const BaseCallbackParameter& Param) -> bool
-            {
-                std::cout << "Data Retrieved\n";
-                std::cout << dynamic_cast<const APPGetConfirmOrResponse&>(Param).m_Data.ToString() << std::endl;
-                CurrentState = ST_GET_DONE;
-                return true;
-            };
-        
-            std::cout << "Operating as a Client (0x" << hex << uint16_t(SourceAddress) << ")... Opening " << pCOMPortName << "\n";
-            if (pSerial->Open(pCOMPortName) != SUCCESS ||
-                pSerial->SetOptions(LinuxSerial::Options(BR)) != SUCCESS)
+
+            if (pSerial->SetOptions(LinuxSerial::Options(BR)) != SUCCESS ||
+                pSerial->Open(pCOMPortName) != SUCCESS)
             {
                 std::cerr << "Error opening port " << pCOMPortName << "\n";
                 exit(-1);
             }
 
-            std::cout << "Connecting to Server (0x" << std::hex << uint16_t(DestinationAddress) << ")\n";
             if (IsSerialWrapper)
             {
-                std::string Command;
-                bool bProcessed = false;
-            
-                APClient.RegisterTransport(&DLWrapper);
-                APClient.RegisterOpenConfirm(OpenConfirm);
-                APClient.RegisterGetConfirm(GetConfirm);
-            
-                bool NeedToProcess = true;
-                while (true)
-                {
-                    if (NeedToProcess)
-                    {
-                        DLWrapper.Process();
-                    }
-                    switch (CurrentState)
-                    {
-                    case ST_OPEN:
-                        APClient.OpenRequest(APPOpenRequestOrIndication(SourceAddress , DestinationAddress, 
-                                                                        Security, pPassword == nullptr ? "" : pPassword));
-                        CurrentState = ST_OPEN_WAIT;
-                        break;
-                    case ST_OPEN_WAIT:
-                        if (APClient.IsOpen())
-                            CurrentState = ST_OPENED;
-                        break;
-                    case ST_OPENED:
-                        APClient.GetRequest(APPGetRequestOrIndication(5, 
-                            COSEMPriority::COSEM_PRIORITY_NORMAL,
-                            COSEMServiceClass::COSEM_SERVICE_CONFIRMED,
-                            { 8, { 0, 0, 1, 0, 0, 255 }, 2 }));
-                        CurrentState = ST_GET_WAIT;
-                        break;
-                    case ST_GET_WAIT:
-                        break;
-                    case ST_GET_DONE:
-                        NeedToProcess = false;
-                        break;
-                    }
-                }
+                pTransport = new SerialWrapper(pSerial);
             }
             else
             {
-                bool                        bConfirmation = false;
-                HDLCClientLLC::CallbackFunction 
-                                            ConnectConfirm = [&](const BaseCallbackParameter& _) -> bool
-                {
-                    std::cout << "Datalink connection established!\n";
-                    bConfirmation = true;
-                    return true;
-                };
-            
-                DLClient.RegisterConnectConfirm(ConnectConfirm);
-                APClient.RegisterTransport(&DLClient);
+                //
+                // TODO - Update HDLCServerLLC to support multiple SAP
+                //
+                uint8_t SourceAddress = uint8_t(strtol(pSourceAddress, nullptr, 16));
+                pTransport = new HDLCServerLLC(HDLCAddress(SourceAddress), pSerial,
+                    HDLCOptions({ StartWithIEC, 3, 500 }));
+                
+            }            
+        }
 
-                DLClient.ConnectRequest(DLConnectRequestOrIndication(HDLCAddress(DestinationAddress)));
-                while (DLClient.Process() == RUN_WAIT)
-                {
-                    if (bConfirmation)
-                    {
-                        bConfirmation = false;
-                        //
-                        // Now we can COSEM open!
-                        //
-                        APClient.OpenRequest(APPOpenRequestOrIndication(SourceAddress, DestinationAddress));
-                    }
-                }    
+        if (pServerEngine)
+        {
+            while (Base()->Process()) 
+            {
+                if (!pServerEngine->Process())
+                    break;
             }
         }
+
     }
-#if 0
-	if (argc == 1)
-	{
-    	bool bConfirmation = false;
-    	HDLCClientLLC::CallbackFunction ConnectConfirm = [&](const BaseCallbackParameter& _) -> HDLCErrorCode
-    	{
-        	printf("CLIENT: Connection established...\n");
-        	bConfirmation = true;
-        	return SUCCESS;
-    	};
-
-    	pSerial->Open("/tmp/ttyS10");
-		pSerial->SetOptions(LinuxSerial::Options(LinuxSerial::Options::BAUD_9600));
-    	
-    	HDLCClientLLC Client(HDLCAddress(0x02), pSerial, HDLCOptions({ 3 }));
-    	Client.RegisterConnectConfirm(ConnectConfirm);
-
-    	printf("CLIENT: Connecting...\n");
-    	Client.ConnectRequest(DLConnectRequestOrIndication(HDLCAddress(0x01)));
-    	while (Client.Process() == RUN_WAIT)
-    	{
-        	if (bConfirmation)
-        	{
-            	printf("CLIENT: Sending data...\n");
-            	const uint8_t SAMPLE_DATA[] = "COME HERE WATSON, I NEED YOU!";
-            	std::vector<uint8_t> DATA(SAMPLE_DATA,
-                	SAMPLE_DATA + sizeof(SAMPLE_DATA));
-            	Client.DataRequest(DLDataRequestParameter(HDLCAddress(0x01), HDLCControl::INFO, DATA));
-            	bConfirmation = false;
+    else if (nullptr != pCOMPortName &&
+             nullptr != pSourceAddress &&
+             nullptr != pDestinationAddress)
+    {
+        uint8_t             SourceAddress = uint8_t(strtol(pSourceAddress, nullptr, 16));
+        uint8_t             DestinationAddress = uint8_t(strtol(pDestinationAddress, nullptr, 16));
+        Transport *         pTransport = nullptr;
+        COSEMClientEngine * pClientEngine = nullptr;
+            
+        if (IsTCP)
+        {
+            pClientEngine = new COSEMClientEngine(COSEMClientEngine::Options(SourceAddress), 
+                new TCPWrapper((pSocket = Base()->GetCore()->GetIP()->CreateSocket(LinuxIP::Options(LinuxIP::Options::MODE_CLIENT)))));
+            if (SUCCESSFUL != pSocket->Open(pCOMPortName))
+            {
+                std::cout << "Failed to initiate connect\n";
+                exit(-1);
             }
-    	}
-	}
-	else
-	{
-    	bool bIndication = false;
-    	HDLCServerLLC::CallbackFunction ConnectIndication = [&](const BaseCallbackParameter& _) -> HDLCErrorCode
-    	{
-        	printf("SERVER: Connect indication...\n");
-        	bIndication = true;
-        	return SUCCESS;
-    	};
-    	HDLCServerLLC::CallbackFunction DataIndication = [&](const BaseCallbackParameter& Param) -> HDLCErrorCode
-    	{
-        	const DLDataRequestParameter& Data = dynamic_cast<const DLDataRequestParameter&>(Param);
-        	printf("SERVER: Data indication...\n");
-        	std::for_each(Data.Data.begin(),
-            	Data.Data.end(), 
-            	[](uint8_t B)
-            	{
-                	printf("%02X [%c] ", B, B);
-            	});
-        	printf("\n");
-        	return SUCCESS;
-    	};
+        }
+        else
+        {
+            ISerial::Options::BaudRate  BR = LinuxSerial::Options::BAUD_9600;
 
+            if (pSerial->SetOptions(LinuxSerial::Options(BR)) != SUCCESS ||
+                pSerial->Open(pCOMPortName) != SUCCESS)
+            {
+                std::cerr << "Error opening port " << pCOMPortName << "\n";
+                exit(-1);
+            }
 
-    	pSerial->Open("/tmp/ttyS11");
-    	pSerial->SetOptions(LinuxSerial::Options(LinuxSerial::Options::BAUD_9600));
-   
-    	HDLCServerLLC Server(HDLCAddress(0x01), pSerial, HDLCOptions({ 3 }));
-    	Server.RegisterConnectIndication(ConnectIndication);
-    	Server.RegisterDataIndication(DataIndication);
-    	printf("SERVER: Waiting for connect...\n");
-    	while (Server.Process() == RUN_WAIT)
-    	{
-        	if (bIndication)
-        	{
-            	printf("SERVER: Approving connect...\n");
-            	Server.ConnectResponse(DLConnectConfirmOrResponse(HDLCAddress(0x02)));
-            	bIndication = false;
-        	}
-    	}
-	}
+            if (IsSerialWrapper)
+            {
+                pTransport = new SerialWrapper(pSerial);
+            }
+            else
+            {
+                pTransport = new HDLCClientLLC(HDLCAddress(SourceAddress), pSerial,
+                                               HDLCOptions({ StartWithIEC, 3, 500 }));
+            }
+                
+        }
+
+        if (pClientEngine)
+        {
+            while (Base()->Process()) 
+            {
+                if (pSocket->IsConnected())
+                {
+                    if (pClientEngine->Open(DestinationAddress, { Security, pPassword }))
+                    {
+                        IData     SerialNumbers;
+                        DLMSValue Value;
+                        if (pClientEngine->Get({ 0, 0, 96, 1, 0, 255 },
+                                               &SerialNumbers.value) &&
+                            COSEMType::VALUE_RETRIEVED == SerialNumbers.value.GetNextValue(&Value))
+                        {
+                            std::cout << DLMSValueGet<VISIBLE_STRING_CType>(Value) << std::endl;
+                        }
+            
+                        pClientEngine->Close();
+                    }
+                }
+                
+                if (!pClientEngine->Process())
+                    break; 
+            }
+
+        }
+    }
 #endif
-
 }

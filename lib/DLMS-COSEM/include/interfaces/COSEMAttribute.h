@@ -14,9 +14,12 @@ namespace EPRI
 #define COSEM_END_ATTRIBUTES
 
     class SelectiveAccess;
+    class ICOSEMInterface;
     
     class ICOSEMAttribute : public COSEMType
     {
+        friend class ICOSEMInterface;
+        
     public:
         ICOSEMAttribute() = delete;
         ICOSEMAttribute(ObjectAttributeIdType Attr, 
@@ -33,6 +36,15 @@ namespace EPRI
             
         const ObjectAttributeIdType AttributeID;
         const ShortNameOffsetType   ShortNameOffset;
+        
+        inline ICOSEMInterface * GetInterface() const
+        {
+            return m_pInterface;
+        }
+        
+    protected:
+        ICOSEMInterface * m_pInterface = nullptr;
+        
     };
     
     template <ObjectAttributeIdType Attr, SchemaType DT, ShortNameOffsetType SNO>
@@ -46,6 +58,13 @@ namespace EPRI
             virtual ~COSEMAttribute()
             {
             }
+            
+            ICOSEMAttribute& operator=(const DLMSVector& rhs)
+            {
+                *dynamic_cast<COSEMType *>(this) = rhs;
+                return *this;
+            }
+
         };
 
 }

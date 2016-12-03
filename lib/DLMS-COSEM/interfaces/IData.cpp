@@ -24,7 +24,7 @@ namespace EPRI
     //
     // IData_0
     //
-    IData_0::IData_0() : ICOSEMInterface(1, 0)
+    IData_0::IData_0() : ICOSEMInterface(CLSID_IData, 0)
     {
         COSEM_BEGIN_ATTRIBUTES
             COSEM_ATTRIBUTE(value)

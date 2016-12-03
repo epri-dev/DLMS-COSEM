@@ -6,19 +6,24 @@
 
 namespace EPRI
 {
+    typedef uint16_t ClassIDType;
+    typedef int8_t   ObjectAttributeIdType;
+    typedef uint8_t  InvokeIdAndPriorityType;
+    typedef uint8_t  ShortNameOffsetType;
+   
     typedef struct __Cosem_Attribute_Descriptor
     {
-        uint16_t               class_id;
+        ClassIDType            class_id;
         COSEMObjectInstanceID  instance_id;
-        int8_t                 attribute_id;
+        ObjectAttributeIdType  attribute_id;
     }               Cosem_Attribute_Descriptor;
-    typedef uint8_t InvokeIdAndPriorityType;
     
     enum COSEMPriority : uint8_t
     {
         COSEM_PRIORITY_NORMAL = 0,
         COSEM_PRIORITY_HIGH   = 0b10000000
     };
+    
     enum COSEMServiceClass : uint8_t
     {
         COSEM_SERVICE_UNCONFIRMED = 0,
@@ -32,6 +37,4 @@ namespace EPRI
 #define COSEM_GET_SERVICE_CLASS(VAL)\
     COSEMPriority(VAL & 0b01000000)
         
-    typedef int8_t  ObjectAttributeIdType;
-    typedef uint8_t ShortNameOffsetType;
 }

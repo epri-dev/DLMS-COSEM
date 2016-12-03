@@ -12,7 +12,7 @@ namespace EPRI
     {
     }
     	
-    bool SerialWrapper::Process()
+    Transport::ProcessResultType SerialWrapper::Process()
     {
         bool RetVal = true;
         if (!m_bConnectionFired)

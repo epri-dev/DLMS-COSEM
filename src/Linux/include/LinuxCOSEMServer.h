@@ -2,6 +2,7 @@
 
 #include "COSEM.h"
 #include "COSEMDevice.h"
+#include "COSEMEngine.h"
 #include "interfaces/IData.h"
 #include "interfaces/IClock.h"
 
@@ -42,14 +43,25 @@ namespace EPRI
 
     };
     
-    class LinuxCOSEMServer : public COSEMDevice
+    class LinuxCOSEMDevice : public COSEMDevice
     {
     public:
-        LinuxCOSEMServer();
-        virtual ~LinuxCOSEMServer();
+        LinuxCOSEMDevice();
+        virtual ~LinuxCOSEMDevice();
         
     protected:
         LinuxManagementDevice m_Management;
         
+    };
+    
+    class LinuxCOSEMServerEngine : public COSEMServerEngine
+    {
+    public:
+        LinuxCOSEMServerEngine() = delete;
+        LinuxCOSEMServerEngine(const Options& Opt, Transport * pXPort);
+        virtual ~LinuxCOSEMServerEngine();
+        
+    protected:
+        LinuxCOSEMDevice    m_Device;
     };
 }

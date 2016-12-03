@@ -16,7 +16,7 @@ namespace EPRI
     	HDLCLLC(HDLCMAC * pMAC);
     	virtual ~HDLCLLC();
     	
-    	virtual HDLCRunResult Process();
+    	virtual ProcessResultType Process();
 
     	HDLCAddress MyAddress() const;
     	const HDLCStatistics& Statistics() const;

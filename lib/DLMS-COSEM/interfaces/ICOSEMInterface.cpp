@@ -23,8 +23,27 @@ namespace EPRI
     {
     }
 
+    uint16_t ICOSEMInterface::GetPropertyValue(InterfaceProperties Property) const
+    {
+        switch (Property)
+        {
+        case CLASS_ID:
+            return m_class_id;
+        case VERSION:
+            return m_version;
+        case CARDINALITY_MIN:
+            return m_CardinalityMin;
+        case CARDINALITY_MAX :
+            return m_CardinalityMax;
+        default:
+            break;
+        }
+        return 0;
+    }
+
     void ICOSEMInterface::RegisterAttribute(ICOSEMAttribute * pAttribute)
     {
+        pAttribute->m_pInterface = this;
         m_Attributes[pAttribute->AttributeID] = pAttribute;
     }
             

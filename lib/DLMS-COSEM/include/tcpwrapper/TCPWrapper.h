@@ -12,15 +12,27 @@ namespace EPRI
         TCPWrapper() = delete;
         TCPWrapper(ISocket * pSocket);
         virtual ~TCPWrapper();
-    	
-        virtual bool Process();
+    	//
+        // Transport
+        // 
+        virtual ProcessResultType Process();
 	
     protected:
         bool Send(const DLMSVector& Data);
         bool Receive(DLMSVector * pData);
+        
+        void Socket_Connect(ERROR_TYPE Error);
+        void Socket_Receive(ERROR_TYPE Error, size_t BytesReceived);
+        
+        bool ArmAsyncRead(size_t MinimumSize = Wrapper::HEADER_SIZE);
  
+        enum TCPReadState
+        {
+            HEADER_WAIT,
+            BODY_WAIT
+        }               m_ReadState = HEADER_WAIT;
         ISocket *	    m_pSocket = nullptr;
-        bool            m_bConnectionFired = false;
+        DLMSVector      m_RXVector;
     };
 
 }

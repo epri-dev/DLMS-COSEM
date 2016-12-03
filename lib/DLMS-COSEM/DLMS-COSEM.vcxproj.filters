@@ -112,6 +112,9 @@
     <ClCompile Include="COSEMDevice.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="COSEMEngine.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ERROR_TYPE.h">
@@ -274,6 +277,12 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="include\COSEMDevice.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\COSEMEngine.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\COSEMSecurity.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

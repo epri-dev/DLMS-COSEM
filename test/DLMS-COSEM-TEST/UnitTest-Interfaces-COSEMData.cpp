@@ -132,7 +132,7 @@ TEST(COSEMData, CHOICE)
     Test1.GetBytes(&Vector1);
     ASSERT_EQ(Vector1, DLMSVector({ 0x04, 0x08, 0x2A }));
     Test1.Rewind();
-    ASSERT_EQ(COSEMType::VALUE_RETRIEVED, Test1.GetNextValue(&Value1));
+    ASSERT_EQ(COSEMType::VALUE_RETRIEVED, Test1.GetNextValue(&Value1)); 
     ASSERT_FALSE(IsSequence(Value1));
     ASSERT_EQ(42, DLMSValueGet<BIT_STRING_CType>(Value1).to_ulong());
 

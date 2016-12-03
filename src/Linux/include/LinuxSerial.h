@@ -2,6 +2,7 @@
 
 #include <asio.hpp>
 #include <memory>
+
 #include "ISerial.h"
 
 namespace EPRI
@@ -9,8 +10,9 @@ namespace EPRI
 	class LinuxSerial : public ISerial
 	{
 	public:
-		LinuxSerial();
-		virtual ~LinuxSerial();
+		LinuxSerial() = delete;
+    	LinuxSerial(asio::io_service& IO);
+    	virtual ~LinuxSerial();
 
 		virtual ERROR_TYPE Open(const char * PortName);
 		virtual Options GetOptions();
@@ -22,8 +24,10 @@ namespace EPRI
 		virtual bool IsConnected();
 		
 	private:
-		asio::io_service  m_IO;
+    	void SetPortOptions();
+    	
 		asio::serial_port m_Port;
+    	Options           m_Options;
 		
 	};
 	

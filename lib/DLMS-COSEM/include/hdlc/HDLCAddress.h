@@ -12,7 +12,6 @@ namespace EPRI
     class HDLCAddress
     {
     public:
-        const uint16_t INVALID_ADDRESS = 0xFFFF;
         enum ShortReservedAddress : uint8_t
         {
             SHORT_NO_STATION = ReservedAddresses::NO_STATION,

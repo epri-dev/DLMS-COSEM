@@ -35,7 +35,7 @@ error:
 	$(error Invalid configuration, please check your inputs)
 endif
 
-SOURCEFILES := APDU/AARE.cpp APDU/AARQ.cpp APDU/APDUConstants.cpp APDU/APDUFactory.cpp APDU/ASNType.cpp APDU/GET-Request.cpp APDU/GET-Response.cpp DLMS-COSEM.cpp hdlc/HDLCAddress.cpp hdlc/HDLCClient.cpp hdlc/HDLCHelpers.cpp hdlc/HDLCLLC.cpp hdlc/HDLCServer.cpp hdlc/HDLCStatistics.cpp hdlc/modcnt.cpp hdlc/packet.cpp hdlc/HDLCMAC.cpp COSEM.cpp COSEMServer.cpp DLMSVector.cpp COSEMObjectInstanceID.cpp COSEMDevice.cpp interfaces/COSEMData.cpp interfaces/IClock.cpp interfaces/ICOSEMInterface.cpp interfaces/IData.cpp LogicalDevice.cpp tcpwrapper/TCPWrapper.cpp Wrapper.cpp serialwrapper/SerialWrapper.cpp StateMachine.cpp COSEMClient.cpp
+SOURCEFILES := APDU/AARE.cpp APDU/AARQ.cpp APDU/APDUConstants.cpp APDU/APDUFactory.cpp APDU/ASNType.cpp APDU/GET-Request.cpp APDU/GET-Response.cpp COSEMEngine.cpp DLMS-COSEM.cpp hdlc/HDLCAddress.cpp hdlc/HDLCClient.cpp hdlc/HDLCHelpers.cpp hdlc/HDLCLLC.cpp hdlc/HDLCServer.cpp hdlc/HDLCStatistics.cpp hdlc/modcnt.cpp hdlc/packet.cpp hdlc/HDLCMAC.cpp COSEM.cpp COSEMServer.cpp DLMSVector.cpp COSEMObjectInstanceID.cpp COSEMDevice.cpp interfaces/COSEMData.cpp interfaces/IClock.cpp interfaces/ICOSEMInterface.cpp interfaces/IData.cpp LogicalDevice.cpp tcpwrapper/TCPWrapper.cpp Wrapper.cpp serialwrapper/SerialWrapper.cpp StateMachine.cpp COSEMClient.cpp
 EXTERNAL_LIBS := 
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 

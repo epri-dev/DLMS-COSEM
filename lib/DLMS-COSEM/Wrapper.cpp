@@ -54,5 +54,33 @@ namespace EPRI
         }
         return RetVal;
     }
+
+    ssize_t Wrapper::ParseMessageLength(const DLMSVector& Data)
+    {
+        try
+        {
+            size_t Offset = 0;
+            //
+            // PRECONDITIONS
+            //
+            if (Data.Size() < Wrapper::HEADER_SIZE)
+            {
+                return -1;
+            }
+            if (Data.Peek<uint16_t>(Offset) == CURRENT_VERSION)
+            {
+                Offset += sizeof(uint16_t);
+                Data.Peek<COSEMAddressType>(Offset);
+                Offset += sizeof(COSEMAddressType);
+                Data.Peek<COSEMAddressType>(Offset);
+                Offset += sizeof(COSEMAddressType);
+                return Data.Peek<uint16_t>(Offset);
+            }
+        }
+        catch (std::out_of_range&)
+        {
+        }
+        return -1;
+    }
 	
 } /* namespace EPRI */

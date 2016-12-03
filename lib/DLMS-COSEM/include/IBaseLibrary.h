@@ -22,6 +22,7 @@ namespace EPRI
 		virtual IScheduler * GetScheduler() = 0;
 		virtual ISynchronization * GetSynchronization() = 0;		
 		virtual IDebug * GetDebug() = 0;
+    	virtual bool Process() = 0;
 	};
     
     IBaseLibrary * Base();
