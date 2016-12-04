@@ -20,12 +20,14 @@ Open a console.
 Open another console for the Server.
 
 	cd [DLMS-COSEM Directory]/bin/src/Linux
-	./Linux SERVER
+	./Linux -S
 
 Open another console for the Client.
 
 	cd [DLMS-COSEM Directory]/bin/src/Linux
 	./Linux
+
+The Client and Server applications are menu-driven.  Start the server listening first, then TCP Connect, COSEM Open, COSEM Get, and COSEM Release.
 
 To run unit tests.
 
