@@ -65,18 +65,19 @@ namespace EPRI
         virtual bool Process();
         
         virtual bool Open(COSEMAddressType ServerAddress, const COSEMSecurityOptions& Security);
-        virtual void OnOpenConfirmation(COSEMAddressType ServerAddress);
+        virtual bool OnOpenConfirmation(COSEMAddressType ServerAddress);
         virtual bool IsOpen() const;
         virtual bool Get(const Cosem_Attribute_Descriptor& Descriptor,
                          GetToken * pToken);    
-        virtual void OnGetConfirmation(GetToken Token,
+        virtual bool OnGetConfirmation(GetToken Token,
                                        const DLMSVector& Data);
-        virtual bool Close();
-        
+        virtual bool Release();
+        virtual bool OnReleaseConfirmation();
         
     protected:
         bool Client_OpenConfirmation(const BaseCallbackParameter& Parameters);
         bool Client_GetConfirmation(const BaseCallbackParameter& Parameters);
+        bool Client_ReleaseConfirmation(const BaseCallbackParameter& Parameters);
         
         COSEMClient      m_Client;
         Options          m_Options;

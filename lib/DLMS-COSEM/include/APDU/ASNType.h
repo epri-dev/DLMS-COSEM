@@ -143,6 +143,9 @@ namespace EPRI
 #define ASN_INTEGER_LIST_TYPE(OPTIONS, ...)\
             { (EPRI::ASN::InternalDataType::INTEGER_LIST_T | (OPTIONS)), \
                     DLMSVariant(std::initializer_list<uint32_t>(__VA_ARGS__)) },
+#define ASN_FIXED_INTEGER_LIST_TYPE(OPTIONS, INTSIZE, ...)\
+            { (EPRI::ASN::InternalDataType::INTEGER_LIST_T | (OPTIONS) | (EPRI::ASN::SchemaBaseType(INTSIZE) << 16)), \
+                    DLMSVariant(std::initializer_list<uint32_t>(__VA_ARGS__)) },
 #define ASN_BOOLEAN_TYPE(OPTIONS)\
             { (EPRI::ASN::DataTypes::BOOLEAN | (OPTIONS)) },
 #define ASN_ENUM_TYPE(OPTIONS)\
@@ -207,7 +210,8 @@ namespace EPRI
             NO_VALUE_FOUND,
             SCHEMA_MISMATCH,
             INVALID_STREAM,
-            INVALID_CONDITION
+            INVALID_CONDITION,
+            VALUE_EMPTY
         };
         
         virtual GetNextResult GetNextValue(ASNType * pValue);

@@ -115,6 +115,12 @@
     <ClCompile Include="COSEMEngine.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="APDU\RLRE.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="APDU\RLRQ.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ERROR_TYPE.h">
@@ -283,6 +289,15 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="include\COSEMSecurity.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\APDU\RLRQ.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\APDU\RLRE.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\APDU\APDUDefs.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

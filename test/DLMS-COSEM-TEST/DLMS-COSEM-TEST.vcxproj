@@ -68,6 +68,8 @@
     <ClCompile Include="UnitTest-APDU-AARQ.cpp" />
     <ClCompile Include="UnitTest-APDU-GET-Request.cpp" />
     <ClCompile Include="UnitTest-APDU-GET-Response.cpp" />
+    <ClCompile Include="UnitTest-APDU-RLRE.cpp" />
+    <ClCompile Include="UnitTest-APDU-RLRQ.cpp" />
     <ClCompile Include="UnitTest-COSEM-Client.cpp" />
     <ClCompile Include="UnitTest-COSEMObjectInstanceID.cpp" />
     <ClCompile Include="UnitTest-DLMSVector.cpp" />

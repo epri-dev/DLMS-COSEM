@@ -1,10 +1,6 @@
 #include <cstring>
 
 #include "COSEM.h"
-#include "APDU/AARQ.h"
-#include "APDU/AARE.h"
-#include "APDU/GET-Request.h"
-#include "APDU/GET-Response.h"
 
 namespace EPRI
 {
@@ -65,6 +61,26 @@ namespace EPRI
         RegisterCallback(APPGetConfirmOrResponse::ID, Callback);
     }
     //
+    // COSEM-RELEASE Service
+    //
+    bool COSEMClient::ReleaseRequest(const APPReleaseRequestOrIndication& Parameters)
+    {
+        bool bAllowed = false;
+        BEGIN_TRANSITION_MAP
+            TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_IDLE, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATION_RELEASE_PENDING)
+        END_TRANSITION_MAP(bAllowed, new ReleaseRequestEventData(Parameters));
+        return bAllowed;
+    }
+    
+    void COSEMClient::RegisterReleaseConfirm(CallbackFunction Callback)
+    {
+        RegisterCallback(APPReleaseConfirmOrResponse::ID, Callback);
+    }
+    //
 	// State Machine Handlers
     //
     void COSEMClient::ST_Inactive_Handler(EventData * pData)
@@ -87,6 +103,30 @@ namespace EPRI
     
     void COSEMClient::ST_Association_Pending_Handler(EventData * pData)
     {
+        //
+        // Receive OPEN Response
+        //
+        OpenResponseEventData * pConnectResponse = dynamic_cast<OpenResponseEventData *>(pData);
+        if (pConnectResponse)
+        {
+            bool  RetVal = false;
+            if (FireCallback(APPOpenConfirmOrResponse::ID, pConnectResponse->Data, &RetVal) && RetVal)
+            {
+                // Denied by upper layers.  Go back to ST_IDLE.
+                //
+                InternalEvent(ST_ASSOCIATED);
+            }
+            else
+            {
+                // Denied by upper layers or catastrophic failure.  Go back to ST_IDLE.
+                //
+                InternalEvent(ST_IDLE);
+            }
+            return;            
+        }
+        //
+        // Transmit OPEN Request
+        //
         OpenRequestEventData * pEventData;
         if ((pEventData = dynamic_cast<OpenRequestEventData *>(pData)) != nullptr)
         {
@@ -134,57 +174,106 @@ namespace EPRI
     
     void COSEMClient::ST_Association_Release_Pending_Handler(EventData * pData)
     {
-    }
-    
-    void COSEMClient::ST_Associated_Handler(EventData * pData)
-    {
-        bool                    RetVal = false;
         //
-        // OPEN Response
+        // Transmit RELEASE Request
         //
-        OpenResponseEventData * pConnectResponse = dynamic_cast<OpenResponseEventData *>(pData);
-        if (pConnectResponse && (!FireCallback(APPOpenConfirmOrResponse::ID, pConnectResponse->Data, &RetVal) || !RetVal))
+        ReleaseRequestEventData * pRequestData;
+        if ((pRequestData = dynamic_cast<ReleaseRequestEventData *>(pData)) != nullptr)
         {
-            // Denied by upper layers.  Go back to ST_IDLE.
+            APPReleaseRequestOrIndication& Parameters = pRequestData->Data;
+            //
+            // We only need to send an RLRQ if the user asks for it, otherwise
+            // just disconnect and call it done.
+            //
+            if (Parameters.m_UseRLRQRLRE)
+            {
+                RLRQ Request;
+                
+                Transport * pTransport = GetTransport();
+                if (nullptr != pTransport)
+                {
+                    pTransport->DataRequest(Transport::DataRequestParameter(GetAddress(),
+                        Parameters.m_DestinationAddress,
+                        Request.GetBytes()));
+                }
+            }
+            else
+            {
+                //
+                // TODO - Just drop the connection
+                //
+            }
+            return;
+        }
+        //
+        // Receive RELEASE Response
+        //
+        ReleaseResponseEventData * pReleaseResponse = dynamic_cast<ReleaseResponseEventData *>(pData);
+        if (pReleaseResponse)
+        {
+            bool RetVal = false;
+            //
+            // Let the upper layers know that we have been released
+            //
+            FireCallback(APPReleaseConfirmOrResponse::ID, pReleaseResponse->Data, &RetVal);
+            //
+            // We have been released, go back to the IDLE state
             //
             InternalEvent(ST_IDLE);
             return;            
         }
-        // 
-        // GET Request
-        //
-        if (!RetVal)
+        
+    }
+    
+    void COSEMClient::ST_Associated_Handler(EventData * pData)
+    {
+        if (nullptr == pData)
         {
-            Transport *           pTransport = GetTransport();
-            GetRequestEventData * pGetRequest = dynamic_cast<GetRequestEventData *>(pData);
-            if (pTransport && pGetRequest)
+            return;
+        }
+        // 
+        // Transmit GET Request
+        //
+        Transport *           pTransport = GetTransport();
+        GetRequestEventData * pGetRequest = dynamic_cast<GetRequestEventData *>(pData);
+        if (pTransport && pGetRequest)
+        {
+            Transport::DataRequestParameter TransportParam;
+                
+            switch (pGetRequest->Data.m_Type)
             {
-                Transport::DataRequestParameter TransportParam;
-                
-                switch (pGetRequest->Data.m_Type)
+            case APPGetRequestOrIndication::GetRequestType::get_request_normal:
                 {
-                case APPGetRequestOrIndication::get_request_normal:
-                    {
-                        Get_Request_Normal Request;
-                        Request.invoke_id_and_priority = pGetRequest->Data.m_InvokeIDAndPriority;
-                        Request.cosem_attribute_descriptor = 
-                            pGetRequest->Data.m_Parameter.get<Cosem_Attribute_Descriptor>();
-                        TransportParam.SourceAddress = GetAddress();
-                        TransportParam.DestinationAddress = pGetRequest->Data.m_SourceAddress;
-                        TransportParam.Data = Request.GetBytes();
-                    }
-                    break;
+                    Get_Request_Normal Request;
+                    Request.invoke_id_and_priority = pGetRequest->Data.m_InvokeIDAndPriority;
+                    Request.cosem_attribute_descriptor = 
+                        pGetRequest->Data.m_Parameter.get<Cosem_Attribute_Descriptor>();
                     
-                case APPGetRequestOrIndication::get_request_next:
-                    throw std::logic_error("get_request_next Not Implemented!");
-
-                case APPGetRequestOrIndication::get_request_with_list:
-                    throw std::logic_error("get_request_with_list Not Implemented!");
-
+                    TransportParam.SourceAddress = GetAddress();
+                    TransportParam.DestinationAddress = pGetRequest->Data.m_SourceAddress;
+                    TransportParam.Data = Request.GetBytes();
                 }
-                
-                pTransport->DataRequest(TransportParam);
+                break;
+                    
+            case APPGetRequestOrIndication::GetRequestType::get_request_next:
+                throw std::logic_error("get_request_next Not Implemented!");
+
+            case APPGetRequestOrIndication::GetRequestType::get_request_with_list:
+                throw std::logic_error("get_request_with_list Not Implemented!");
+
             }
+                
+            pTransport->DataRequest(TransportParam);
+        }
+        //
+        // Receive GET Response
+        //
+        GetResponseEventData * pGetResponse = dynamic_cast<GetResponseEventData *>(pData);
+        if (pGetResponse)
+        {
+            bool  RetVal = false;
+            FireCallback(APPGetConfirmOrResponse::ID, pGetResponse->Data, &RetVal);
+            return;            
         }
     }
     //
@@ -192,27 +281,28 @@ namespace EPRI
     //
     bool COSEMClient::AARE_Handler(const IAPDUPtr& pAPDU)
     {
-        AARE * pAARE = dynamic_cast<AARE *>(pAPDU.get());
-        if (pAARE)
+        bool      RetVal = false;
+        DLMSValue AssociationResult;
+        AARE *    pAARE = dynamic_cast<AARE *>(pAPDU.get());
+        if (pAARE && 
+            (ASNType::GetNextResult::VALUE_RETRIEVED == pAARE->result.GetNextValue(&AssociationResult)))
         {
-            DLMSValue AssociationResult;
-            if (ASNType::GetNextResult::VALUE_RETRIEVED == pAARE->result.GetNextValue(&AssociationResult) &&
-                DLMSValueGet<int8_t>(AssociationResult) == AARE::AssociationResult::accepted)
-            {
-                //
-                // TODO - Fill Parameter
-                //
-                ExternalEvent(ST_ASSOCIATED, 
-                    new OpenResponseEventData(APPOpenConfirmOrResponse(pAARE->GetSourceAddress(),
-                                                                       pAARE->GetDestinationAddress())));
-            }
-            else
-            {
-                ExternalEvent(ST_IDLE);
-            }
-            return true;    
+            BEGIN_TRANSITION_MAP
+                TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_IDLE, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_ASSOCIATION_PENDING)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATED, EVENT_IGNORED)
+            END_TRANSITION_MAP(RetVal,
+                new OpenResponseEventData(APPOpenConfirmOrResponse(pAARE->GetSourceAddress(),
+                        pAARE->GetDestinationAddress(),
+                        (APPOpenConfirmOrResponse::AssociationResultType) DLMSValueGet<int8_t>(AssociationResult))))
         }
-        return false;
+        else
+        {
+            ExternalEvent(ST_IDLE);
+        }
+        return RetVal;
     }
 
     bool COSEMClient::AARQ_Handler(const IAPDUPtr& pAPDU)
@@ -231,12 +321,42 @@ namespace EPRI
         Get_Response_Normal * pGetResponse = dynamic_cast<Get_Response_Normal *>(pAPDU.get());
         if (pGetResponse && (Get_Response::data == pGetResponse->result.which()))
         {
-            RetVal = FireCallback(APPGetConfirmOrResponse::ID, 
-                                  APPGetConfirmOrResponse(pGetResponse->GetSourceAddress(),
-                                                          pGetResponse->GetDestinationAddress(),
-                                                          pGetResponse->invoke_id_and_priority,
-                                                          pGetResponse->result.get<DLMSVector>()),
-                                  &RetVal);
+            BEGIN_TRANSITION_MAP
+                TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_IDLE, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATED)
+            END_TRANSITION_MAP(RetVal,
+                                new GetResponseEventData(
+                                    APPGetConfirmOrResponse(pGetResponse->GetSourceAddress(),
+                                        pGetResponse->GetDestinationAddress(),
+                                        pGetResponse->invoke_id_and_priority,
+                                        pGetResponse->result.get<DLMSVector>())));
+        }
+        return RetVal;
+    }
+
+    bool COSEMClient::RLRQ_Handler(const IAPDUPtr& pAPDU)
+    {
+        return false;
+    }
+    
+    bool COSEMClient::RLRE_Handler(const IAPDUPtr& pAPDU)
+    {
+        bool   RetVal = false;
+        RLRE * pReleaseResponse = dynamic_cast<RLRE *>(pAPDU.get());
+        if (pReleaseResponse)
+        {
+            BEGIN_TRANSITION_MAP
+                TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_IDLE, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_ASSOCIATION_RELEASE_PENDING)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATED, EVENT_IGNORED)
+            END_TRANSITION_MAP(RetVal,
+                                new ReleaseResponseEventData(APPReleaseConfirmOrResponse(pReleaseResponse->GetSourceAddress(),
+                                    pReleaseResponse->GetDestinationAddress())));
         }
         return RetVal;
     }

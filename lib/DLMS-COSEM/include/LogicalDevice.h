@@ -18,6 +18,7 @@ namespace EPRI
     
     class COSEMServer;
     class APPGetRequestOrIndication;
+    class APPReleaseRequestOrIndication;
     
     class LogicalDevice
     {
@@ -26,7 +27,8 @@ namespace EPRI
         LogicalDevice(COSEMServer * pServer);
         virtual ~LogicalDevice();
         
-        virtual bool InitiateGet(const APPGetRequestOrIndication& Request);
+        virtual bool InitiateGet(const APPGetRequestOrIndication& Request, bool UpperLayerAllowed);
+        virtual bool InitiateRelease(const APPReleaseRequestOrIndication& Request, bool UpperLayerAllowed);
         virtual bool Run();
         virtual COSEMAddressType SAP() const;
         

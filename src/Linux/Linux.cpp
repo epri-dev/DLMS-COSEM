@@ -130,13 +130,14 @@ public:
     {
     }
     
-    virtual void OnOpenConfirmation(COSEMAddressType ServerAddress)
+    virtual bool OnOpenConfirmation(COSEMAddressType ServerAddress)
     {
         Base()->GetDebug()->TRACE("\n\nAssociated with Server %d...\n\n",
             ServerAddress);
+        return true;
     }
 
-    virtual void OnGetConfirmation(GetToken Token,
+    virtual bool OnGetConfirmation(GetToken Token,
                                    const DLMSVector& Data)
     {
         Base()->GetDebug()->TRACE("\n\nGet Confirmation for Token %d...\n\n", Token);
@@ -152,6 +153,14 @@ public:
         }
         
         Base()->GetDebug()->TRACE_VECTOR("GET", Data);
+        
+        return true;
+    }
+    
+    virtual bool OnReleaseConfirmation()
+    {
+        Base()->GetDebug()->TRACE("\n\nRelease Confirmation from Server\n\n");
+        return true;
     }
 
 };
@@ -173,7 +182,7 @@ protected:
         PrintLine("\t1 - TCP Connect\n");
         PrintLine("\t2 - COSEM Open\n");
         PrintLine("\t3 - COSEM Get\n");
-        PrintLine("\t4 - COSEM Close\n\n");
+        PrintLine("\t4 - COSEM Release\n\n");
         PrintLine("Select: ");
         ReadLine(std::bind(&ClientApp::ClientMenu_Handler, this, std::placeholders::_1));
     }
@@ -243,9 +252,9 @@ protected:
         }
         else if (RetVal == "4")
         {
-            if (m_pClientEngine->Close())
+            if (!m_pClientEngine->Release())
             {
-                PrintLine("COSEM Connection Closed\n");
+                PrintLine("Problem submitting COSEM Release!\n");
             }
         }
         m_Base.get_io_service().post(std::bind(&ClientApp::ClientMenu, this));

@@ -217,7 +217,8 @@ namespace EPRI
             NO_VALUE_FOUND,
             SCHEMA_MISMATCH,
             INVALID_STREAM,
-            INVALID_CONDITION
+            INVALID_CONDITION,
+            VALUE_EMPTY
         };
         
         virtual GetNextResult GetNextValue(DLMSValue * pValue);

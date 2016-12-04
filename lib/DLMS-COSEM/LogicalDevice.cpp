@@ -12,7 +12,7 @@ namespace EPRI
     {
     }
 
-    bool LogicalDevice::InitiateGet(const APPGetRequestOrIndication& Request)
+    bool LogicalDevice::InitiateGet(const APPGetRequestOrIndication& Request, bool UpperLayerAllowed)
     {
         if (SAP() == Request.m_DestinationAddress ||
             Request.m_DestinationAddress == ReservedAddresses::BROADCAST)
@@ -28,7 +28,7 @@ namespace EPRI
             {
                 switch (Request.m_Type)
                 {
-                case APPGetRequestOrIndication::get_request_normal:
+                case APPGetRequestOrIndication::GetRequestType::get_request_normal:
                     {
                         ssize_t ObjectIndex = 
                             FindObject(Request.m_Parameter.get<Cosem_Attribute_Descriptor>());
@@ -40,6 +40,9 @@ namespace EPRI
                             //
                             if (m_Objects[ObjectIndex]->Get(&Data, Request.m_Parameter.get<Cosem_Attribute_Descriptor>()))
                             {
+                                //
+                                // TODO - Add error cases...
+                                //
                                 return m_pServer->GetResponse(APPGetConfirmOrResponse(SAP(),
                                                                                       Request.m_SourceAddress,
                                                                                       Request.m_InvokeIDAndPriority,
@@ -49,15 +52,24 @@ namespace EPRI
                     }
                     break;
                     
-                case APPGetRequestOrIndication::get_request_next:
+                case APPGetRequestOrIndication::GetRequestType::get_request_next:
                     throw std::logic_error("get_request_next Not Implemented!");
                     
-                case APPGetRequestOrIndication::get_request_with_list:
+                case APPGetRequestOrIndication::GetRequestType::get_request_with_list:
                     throw std::logic_error("get_request_with_list Not Implemented!");
                 }
             }
         }
         return false;
+    }
+    
+    bool LogicalDevice::InitiateRelease(const APPReleaseRequestOrIndication& Request, bool UpperLayerAllowed)
+    {
+        return m_pServer->ReleaseResponse(APPReleaseConfirmOrResponse(SAP(),
+            Request.m_SourceAddress,
+            Request.m_UseRLRQRLRE,
+            UpperLayerAllowed ? APPReleaseConfirmOrResponse::ReleaseReason::normal : 
+                  APPReleaseConfirmOrResponse::ReleaseReason::not_finished));
     }
     
     bool LogicalDevice::Run()

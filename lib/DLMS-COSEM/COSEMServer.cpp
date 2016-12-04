@@ -1,10 +1,6 @@
 #include <algorithm>
 
 #include "COSEM.h"
-#include "APDU/AARQ.h"
-#include "APDU/AARE.h"
-#include "APDU/GET-Request.h"
-#include "APDU/GET-Response.h"
 
 namespace EPRI
 {
@@ -27,11 +23,6 @@ namespace EPRI
     //
     // COSEM-OPEN Service
     //
-    void COSEMServer::RegisterOpenIndication(CallbackFunction Callback)
-    {
-        RegisterCallback(APPOpenRequestOrIndication::ID, Callback);
-    }
-    
     bool COSEMServer::OpenResponse(const APPOpenConfirmOrResponse& Parameters)
     {
         bool bAllowed = false;
@@ -44,13 +35,17 @@ namespace EPRI
         END_TRANSITION_MAP(bAllowed, new OpenResponseEventData(Parameters));
         return bAllowed;
     }
+    
+    bool COSEMServer::OnOpenIndication(const APPOpenRequestOrIndication& Parameters)
+    {
+        //
+        // Default Handler Does Nothing
+        //
+        return true;
+    }
     //
     // COSEM-GET Service
     //
-    void COSEMServer::RegisterGetIndication(LogicalDevice * pLogicalDevice)
-    {
-    }
-    
     bool COSEMServer::GetResponse(const APPGetConfirmOrResponse& Parameters)
     {
         bool bAllowed = false;
@@ -63,6 +58,37 @@ namespace EPRI
         END_TRANSITION_MAP(bAllowed, new GetResponseEventData(Parameters));
         return bAllowed;
     }
+    
+    bool COSEMServer::OnGetIndication(const APPGetRequestOrIndication& Parameters)
+    {
+        //
+        // Default Handler Does Nothing
+        //
+        return true;
+    }
+    //
+    // COSEM-RELEASE Service
+    //
+    bool COSEMServer::ReleaseResponse(const APPReleaseConfirmOrResponse& Parameters)
+    {
+        bool bAllowed = false;
+        BEGIN_TRANSITION_MAP
+            TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_IDLE, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IDLE)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATED, EVENT_IGNORED)
+        END_TRANSITION_MAP(bAllowed, new ReleaseResponseEventData(Parameters));
+        return bAllowed;
+    }
+
+    bool COSEMServer::OnReleaseIndication(const APPReleaseRequestOrIndication& Parameters)
+    {
+        //
+        // Default Handler Does Nothing
+        //
+        return true;
+    }
     //
 	// State Machine Handlers
     //
@@ -72,6 +98,29 @@ namespace EPRI
     
     void COSEMServer::ST_Idle_Handler(EventData * pData)
     {
+        // 
+        // Transmit RELEASE Response
+        //
+        Transport *                pTransport = GetTransport();
+        ReleaseResponseEventData * pReleaseResponse = dynamic_cast<ReleaseResponseEventData *>(pData);
+        if (pTransport && pReleaseResponse)
+        {
+            Transport::DataRequestParameter TransportParam;
+            RLRE                            Response;
+            //
+            // TODO - For Real
+            //
+            Response.reason.Append(int8_t(EPRI::RLRE::ReleaseResponseReason::normal)); 
+            Response.user_information.Append(DLMSVector({ 0x08, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00,
+                                                                0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07 }));
+            
+            TransportParam.SourceAddress = GetAddress();
+            TransportParam.DestinationAddress = pReleaseResponse->Data.m_SourceAddress;
+            TransportParam.Data = Response.GetBytes();
+                
+            pTransport->DataRequest(TransportParam);
+            
+        }              
     }
     
     void COSEMServer::ST_Association_Pending_Handler(EventData * pData)
@@ -81,23 +130,33 @@ namespace EPRI
         {
             AARE                        Response;
             APPOpenRequestOrIndication& Parameters = pEventData->Data;
-            if (Parameters.m_LogicalNameReferencing && !Parameters.m_WithCiphering)
+            if (OnOpenIndication(Parameters))
             {
-                Response.application_context_name.Append(ContextLNRNoCipher);
+                if (Parameters.m_LogicalNameReferencing && !Parameters.m_WithCiphering)
+                {
+                    Response.application_context_name.Append(ContextLNRNoCipher);
+                }
+                else if (!Parameters.m_LogicalNameReferencing && !Parameters.m_WithCiphering)
+                {
+                    Response.application_context_name.Append(ContextSNRNoCipher);
+                }
+                //
+                // TODO - Actually make this work!
+                //
+                Response.responder_acse_requirements.Append(ASNBitString(1, 1));
+                Response.result.Append(int8_t(AARE::AssociationResult::accepted));
+                Response.result_source_diagnostic.SelectChoice(AARE::AssociateDiagnosticChoice::acse_service_user);
+                Response.result_source_diagnostic.Append(int8_t(AARE::AssociateDiagnosticUser::user_null));
+                Response.user_information.Append(DLMSVector({ 0x08, 0x00, 0x06, 0x5F, 0x1F, 0x04, 
+                                                                    0x00, 0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07 }));                
             }
-            else if (!Parameters.m_LogicalNameReferencing && !Parameters.m_WithCiphering)
+            else 
             {
-                Response.application_context_name.Append(ContextSNRNoCipher);
+                //
+                // TODO - Error Code!
+                //
             }
-            //
-            // TODO - Actually make this work!
-            //
-            Response.responder_acse_requirements.Append(ASNBitString(1, 1));
-            Response.result.Append(int8_t(AARE::AssociationResult::accepted));
-            Response.result_source_diagnostic.SelectChoice(AARE::AssociateDiagnosticChoice::acse_service_user);
-            Response.result_source_diagnostic.Append(int8_t(AARE::AssociateDiagnosticUser::user_null));
-            Response.user_information.Append(DLMSVector({ 0x08, 0x00, 0x06, 0x5F, 0x1F, 0x04, 
-                                                                0x00, 0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07 }));
+
             Transport * pTransport = GetTransport();
             if (nullptr != pTransport &&
                 pTransport->DataRequest(Transport::DataRequestParameter(GetAddress(),
@@ -116,21 +175,29 @@ namespace EPRI
     
     void COSEMServer::ST_Association_Release_Pending_Handler(EventData * pData)
     {
+        ReleaseRequestEventData * pEventData;
+        if ((pEventData = dynamic_cast<ReleaseRequestEventData *>(pData)) != nullptr)
+        {
+            APPReleaseRequestOrIndication& Parameters = pEventData->Data;
+            InitiateRelease(Parameters, 
+                OnReleaseIndication(Parameters));
+        }        
     }
     
     void COSEMServer::ST_Associated_Handler(EventData * pData)
     {
         // 
-        // GET Request
+        // Received GET Request
         //
         GetRequestEventData * pGetRequest = dynamic_cast<GetRequestEventData *>(pData);
         if (pGetRequest)
         {
-            InitiateGet(pGetRequest->Data);
+            InitiateGet(pGetRequest->Data,
+                OnGetIndication(pGetRequest->Data));
             return;
         }    
         // 
-        // GET Response
+        // Transmit GET Response
         //
         Transport *            pTransport = GetTransport();
         GetResponseEventData * pGetResponse = dynamic_cast<GetResponseEventData *>(pData);
@@ -140,7 +207,7 @@ namespace EPRI
 
             switch (pGetResponse->Data.m_Type)
             {
-            case APPGetConfirmOrResponse::get_response_normal:
+            case APPGetConfirmOrResponse::GetResponseType::get_response_normal:
                 {
                     Get_Response_Normal Response;
                     Response.invoke_id_and_priority = pGetResponse->Data.m_InvokeIDAndPriority;
@@ -151,10 +218,10 @@ namespace EPRI
                 }
                 break;
                 
-            case APPGetConfirmOrResponse::get_response_next:
+            case APPGetConfirmOrResponse::GetResponseType::get_response_next:
                 throw std::logic_error("get_response_next Not Implemented!");
                 
-            case APPGetConfirmOrResponse::get_response_with_list:
+            case APPGetConfirmOrResponse::GetResponseType::get_response_with_list:
                 throw std::logic_error("get_response_with_list Not Implemented!");
             }
                 
@@ -222,6 +289,35 @@ namespace EPRI
     }
     
     bool COSEMServer::GET_Response_Handler(const IAPDUPtr& pAPDU)
+    {
+        return false;
+    }
+
+    bool COSEMServer::RLRQ_Handler(const IAPDUPtr& pAPDU)
+    {
+        RLRQ *  pRLRQ = dynamic_cast<RLRQ *>(pAPDU.get());
+        if (pRLRQ)
+        {
+            //
+            // TODO - Really implement this...
+            //
+            bool bAllowed = false;
+            BEGIN_TRANSITION_MAP
+                TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_IDLE, ST_ASSOCIATION_PENDING)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATION_RELEASE_PENDING)
+            END_TRANSITION_MAP(bAllowed, 
+                new ReleaseRequestEventData(APPReleaseRequestOrIndication(pRLRQ->GetSourceAddress(),
+                                                                          pRLRQ->GetDestinationAddress(),
+                                                                          true)));
+            return bAllowed;
+        }
+        return false;
+    }
+    
+    bool COSEMServer::RLRE_Handler(const IAPDUPtr& pAPDU)
     {
         return false;
     }

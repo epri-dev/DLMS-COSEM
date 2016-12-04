@@ -8,13 +8,12 @@
 #include "Callback.h"
 #include "Transport.h"
 #include "StateMachine.h"
-#include "APDU/ASNType.h"
+#include "APDU/APDUDefs.h"
 #include "LogicalDevice.h"
 
 namespace EPRI
 {
     class IAPDU;
-    class LogicalDevice;    
     
     enum COSEMRunResult : uint16_t
     {
@@ -96,6 +95,8 @@ namespace EPRI
         virtual bool AARE_Handler(const IAPDUPtr& pAPDU) = 0;
         virtual bool GET_Request_Handler(const IAPDUPtr& pAPDU) = 0;
         virtual bool GET_Response_Handler(const IAPDUPtr& pAPDU) = 0;
+        virtual bool RLRQ_Handler(const IAPDUPtr& pAPDU) = 0;
+        virtual bool RLRE_Handler(const IAPDUPtr& pAPDU) = 0;
         //
         // Helpers
         //
@@ -124,18 +125,23 @@ namespace EPRI
     struct APPOpenConfirmOrResponse : public APPBaseCallbackParameter
     {
         static const uint16_t ID = 0x2001;
+        using AssociationResultType = AARE::AssociationResult;
+        
         APPOpenConfirmOrResponse(COSEMAddressType SourceAddress,
                                  COSEMAddressType DestinationAddress,
+                                 AssociationResultType Result,
                                  bool LogicalNameReferencing = true, 
                                  bool WithCiphering = false) : 
             APPBaseCallbackParameter(SourceAddress, DestinationAddress),
+            m_Result(Result),
             m_LogicalNameReferencing(LogicalNameReferencing), m_WithCiphering(WithCiphering)
         {
         }
         // Application Context Name Building
         //
-        bool m_LogicalNameReferencing;
-        bool m_WithCiphering;
+        bool                  m_LogicalNameReferencing;
+        bool                  m_WithCiphering;
+        AssociationResultType m_Result;
     };
     
     struct APPOpenRequestOrIndication : public APPBaseCallbackParameter
@@ -173,6 +179,7 @@ namespace EPRI
     {
         static const uint16_t ID = 0x2003;
         typedef variant<Cosem_Attribute_Descriptor, uint32_t> RequestParameter;
+        using GetRequestType = Get_Request::Get_Request_Choice;
 
         APPGetRequestOrIndication(COSEMAddressType SourceAddress,
                                   COSEMAddressType DestinationAddress,
@@ -181,7 +188,7 @@ namespace EPRI
                                   COSEMServiceClass ServiceClass,
                                   const Cosem_Attribute_Descriptor& AttributeDescriptor) : 
             APPBaseCallbackParameter(SourceAddress, DestinationAddress),
-            m_Type(get_request_normal),
+            m_Type(GetRequestType::get_request_normal),
             m_InvokeIDAndPriority(InvokeID | Priority | ServiceClass)
         {
             m_Parameter = AttributeDescriptor;
@@ -191,7 +198,7 @@ namespace EPRI
                                   InvokeIdAndPriorityType InvokeIDAndPriority,
                                   const Cosem_Attribute_Descriptor& AttributeDescriptor) : 
             APPBaseCallbackParameter(SourceAddress, DestinationAddress),
-            m_Type(get_request_normal), 
+            m_Type(GetRequestType::get_request_normal), 
             m_InvokeIDAndPriority(InvokeIDAndPriority)
         {
             m_Parameter = AttributeDescriptor;
@@ -201,18 +208,13 @@ namespace EPRI
                                   InvokeIdAndPriorityType InvokeID,
                                   uint32_t BlockNumber) : 
             APPBaseCallbackParameter(SourceAddress, DestinationAddress),
-            m_Type(get_request_next), 
+            m_Type(GetRequestType::get_request_next), 
             m_InvokeIDAndPriority(InvokeID)
         {
             m_Parameter = BlockNumber;
         }
-
-        enum GetRequestType : int8_t
-        {
-            get_request_normal    = 1,
-            get_request_next      = 2,
-            get_request_with_list = 3
-        }                              m_Type;        
+        
+        GetRequestType                 m_Type;        
         InvokeIdAndPriorityType        m_InvokeIDAndPriority;
         RequestParameter               m_Parameter;
     };
@@ -220,28 +222,70 @@ namespace EPRI
     struct APPGetConfirmOrResponse : public APPBaseCallbackParameter
     {
         static const uint16_t ID = 0x2004;
+        using GetResponseType = Get_Response::Get_Response_Choice;
+        
         APPGetConfirmOrResponse(COSEMAddressType SourceAddress,
                                 COSEMAddressType DestinationAddress,
                                 InvokeIdAndPriorityType InvokeID,
                                 const DLMSVector& Data) : 
             APPBaseCallbackParameter(SourceAddress, DestinationAddress),
-            m_Type(get_response_normal),
+            m_Type(GetResponseType::get_response_normal),
             m_InvokeIDAndPriority(InvokeID), 
             m_Data(Data)
         {
         }
-        enum GetResponseType : int8_t
-        {
-            get_response_normal    = 1,
-            get_response_next      = 2,
-            get_response_with_list = 3
-        }                               m_Type;        
-        InvokeIdAndPriorityType         m_InvokeIDAndPriority;
-        DLMSVector                      m_Data;
+        GetResponseType         m_Type;        
+        InvokeIdAndPriorityType m_InvokeIDAndPriority;
+        DLMSVector              m_Data;
     };
     
     using GetRequestEventData = COSEMEventData<APPGetRequestOrIndication>;
     using GetResponseEventData = COSEMEventData<APPGetConfirmOrResponse>;
+    //
+    // RELEASE Service
+    //
+    struct APPReleaseConfirmOrResponse : public APPBaseCallbackParameter
+    {
+        static const uint16_t ID = 0x2005;
+        using ReleaseReason = RLRE::ReleaseResponseReason;
+        
+        APPReleaseConfirmOrResponse(COSEMAddressType SourceAddress,
+            COSEMAddressType DestinationAddress,
+            bool UseRLRQRLRE = true,
+            ReleaseReason Reason = ReleaseReason::normal)
+            : APPBaseCallbackParameter(SourceAddress, DestinationAddress)
+            , m_UseRLRQRLRE(UseRLRQRLRE)
+            , m_Reason(Reason)
+        {
+        }
+
+        bool          m_UseRLRQRLRE;
+        ReleaseReason m_Reason;    
+
+    };
+    
+    struct APPReleaseRequestOrIndication : public APPBaseCallbackParameter
+    {
+        static const uint16_t ID = 0x2006;
+        using ReleaseReason = RLRQ::ReleaseRequestReason;
+        
+        APPReleaseRequestOrIndication(COSEMAddressType SourceAddress,
+            COSEMAddressType DestinationAddress,
+            bool UseRLRQRLRE = true,
+            ReleaseReason Reason = ReleaseReason::normal) : 
+            APPBaseCallbackParameter(SourceAddress, DestinationAddress), 
+            m_UseRLRQRLRE(UseRLRQRLRE), 
+            m_Reason(Reason)
+        {
+        }
+        
+        bool          m_UseRLRQRLRE;
+        ReleaseReason m_Reason;    
+        
+    };
+
+    using ReleaseRequestEventData = COSEMEventData<APPReleaseRequestOrIndication>;
+    using ReleaseResponseEventData = COSEMEventData<APPReleaseConfirmOrResponse>;
    
     class COSEMClient : public COSEM
     {
@@ -263,6 +307,11 @@ namespace EPRI
         //
         bool GetRequest(const APPGetRequestOrIndication& Parameters);
         void RegisterGetConfirm(CallbackFunction Callback);
+        //
+        // COSEM-RELEASE Service
+        //
+        bool ReleaseRequest(const APPReleaseRequestOrIndication& Parameters);
+        void RegisterReleaseConfirm(CallbackFunction Callback);
 
     protected:
         //
@@ -280,7 +329,9 @@ namespace EPRI
         virtual bool AARE_Handler(const IAPDUPtr& pAPDU);
         virtual bool GET_Request_Handler(const IAPDUPtr& pAPDU);
         virtual bool GET_Response_Handler(const IAPDUPtr& pAPDU);
-        
+        virtual bool RLRQ_Handler(const IAPDUPtr& pAPDU);
+        virtual bool RLRE_Handler(const IAPDUPtr& pAPDU);
+       
     };
     
     class COSEMServer : public COSEM, public LogicalDevice
@@ -296,18 +347,32 @@ namespace EPRI
         //
         // COSEM-OPEN Service
         //
-        void RegisterOpenIndication(CallbackFunction Callback);
         bool OpenResponse(const APPOpenConfirmOrResponse& Parameters);
         //
         // COSEM-GET Service
         //
-        void RegisterGetIndication(LogicalDevice * pLogicalDevice);
         bool GetResponse(const APPGetConfirmOrResponse& Parameters);
+        //
+        // COSEM-RELEASE Service
+        //
+        bool ReleaseResponse(const APPReleaseConfirmOrResponse& Parameters);
 
     protected:
         //
-        // Server Overrides
+        // Server Event Handlers
         //
+        //
+        // COSEM-OPEN Service
+        //
+        bool OnOpenIndication(const APPOpenRequestOrIndication& Parameters);
+        //
+        // COSEM-GET Service
+        //
+        bool OnGetIndication(const APPGetRequestOrIndication& Parameters);
+        //
+        // COSEM-RELEASE Service
+        //
+        bool OnReleaseIndication(const APPReleaseRequestOrIndication& Parameters);
         //
         // State Machine
         //
@@ -323,6 +388,8 @@ namespace EPRI
         virtual bool AARE_Handler(const IAPDUPtr& pAPDU);
         virtual bool GET_Request_Handler(const IAPDUPtr& pAPDU);
         virtual bool GET_Response_Handler(const IAPDUPtr& pAPDU);
+        virtual bool RLRQ_Handler(const IAPDUPtr& pAPDU);
+        virtual bool RLRE_Handler(const IAPDUPtr& pAPDU);
        
     };
     

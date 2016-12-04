@@ -11,13 +11,15 @@ namespace EPRI
     //
     COSEMClientEngine::COSEMClientEngine(const Options& Opt, Transport * pXPort) :
         COSEMEngine(pXPort), m_Client(Opt.m_Address), m_Options(Opt),
-        m_InvokeID(16, 0)
+        m_InvokeID(ALLOWED_INVOCATION_IDS, 0)
     {
         m_Client.RegisterTransport(pXPort);
         m_Client.RegisterOpenConfirm(
             std::bind(&COSEMClientEngine::Client_OpenConfirmation, this, std::placeholders::_1));
         m_Client.RegisterGetConfirm(
             std::bind(&COSEMClientEngine::Client_GetConfirmation, this, std::placeholders::_1));
+        m_Client.RegisterReleaseConfirm(
+            std::bind(&COSEMClientEngine::Client_ReleaseConfirmation, this, std::placeholders::_1));
     }
     
     COSEMClientEngine::~COSEMClientEngine()
@@ -35,11 +37,12 @@ namespace EPRI
                                                                Security.Level, Security.Password));
     }
     
-    void COSEMClientEngine::OnOpenConfirmation(COSEMAddressType /*ServerAddress*/)
+    bool COSEMClientEngine::OnOpenConfirmation(COSEMAddressType /*ServerAddress*/)
     {
         //
         // Default Handler Does Nothing
         //
+        return true;
     }
 
     bool COSEMClientEngine::IsOpen() const
@@ -70,17 +73,32 @@ namespace EPRI
         return RetVal;
     }
     
-    void COSEMClientEngine::OnGetConfirmation(GetToken Token,
+    bool COSEMClientEngine::OnGetConfirmation(GetToken Token,
                                               const DLMSVector& Data)
     {
         //
         // Default Handler Does Nothing
         //
+        return true;
     }
     
-    bool COSEMClientEngine::Close()
+    bool COSEMClientEngine::Release()
     {
-        return false;
+        if (m_Client.IsOpen())
+        {
+            m_Client.ReleaseRequest(
+                APPReleaseRequestOrIndication(m_Options.m_Address,
+                m_ServerAddress));
+        }
+        return true;    
+    }
+    
+    bool COSEMClientEngine::OnReleaseConfirmation()
+    {
+        //
+        // Default Handler Does Nothing
+        //
+        return true;
     }
 
     bool COSEMClientEngine::Client_OpenConfirmation(const BaseCallbackParameter& Parameters)
@@ -88,20 +106,19 @@ namespace EPRI
         const APPOpenConfirmOrResponse& Confirmation = 
             dynamic_cast<const APPOpenConfirmOrResponse&>(Parameters);
         m_ServerAddress = Confirmation.m_SourceAddress;
-        
-        OnOpenConfirmation(m_ServerAddress);
-        
-        return true;
+        return OnOpenConfirmation(m_ServerAddress);
     }
     
     bool COSEMClientEngine::Client_GetConfirmation(const BaseCallbackParameter& Parameters)
     {
         const APPGetConfirmOrResponse& Confirmation = dynamic_cast<const APPGetConfirmOrResponse&>(Parameters);
-        
-        OnGetConfirmation(COSEM_GET_INVOKE_ID(Confirmation.m_InvokeIDAndPriority),
-            Confirmation.m_Data);
-        
-        return true;        
+        return OnGetConfirmation(COSEM_GET_INVOKE_ID(Confirmation.m_InvokeIDAndPriority),
+                                 Confirmation.m_Data);
+    }
+
+    bool COSEMClientEngine::Client_ReleaseConfirmation(const BaseCallbackParameter& Parameters)
+    {
+        return OnReleaseConfirmation();
     }
     //
     // COSEMServerEngine

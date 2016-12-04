@@ -104,7 +104,13 @@ namespace EPRI
                         RetVal = m_Data.Append(pData, Length) >= 0;
                     }
                 }
-                
+                // 
+                // Optional?
+                //
+                if (Options & ASN::OPTIONAL)
+                {
+                    RetVal = true;
+                }
             }
             catch (std::overflow_error ex)
             {

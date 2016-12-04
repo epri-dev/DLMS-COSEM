@@ -185,15 +185,33 @@ namespace EPRI
     {
         GetNextResult RetVal = NO_VALUE_FOUND;
         bool          GetResult = false;
+        bool          IsImplicit = ASN_IS_IMPLICIT(SchemaEntry);
         //
         // Validate our appropriate lengths for this data type.
         //
-        const std::set<uint8_t> VALID_LENGTHS({ 1, 2, 4, 8 });
-        if (m_Data.PeekByte() == ASN::INTEGER &&
-            VALID_LENGTHS.find(m_Data.PeekByte(1)) != VALID_LENGTHS.end())
+        if (IsImplicit ||
+            (m_Data.PeekByte() == ASN::INTEGER))
         {
-            m_Data.Skip(sizeof(uint8_t));
-            switch (m_Data.Get<uint8_t>())
+            size_t                  Length = ASN_SCHEMA_DATA_TYPE_SIZE(SchemaEntry);
+            const std::set<uint8_t> VALID_LENGTHS({ 1, 2, 4, 8 });
+            uint8_t                 BytesToSkip = 0;
+            //
+            // Skip datatype
+            //
+            if (!IsImplicit)
+            {
+                ++BytesToSkip;
+                if (0 == Length)
+                {
+                    Length = m_Data.Peek<uint8_t>(BytesToSkip++);
+                }
+            }
+            if (VALID_LENGTHS.find(Length) == VALID_LENGTHS.end())
+            {
+                return RetVal;
+            }
+            m_Data.Skip(BytesToSkip);
+            switch (Length)
             {
             case 1:
                 GetResult = m_Data.Get<int8_t>(pValue);
@@ -345,7 +363,7 @@ namespace EPRI
         //
         if (m_Data.Size() == 0)
         {
-            return INVALID_CONDITION;
+            return VALUE_EMPTY;
         }
         if (m_Data.IsAtEnd())
         {
@@ -484,7 +502,7 @@ namespace EPRI
         //
         if (m_Data.Size() == 0)
         {
-            return RetVal;
+            return VALUE_EMPTY;
         }
         
         ASN::SchemaEntryPtr SchemaEntry = GetCurrentSchemaEntry();

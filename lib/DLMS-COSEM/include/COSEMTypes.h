@@ -36,5 +36,7 @@ namespace EPRI
     COSEMPriority(VAL & 0b10000000)
 #define COSEM_GET_SERVICE_CLASS(VAL)\
     COSEMPriority(VAL & 0b01000000)
-        
+
+    const InvokeIdAndPriorityType ALLOWED_INVOCATION_IDS = 16;
+    
 }

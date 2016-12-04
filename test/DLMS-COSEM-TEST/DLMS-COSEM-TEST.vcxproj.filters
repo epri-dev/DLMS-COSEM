@@ -69,6 +69,12 @@
     <ClCompile Include="UnitTest-Interfaces-COSEMData.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="UnitTest-APDU-RLRQ.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnitTest-APDU-RLRE.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt">

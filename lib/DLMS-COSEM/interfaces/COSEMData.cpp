@@ -226,7 +226,7 @@ namespace EPRI
         //
         if (m_Data.Size() == 0)
         {
-            return INVALID_CONDITION;
+            return VALUE_EMPTY;
         }
         if (m_Data.IsAtEnd())
         {

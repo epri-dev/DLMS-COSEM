@@ -3,6 +3,8 @@
 #include "APDU/AARQ.h"
 #include "APDU/GET-Request.h"
 #include "APDU/GET-Response.h"
+#include "APDU/RLRE.h"
+#include "APDU/RLRQ.h"
 
 namespace EPRI
 {
@@ -35,6 +37,12 @@ namespace EPRI
             break;
         case Get_Response_Base::Tag:
             pRetVal.reset(new Get_Response_Normal());
+            break;
+        case RLRQ::Tag:
+            pRetVal.reset(new RLRQ());
+            break;
+        case RLRE::Tag:
+            pRetVal.reset(new RLRE());
             break;
         default:
             break;
