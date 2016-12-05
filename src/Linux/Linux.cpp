@@ -162,6 +162,18 @@ public:
         Base()->GetDebug()->TRACE("\n\nRelease Confirmation from Server\n\n");
         return true;
     }
+    
+    virtual bool OnReleaseConfirmation(COSEMAddressType ServerAddress)
+    {
+        Base()->GetDebug()->TRACE("\n\nRelease Confirmation from Server %d\n\n", ServerAddress);
+        return true;
+    }
+
+    virtual bool OnAbortIndication(COSEMAddressType ServerAddress)
+    {
+        Base()->GetDebug()->TRACE("\n\nAbort Indication from Server %d\n\n", ServerAddress);
+        return true;
+    }
 
 };
 
@@ -182,7 +194,8 @@ protected:
         PrintLine("\t1 - TCP Connect\n");
         PrintLine("\t2 - COSEM Open\n");
         PrintLine("\t3 - COSEM Get\n");
-        PrintLine("\t4 - COSEM Release\n\n");
+        PrintLine("\t4 - COSEM Release\n");
+        PrintLine("\t5 - TCP Disconnect\n\n"); 
         PrintLine("Select: ");
         ReadLine(std::bind(&ClientApp::ClientMenu_Handler, this, std::placeholders::_1));
     }
@@ -207,7 +220,7 @@ protected:
         }
         else if (RetVal == "2")
         {
-            if (m_pSocket->IsConnected())
+            if (m_pSocket && m_pSocket->IsConnected())
             {
                 int                  DestinationAddress = GetNumericInput("Server Address (Default: 1)", 1);
                 COSEM::SecurityLevel Security = (COSEM::SecurityLevel)
@@ -226,7 +239,7 @@ protected:
         }
         else if (RetVal == "3")
         {
-            if (m_pSocket->IsConnected() && m_pClientEngine->IsOpen())
+            if (m_pSocket && m_pSocket->IsConnected() && m_pClientEngine->IsOpen())
             {
                 Cosem_Attribute_Descriptor Descriptor;
                 
@@ -257,6 +270,20 @@ protected:
                 PrintLine("Problem submitting COSEM Release!\n");
             }
         }
+        else if (RetVal == "5")
+        {
+            if (m_pSocket)
+            {
+                Base()->GetCore()->GetIP()->ReleaseSocket(m_pSocket);
+                m_pSocket = nullptr;
+                PrintLine("Socket released.\n");
+            }
+            else
+            {
+                PrintLine("TCP Not Opened!\n");
+            }
+        }
+       
         m_Base.get_io_service().post(std::bind(&ClientApp::ClientMenu, this));
     }
     

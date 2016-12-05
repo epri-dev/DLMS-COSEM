@@ -64,7 +64,7 @@ namespace EPRI
         static const uint8_t TRANSITIONS[] = {\
  
 #define TRANSITION_MAP_ENTRY(State, Entry)\
-        Entry,
+        (uint8_t)(Entry),
  
 #define END_TRANSITION_MAP(RetVal, Data) \
         0 };\

@@ -13,6 +13,8 @@ namespace EPRI
             std::bind(&TCPWrapper::Socket_Connect, this, std::placeholders::_1));
         m_pSocket->RegisterReadHandler(
             std::bind(&TCPWrapper::Socket_Receive, this, std::placeholders::_1, std::placeholders::_2));
+        m_pSocket->RegisterCloseHandler(
+            std::bind(&TCPWrapper::Socket_Close, this, std::placeholders::_1));
     }
     
     TCPWrapper::~TCPWrapper()
@@ -77,6 +79,11 @@ namespace EPRI
             //
             ArmAsyncRead();
         }
+    }
+    
+    void TCPWrapper::Socket_Close(ERROR_TYPE Error)
+    {
+        FireTransportEvent(Transport::TRANSPORT_DISCONNECTED);
     }
     
     bool TCPWrapper::ArmAsyncRead(size_t MinimumSize /* = Wrapper::HEADER_SIZE*/)

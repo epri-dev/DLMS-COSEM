@@ -72,17 +72,18 @@ namespace EPRI
         virtual bool OnGetConfirmation(GetToken Token,
                                        const DLMSVector& Data);
         virtual bool Release();
-        virtual bool OnReleaseConfirmation();
+        virtual bool OnReleaseConfirmation(COSEMAddressType ServerAddress);
+        virtual bool OnAbortIndication(COSEMAddressType ServerAddress);
         
     protected:
         bool Client_OpenConfirmation(const BaseCallbackParameter& Parameters);
         bool Client_GetConfirmation(const BaseCallbackParameter& Parameters);
         bool Client_ReleaseConfirmation(const BaseCallbackParameter& Parameters);
-        
+        bool Client_AbortIndication(const BaseCallbackParameter& Parameters);
+       
         COSEMClient      m_Client;
         Options          m_Options;
         modcounter       m_InvokeID;
-        COSEMAddressType m_ServerAddress = INVALID_ADDRESS;
     };
     
 #define ENGINE_BEGIN_DEVICES

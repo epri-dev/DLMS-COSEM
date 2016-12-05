@@ -59,8 +59,10 @@ namespace EPRI
             {
                 m_States[m_CurrentState](pDataTemp);
             }
- 
-            if (pDataTemp) 
+            
+            // If we are cascading states, then don't release
+            //  
+            if (pDataTemp && pDataTemp != m_pEventData) 
             {
                 pDataTemp->Release();
                 pDataTemp = nullptr;

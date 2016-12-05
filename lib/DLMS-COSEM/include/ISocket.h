@@ -74,6 +74,7 @@ namespace EPRI
         typedef std::function<void(ERROR_TYPE)>         ConnectCallbackFunction;
         typedef std::function<void(ERROR_TYPE, size_t)> WriteCallbackFunction;
         typedef std::function<void(ERROR_TYPE, size_t)> ReadCallbackFunction;
+        typedef std::function<void(ERROR_TYPE)>         CloseCallbackFunction;
 
         virtual ERROR_TYPE Open(const char * DestinationAddress = nullptr, int Port = DEFAULT_DLMS_PORT) = 0;
         virtual ConnectCallbackFunction RegisterConnectHandler(ConnectCallbackFunction Callback) = 0;
@@ -85,6 +86,7 @@ namespace EPRI
         virtual bool AppendAsyncReadResult(DLMSVector * pData, size_t ReadAtLeast = 0) = 0;
         virtual ReadCallbackFunction RegisterReadHandler(ReadCallbackFunction Callback) = 0;
         virtual ERROR_TYPE Close() = 0;
+        virtual CloseCallbackFunction RegisterCloseHandler(CloseCallbackFunction Callback) = 0;
         virtual bool IsConnected() = 0;
         
     };

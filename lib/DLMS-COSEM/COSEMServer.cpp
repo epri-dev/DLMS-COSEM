@@ -27,11 +27,11 @@ namespace EPRI
     {
         bool bAllowed = false;
         BEGIN_TRANSITION_MAP
-            TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
             TRANSITION_MAP_ENTRY(ST_IDLE, ST_ASSOCIATION_PENDING)
-            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_ASSOCIATED, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_IGNORED)
         END_TRANSITION_MAP(bAllowed, new OpenResponseEventData(Parameters));
         return bAllowed;
     }
@@ -50,10 +50,10 @@ namespace EPRI
     {
         bool bAllowed = false;
         BEGIN_TRANSITION_MAP
-            TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_IDLE, EVENT_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
             TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATED)
         END_TRANSITION_MAP(bAllowed, new GetResponseEventData(Parameters));
         return bAllowed;
@@ -73,11 +73,11 @@ namespace EPRI
     {
         bool bAllowed = false;
         BEGIN_TRANSITION_MAP
-            TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_IDLE, EVENT_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IDLE)
-            TRANSITION_MAP_ENTRY(ST_ASSOCIATED, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_ASSOCIATION_RELEASE_PENDING)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_IGNORED)
         END_TRANSITION_MAP(bAllowed, new ReleaseResponseEventData(Parameters));
         return bAllowed;
     }
@@ -90,37 +90,31 @@ namespace EPRI
         return true;
     }
     //
+    // COSEM-ABORT Service
+    //
+    bool COSEMServer::OnAbortIndication(const APPAbortIndication& Parameters)
+    {
+        //
+        // Default Handler Does Nothing
+        //
+        return true;
+    }
+    //
 	// State Machine Handlers
     //
     void COSEMServer::ST_Inactive_Handler(EventData * pData)
     {
+        TransportEventData * pTransportData = dynamic_cast<TransportEventData *>(pData);
+        if (pTransportData && pTransportData->Data == Transport::TRANSPORT_DISCONNECTED)
+        {
+            OnAbortIndication(APPAbortIndication(m_AssociatedAddress, GetAddress()));
+        }
+        m_AssociatedAddress = INVALID_ADDRESS;
     }
     
     void COSEMServer::ST_Idle_Handler(EventData * pData)
     {
-        // 
-        // Transmit RELEASE Response
-        //
-        Transport *                pTransport = GetTransport();
-        ReleaseResponseEventData * pReleaseResponse = dynamic_cast<ReleaseResponseEventData *>(pData);
-        if (pTransport && pReleaseResponse)
-        {
-            Transport::DataRequestParameter TransportParam;
-            RLRE                            Response;
-            //
-            // TODO - For Real
-            //
-            Response.reason.Append(int8_t(EPRI::RLRE::ReleaseResponseReason::normal)); 
-            Response.user_information.Append(DLMSVector({ 0x08, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00,
-                                                                0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07 }));
-            
-            TransportParam.SourceAddress = GetAddress();
-            TransportParam.DestinationAddress = pReleaseResponse->Data.m_SourceAddress;
-            TransportParam.Data = Response.GetBytes();
-                
-            pTransport->DataRequest(TransportParam);
-            
-        }              
+        m_AssociatedAddress = INVALID_ADDRESS;
     }
     
     void COSEMServer::ST_Association_Pending_Handler(EventData * pData)
@@ -148,7 +142,7 @@ namespace EPRI
                 Response.result_source_diagnostic.SelectChoice(AARE::AssociateDiagnosticChoice::acse_service_user);
                 Response.result_source_diagnostic.Append(int8_t(AARE::AssociateDiagnosticUser::user_null));
                 Response.user_information.Append(DLMSVector({ 0x08, 0x00, 0x06, 0x5F, 0x1F, 0x04, 
-                                                                    0x00, 0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07 }));                
+                                                                    0x00, 0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07 }));    
             }
             else 
             {
@@ -163,7 +157,7 @@ namespace EPRI
                                                                         Parameters.m_SourceAddress,
                                                                         Response.GetBytes())))
             {
-                InternalEvent(ST_ASSOCIATED);
+                InternalEvent(ST_ASSOCIATED, pData);
             }
             else
             {
@@ -175,17 +169,56 @@ namespace EPRI
     
     void COSEMServer::ST_Association_Release_Pending_Handler(EventData * pData)
     {
+        // 
+        // Receive RELEASE Request
+        //
         ReleaseRequestEventData * pEventData;
         if ((pEventData = dynamic_cast<ReleaseRequestEventData *>(pData)) != nullptr)
         {
             APPReleaseRequestOrIndication& Parameters = pEventData->Data;
             InitiateRelease(Parameters, 
                 OnReleaseIndication(Parameters));
+            return;
         }        
+        // 
+        // Transmit RELEASE Response
+        //
+        Transport *                pTransport = GetTransport();
+        ReleaseResponseEventData * pReleaseResponse = dynamic_cast<ReleaseResponseEventData *>(pData);
+        if (pTransport && pReleaseResponse)
+        {
+            Transport::DataRequestParameter TransportParam;
+            RLRE                            Response;
+            //
+            // TODO - For Real
+            //
+            Response.reason.Append(int8_t(EPRI::RLRE::ReleaseResponseReason::normal)); 
+            Response.user_information.Append(DLMSVector({ 0x08, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00,
+                                                                0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07 }));
+            
+            TransportParam.SourceAddress = GetAddress();
+            TransportParam.DestinationAddress = pReleaseResponse->Data.m_SourceAddress;
+            TransportParam.Data = Response.GetBytes();
+                
+            pTransport->DataRequest(TransportParam);
+            
+            InternalEvent(ST_IDLE);
+            return;
+        }              
+        
     }
     
     void COSEMServer::ST_Associated_Handler(EventData * pData)
     {
+        //
+        // OPEN Transition
+        //
+        OpenRequestEventData * pOpenRequest = dynamic_cast<OpenRequestEventData *>(pData);
+        if (pOpenRequest)
+        {
+            m_AssociatedAddress = pOpenRequest->Data.m_SourceAddress;
+            return;
+        }
         // 
         // Received GET Request
         //
@@ -245,11 +278,11 @@ namespace EPRI
         {
             bool bAllowed = false;
             BEGIN_TRANSITION_MAP
-                TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
                 TRANSITION_MAP_ENTRY(ST_IDLE, ST_ASSOCIATION_PENDING)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATED, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_IGNORED)
             //
             // TODO - Really parse
             //
@@ -277,10 +310,10 @@ namespace EPRI
         {
             bool bAllowed = false;
             BEGIN_TRANSITION_MAP
-                TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_IDLE, EVENT_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
                 TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATED)
             END_TRANSITION_MAP(bAllowed, pEvent);
             return bAllowed;
@@ -303,10 +336,10 @@ namespace EPRI
             //
             bool bAllowed = false;
             BEGIN_TRANSITION_MAP
-                TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_IDLE, ST_ASSOCIATION_PENDING)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
                 TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATION_RELEASE_PENDING)
             END_TRANSITION_MAP(bAllowed, 
                 new ReleaseRequestEventData(APPReleaseRequestOrIndication(pRLRQ->GetSourceAddress(),

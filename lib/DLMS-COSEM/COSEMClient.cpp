@@ -27,11 +27,11 @@ namespace EPRI
     {
         bool bAllowed = false;
         BEGIN_TRANSITION_MAP
-            TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
             TRANSITION_MAP_ENTRY(ST_IDLE, ST_ASSOCIATION_PENDING)
-            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_ASSOCIATED, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_IGNORED)
         END_TRANSITION_MAP(bAllowed, new OpenRequestEventData(Parameters));
         return bAllowed;
     }
@@ -47,10 +47,10 @@ namespace EPRI
     {
         bool bAllowed = false;
         BEGIN_TRANSITION_MAP
-            TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_IDLE, EVENT_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
             TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATED)
         END_TRANSITION_MAP(bAllowed, new GetRequestEventData(Parameters));
         return bAllowed;
@@ -67,10 +67,10 @@ namespace EPRI
     {
         bool bAllowed = false;
         BEGIN_TRANSITION_MAP
-            TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_IDLE, EVENT_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
             TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATION_RELEASE_PENDING)
         END_TRANSITION_MAP(bAllowed, new ReleaseRequestEventData(Parameters));
         return bAllowed;
@@ -85,20 +85,18 @@ namespace EPRI
     //
     void COSEMClient::ST_Inactive_Handler(EventData * pData)
     {
+        TransportEventData * pTransportData = dynamic_cast<TransportEventData *>(pData);
+        if (pTransportData && pTransportData->Data == Transport::TRANSPORT_DISCONNECTED)
+        {
+            bool RetVal = false;
+            FireCallback(APPAbortIndication::ID, APPAbortIndication(m_AssociatedAddress, GetAddress()), &RetVal);
+        }
+        m_AssociatedAddress = INVALID_ADDRESS;
     }
     
     void COSEMClient::ST_Idle_Handler(EventData * pData)
     {
-        TransportEventData * pTransport;
-        if ((pTransport = dynamic_cast<TransportEventData *>(pData)) != nullptr)
-        {
-            // If we have disconnected, then we need to go back to the Inactive state.
-            //
-            if (pTransport->Data == Transport::TRANSPORT_DISCONNECTED)
-            {
-                InternalEvent(ST_INACTIVE);
-            }
-        }
+        m_AssociatedAddress = INVALID_ADDRESS;
     }
     
     void COSEMClient::ST_Association_Pending_Handler(EventData * pData)
@@ -110,11 +108,10 @@ namespace EPRI
         if (pConnectResponse)
         {
             bool  RetVal = false;
-            if (FireCallback(APPOpenConfirmOrResponse::ID, pConnectResponse->Data, &RetVal) && RetVal)
+            APPOpenConfirmOrResponse& Parameters = pConnectResponse->Data;
+            if (FireCallback(APPOpenConfirmOrResponse::ID, Parameters, &RetVal) && RetVal)
             {
-                // Denied by upper layers.  Go back to ST_IDLE.
-                //
-                InternalEvent(ST_ASSOCIATED);
+                InternalEvent(ST_ASSOCIATED, pData);
             }
             else
             {
@@ -231,6 +228,15 @@ namespace EPRI
         {
             return;
         }
+        //
+        // OPEN Transition
+        //
+        OpenResponseEventData * pConnectResponse = dynamic_cast<OpenResponseEventData *>(pData);
+        if (pConnectResponse)
+        {
+            m_AssociatedAddress = pConnectResponse->Data.m_SourceAddress;
+            return;
+        }
         // 
         // Transmit GET Request
         //
@@ -288,11 +294,11 @@ namespace EPRI
             (ASNType::GetNextResult::VALUE_RETRIEVED == pAARE->result.GetNextValue(&AssociationResult)))
         {
             BEGIN_TRANSITION_MAP
-                TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_IDLE, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
                 TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_ASSOCIATION_PENDING)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATED, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_IGNORED)
             END_TRANSITION_MAP(RetVal,
                 new OpenResponseEventData(APPOpenConfirmOrResponse(pAARE->GetSourceAddress(),
                         pAARE->GetDestinationAddress(),
@@ -322,10 +328,10 @@ namespace EPRI
         if (pGetResponse && (Get_Response::data == pGetResponse->result.which()))
         {
             BEGIN_TRANSITION_MAP
-                TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_IDLE, EVENT_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
                 TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATED)
             END_TRANSITION_MAP(RetVal,
                                 new GetResponseEventData(
@@ -349,11 +355,11 @@ namespace EPRI
         if (pReleaseResponse)
         {
             BEGIN_TRANSITION_MAP
-                TRANSITION_MAP_ENTRY(ST_INACTIVE, EVENT_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_IDLE, EVENT_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
                 TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_ASSOCIATION_RELEASE_PENDING)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATED, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_IGNORED)
             END_TRANSITION_MAP(RetVal,
                                 new ReleaseResponseEventData(APPReleaseConfirmOrResponse(pReleaseResponse->GetSourceAddress(),
                                     pReleaseResponse->GetDestinationAddress())));

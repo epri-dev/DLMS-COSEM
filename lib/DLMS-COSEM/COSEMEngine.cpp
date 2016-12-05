@@ -20,6 +20,8 @@ namespace EPRI
             std::bind(&COSEMClientEngine::Client_GetConfirmation, this, std::placeholders::_1));
         m_Client.RegisterReleaseConfirm(
             std::bind(&COSEMClientEngine::Client_ReleaseConfirmation, this, std::placeholders::_1));
+        m_Client.RegisterAbortIndication(
+            std::bind(&COSEMClientEngine::Client_AbortIndication, this, std::placeholders::_1));
     }
     
     COSEMClientEngine::~COSEMClientEngine()
@@ -58,7 +60,7 @@ namespace EPRI
         {
             RetVal = m_Client.GetRequest(
                            APPGetRequestOrIndication(m_Options.m_Address,
-                                                     m_ServerAddress,
+                                                     m_Client.GetAssociatedAddress(),
                                                      m_InvokeID, 
                                                      COSEMPriority::COSEM_PRIORITY_NORMAL,
                                                      COSEMServiceClass::COSEM_SERVICE_CONFIRMED,
@@ -88,12 +90,20 @@ namespace EPRI
         {
             m_Client.ReleaseRequest(
                 APPReleaseRequestOrIndication(m_Options.m_Address,
-                m_ServerAddress));
+                m_Client.GetAssociatedAddress()));
         }
         return true;    
     }
     
-    bool COSEMClientEngine::OnReleaseConfirmation()
+    bool COSEMClientEngine::OnReleaseConfirmation(COSEMAddressType /*ServerAddress*/)
+    {
+        //
+        // Default Handler Does Nothing
+        //
+        return true;
+    }
+    
+    bool COSEMClientEngine::OnAbortIndication(COSEMAddressType /*ServerAddress*/)
     {
         //
         // Default Handler Does Nothing
@@ -105,8 +115,7 @@ namespace EPRI
     {
         const APPOpenConfirmOrResponse& Confirmation = 
             dynamic_cast<const APPOpenConfirmOrResponse&>(Parameters);
-        m_ServerAddress = Confirmation.m_SourceAddress;
-        return OnOpenConfirmation(m_ServerAddress);
+        return OnOpenConfirmation(Confirmation.m_SourceAddress);
     }
     
     bool COSEMClientEngine::Client_GetConfirmation(const BaseCallbackParameter& Parameters)
@@ -118,7 +127,14 @@ namespace EPRI
 
     bool COSEMClientEngine::Client_ReleaseConfirmation(const BaseCallbackParameter& Parameters)
     {
-        return OnReleaseConfirmation();
+        const APPReleaseConfirmOrResponse& Confirmation = dynamic_cast<const APPReleaseConfirmOrResponse&>(Parameters);
+        return OnReleaseConfirmation(Confirmation.m_SourceAddress);
+    }
+    
+    bool COSEMClientEngine::Client_AbortIndication(const BaseCallbackParameter& Parameters)
+    {
+        const APPAbortIndication& Indication = dynamic_cast<const APPAbortIndication&>(Parameters);
+        return OnAbortIndication(Indication.m_SourceAddress);
     }
     //
     // COSEMServerEngine

@@ -30,6 +30,7 @@ namespace EPRI
         virtual bool AppendAsyncReadResult(DLMSVector * pData, size_t ReadAtLeast = 0);
         virtual ReadCallbackFunction RegisterReadHandler(ReadCallbackFunction Callback);
         virtual ERROR_TYPE Close();
+        virtual CloseCallbackFunction RegisterCloseHandler(CloseCallbackFunction Callback);
         virtual bool IsConnected();
         
     private:
@@ -47,6 +48,7 @@ namespace EPRI
         ConnectCallbackFunction         m_Connect;
         WriteCallbackFunction           m_Write;
         ReadCallbackFunction            m_Read;
+        CloseCallbackFunction           m_Close;
         
     };
 
@@ -64,6 +66,8 @@ namespace EPRI
         virtual bool Process();
 
     protected:
+        void RemoveSocket(ISocket * pSocket);
+        
         using             TCPSocketList = std::list<LinuxTCPSocket>;        
         TCPSocketList     m_TCPSockets;
         asio::io_service& m_IO;

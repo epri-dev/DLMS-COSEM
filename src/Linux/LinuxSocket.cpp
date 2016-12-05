@@ -31,17 +31,27 @@ namespace EPRI
     
     void LinuxIP::ReleaseSocket(ISocket * pSocket)
     {
-        m_TCPSockets.remove_if(
-            [pSocket](const LinuxTCPSocket& Socket)
-            {
-                return &Socket == pSocket;
-            });
+        pSocket->Close();
+        //
+        // Post to allow socket cleanup befor removal.
+        //
+        m_IO.post(std::bind(&LinuxIP::RemoveSocket, this, pSocket));
     }
     
     bool LinuxIP::Process()
     {
         return true;
     }
+
+    void LinuxIP::RemoveSocket(ISocket * pSocket)
+    {
+        m_TCPSockets.remove_if(
+            [pSocket](const LinuxTCPSocket& Socket)
+            {
+                return &Socket == pSocket;
+            });
+    }
+
     //
     // LinuxTCPSocket
     //
@@ -95,7 +105,19 @@ namespace EPRI
 
     void LinuxTCPSocket::ASIO_Write_Handler(const asio::error_code& Error, size_t BytesTransferred)
     {
-        if (m_Write)
+        //
+        // Handle TCP Disconnection
+        //
+        if ((asio::error::eof == Error) ||
+            (asio::error::connection_reset == Error) ||
+            (asio::error::operation_aborted == Error))
+        {
+            if (m_Close)
+            {
+                m_Close(SUCCESSFUL);
+            }
+        }
+        else if (m_Write)
         {
             m_Write(Error || !m_Socket.is_open() ? !SUCCESSFUL : SUCCESSFUL, BytesTransferred);
         }
@@ -103,7 +125,19 @@ namespace EPRI
     
     void LinuxTCPSocket::ASIO_Read_Handler(const asio::error_code& Error, size_t BytesTransferred)
     {
-        if (m_Read)
+        //
+        // Handle TCP Disconnection
+        //
+        if ((asio::error::eof == Error) ||
+            (asio::error::connection_reset == Error) ||
+            (asio::error::operation_aborted == Error))
+        {
+            if (m_Close)
+            {
+                m_Close(SUCCESSFUL);
+            }
+        }
+        else if (m_Read)
         {
             m_Read(Error ? !SUCCESSFUL : SUCCESSFUL, BytesTransferred);
         }
@@ -218,8 +252,16 @@ namespace EPRI
             uint8_t *        pAppend = &(*pData)[pData->AppendExtra(ActualBytes)];
 
             ActualBytes = m_Socket.read_some(asio::buffer(pAppend, ActualBytes), ErrorCode);
-            if (ErrorCode == asio::error::eof)
+            //
+            // Handle TCP Disconnection
+            //
+            if ((asio::error::eof == ErrorCode) ||
+                (asio::error::connection_reset == ErrorCode))
             {
+                if (m_Close)
+                {
+                    m_Close(SUCCESSFUL);
+                }
             }
             else if (ErrorCode)
             {
@@ -268,6 +310,13 @@ namespace EPRI
         return SUCCESSFUL;
     }
     
+    LinuxTCPSocket::CloseCallbackFunction LinuxTCPSocket::RegisterCloseHandler(CloseCallbackFunction Callback)
+    {
+        CloseCallbackFunction RetVal = m_Close;
+        m_Close = Callback;
+        return RetVal;
+    }
+
     bool LinuxTCPSocket::IsConnected()
     {
         return m_Socket.is_open();

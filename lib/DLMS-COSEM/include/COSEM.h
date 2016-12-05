@@ -39,6 +39,42 @@ namespace EPRI
         };
         
     using TransportEventData = COSEMEventData<Transport::TransportEvent>;
+    //
+    // BaseCallbackParameter for COSEM
+    //
+    struct APPBaseCallbackParameter : public BaseCallbackParameter
+    {
+        APPBaseCallbackParameter(COSEMAddressType SourceAddress,
+            COSEMAddressType DestinationAddress)
+            : m_SourceAddress(SourceAddress)
+            , m_DestinationAddress(DestinationAddress)
+        {
+        }
+        COSEMAddressType  m_SourceAddress;
+        COSEMAddressType  m_DestinationAddress;
+    };
+    //
+    // ABORT Service
+    //
+    struct APPAbortIndication : public APPBaseCallbackParameter
+    {
+        static const uint16_t ID = 0x2007;
+        
+        APPAbortIndication(COSEMAddressType SourceAddress,
+            COSEMAddressType DestinationAddress,
+            uint32_t Diagnostic = 0)
+            : APPBaseCallbackParameter(SourceAddress, DestinationAddress)
+            , m_Diagnostic(Diagnostic)
+        {
+        }
+        //
+        // TODO - Make useful
+        //
+        uint32_t      m_Diagnostic;
+        
+    };
+
+    using AbortIndicationEventData = COSEMEventData<APPAbortIndication>;    
     
     class COSEM : public Callback<bool, uint16_t>, public StateMachine
     {
@@ -65,6 +101,11 @@ namespace EPRI
         virtual TRANSPORT_HANDLE RegisterTransport(Transport * pTransport);
         virtual bool IsOpen() const;
         virtual COSEMAddressType GetAddress() const;
+        virtual COSEMAddressType GetAssociatedAddress() const;
+        //
+        // COSEM-ABORT Service
+        //
+        void RegisterAbortIndication(CallbackFunction Callback);
 
     protected:
         //
@@ -77,7 +118,8 @@ namespace EPRI
             ST_ASSOCIATION_PENDING,
             ST_ASSOCIATION_RELEASE_PENDING,
             ST_ASSOCIATED,
-            ST_MAX_STATES
+            ST_MAX_STATES,
+            ST_IGNORED = StateMachine::EVENT_IGNORED
         };
         
         virtual size_t MaxTransports();
@@ -104,20 +146,8 @@ namespace EPRI
         
         std::map<TRANSPORT_HANDLE, Transport *> m_Transports;
         COSEMAddressType                        m_Address;
+        COSEMAddressType                        m_AssociatedAddress = INVALID_ADDRESS;
         
-    };
-    //
-    // BaseCallbackParameter for COSEM
-    //
-    struct APPBaseCallbackParameter : public BaseCallbackParameter
-    {
-        APPBaseCallbackParameter(COSEMAddressType SourceAddress,
-            COSEMAddressType DestinationAddress) :
-            m_SourceAddress(SourceAddress), m_DestinationAddress(DestinationAddress)
-        {
-        }
-        COSEMAddressType  m_SourceAddress;
-        COSEMAddressType  m_DestinationAddress;
     };
     //
     // OPEN Service
@@ -373,6 +403,10 @@ namespace EPRI
         // COSEM-RELEASE Service
         //
         bool OnReleaseIndication(const APPReleaseRequestOrIndication& Parameters);
+        //
+        // COSEM-ABORT Service
+        //
+        bool OnAbortIndication(const APPAbortIndication& Parameters);
         //
         // State Machine
         //

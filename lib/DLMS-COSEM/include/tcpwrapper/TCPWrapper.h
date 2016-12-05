@@ -23,7 +23,8 @@ namespace EPRI
         
         void Socket_Connect(ERROR_TYPE Error);
         void Socket_Receive(ERROR_TYPE Error, size_t BytesReceived);
-        
+        void Socket_Close(ERROR_TYPE Error);
+       
         bool ArmAsyncRead(size_t MinimumSize = Wrapper::HEADER_SIZE);
  
         enum TCPReadState

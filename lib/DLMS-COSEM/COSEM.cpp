@@ -76,6 +76,11 @@ namespace EPRI
     {
         return m_Address;
     }
+    
+    COSEMAddressType COSEM::GetAssociatedAddress() const
+    {
+        return m_AssociatedAddress;
+    }
 
     size_t COSEM::MaxTransports()
     {
@@ -84,15 +89,22 @@ namespace EPRI
     
     bool COSEM::TransportEventHandler(const Transport::TransportEvent& Event)
     {
-        bool bAllowed = false;
-        BEGIN_TRANSITION_MAP
-            TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IDLE)
-            TRANSITION_MAP_ENTRY(ST_IDLE, EVENT_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, EVENT_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, EVENT_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_INACTIVE)
-        END_TRANSITION_MAP(bAllowed, new TransportEventData(Event));
-        return bAllowed;
+        if (ST_INACTIVE == m_CurrentState && Transport::TRANSPORT_CONNECTED == Event)
+        {
+            return ExternalEvent(ST_IDLE, new TransportEventData(Event));
+        }
+        else if (Transport::TRANSPORT_DISCONNECTED == Event)
+        {
+            return ExternalEvent(ST_INACTIVE, new TransportEventData(Event));
+        }
+        return false;
+    }
+    //
+    // COSEM-ABORT Service
+    //
+    void COSEM::RegisterAbortIndication(CallbackFunction Callback)
+    {
+        RegisterCallback(APPAbortIndication::ID, Callback);
     }
     //
     // HELPERS
