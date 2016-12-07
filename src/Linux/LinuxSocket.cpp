@@ -251,7 +251,7 @@ namespace EPRI
 
         Base()->GetDebug()->TRACE_BUFFER("IR", pBuffer, ReadAtLeast);
         
-        return Stream;
+        return static_cast<bool>(Stream);
     }
     
     
