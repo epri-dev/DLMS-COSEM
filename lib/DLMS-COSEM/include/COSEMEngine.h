@@ -45,6 +45,7 @@ namespace EPRI
     {
     public:
         typedef InvokeIdAndPriorityType GetToken; 
+        typedef InvokeIdAndPriorityType SetToken; 
             
         typedef struct _Options : public COSEMEngine::Options
         {
@@ -71,19 +72,35 @@ namespace EPRI
                          GetToken * pToken);    
         virtual bool OnGetConfirmation(GetToken Token,
                                        const DLMSVector& Data);
+        virtual bool Set(const Cosem_Attribute_Descriptor& Descriptor,
+                         const DLMSVector& Value,
+                         SetToken * pToken);    
+        virtual bool OnSetConfirmation(SetToken Token);
         virtual bool Release();
         virtual bool OnReleaseConfirmation(COSEMAddressType ServerAddress);
         virtual bool OnAbortIndication(COSEMAddressType ServerAddress);
         
     protected:
+        enum ServiceID : uint8_t
+        {
+            SERVICE_GET    = 0,
+            SERVICE_SET    = 1,
+            SERVICE_ACTION = 2,
+            SERVICE_COUNT  = 3
+        };
+        
         bool Client_OpenConfirmation(const BaseCallbackParameter& Parameters);
         bool Client_GetConfirmation(const BaseCallbackParameter& Parameters);
+        bool Client_SetConfirmation(const BaseCallbackParameter& Parameters);
         bool Client_ReleaseConfirmation(const BaseCallbackParameter& Parameters);
         bool Client_AbortIndication(const BaseCallbackParameter& Parameters);
-       
-        COSEMClient      m_Client;
-        Options          m_Options;
-        modcounter       m_InvokeID;
+        
+        virtual InvokeIdAndPriorityType CurrentInvokeID(ServiceID Service) const;
+        virtual InvokeIdAndPriorityType GetAndIncrementInvokeID(ServiceID Service);
+        
+        COSEMClient                         m_Client;
+        Options                             m_Options;
+        ModCounter<ALLOWED_INVOCATION_IDS>  m_InvokeID[SERVICE_COUNT];
     };
     
 #define ENGINE_BEGIN_DEVICES

@@ -1,10 +1,5 @@
 #include "APDU/APDUFactory.h"
-#include "APDU/AARE.h"
-#include "APDU/AARQ.h"
-#include "APDU/GET-Request.h"
-#include "APDU/GET-Response.h"
-#include "APDU/RLRE.h"
-#include "APDU/RLRQ.h"
+#include "APDU/APDUDefs.h"
 
 namespace EPRI
 {
@@ -37,6 +32,15 @@ namespace EPRI
             break;
         case Get_Response_Base::Tag:
             pRetVal.reset(new Get_Response_Normal());
+            break;
+        case Set_Request_Base::Tag:
+            //
+            // TODO - Appropriate SET types...
+            //
+            pRetVal.reset(new Set_Request_Normal());
+            break;
+        case Set_Response_Base::Tag:
+            pRetVal.reset(new Set_Response_Normal());
             break;
         case RLRQ::Tag:
             pRetVal.reset(new RLRQ());

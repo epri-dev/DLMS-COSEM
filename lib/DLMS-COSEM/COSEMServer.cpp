@@ -67,6 +67,29 @@ namespace EPRI
         return true;
     }
     //
+    // COSEM-SET Service
+    //
+    bool COSEMServer::SetResponse(const APPSetConfirmOrResponse& Parameters)
+    {
+        bool bAllowed = false;
+        BEGIN_TRANSITION_MAP
+            TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATED)
+        END_TRANSITION_MAP(bAllowed, new SetResponseEventData(Parameters));
+        return bAllowed;
+    }
+    
+    bool COSEMServer::OnSetIndication(const APPSetRequestOrIndication& Parameters)
+    {
+        //
+        // Default Handler Does Nothing
+        //
+        return true;
+    }
+    //
     // COSEM-RELEASE Service
     //
     bool COSEMServer::ReleaseResponse(const APPReleaseConfirmOrResponse& Parameters)
@@ -260,7 +283,56 @@ namespace EPRI
                 
             pTransport->DataRequest(TransportParam);
             
-        }        
+        } 
+        // 
+        // Received SET Request
+        //
+        SetRequestEventData * pSetRequest = dynamic_cast<SetRequestEventData *>(pData);
+        if (pSetRequest)
+        {
+            InitiateSet(pSetRequest->Data,
+                OnSetIndication(pSetRequest->Data));
+            return;
+        }    
+        // 
+        // Transmit SET Response
+        //
+        SetResponseEventData * pSetResponse = dynamic_cast<SetResponseEventData *>(pData);
+        if (pTransport && pSetResponse)
+        {
+            Transport::DataRequestParameter TransportParam;
+
+            switch (pSetResponse->Data.m_Type)
+            {
+            case APPSetConfirmOrResponse::SetResponseType::set_response_normal:
+                {
+                    Set_Response_Normal Response;
+                    const APPSetConfirmOrResponse& Parameters = pSetResponse->Data;
+                    
+                    Response.invoke_id_and_priority = Parameters.m_InvokeIDAndPriority;
+                    Response.result = Parameters.m_Result;
+
+                    TransportParam.SourceAddress = GetAddress();
+                    TransportParam.DestinationAddress = Parameters.m_SourceAddress;
+                    TransportParam.Data = Response.GetBytes();
+                }
+                break;
+                
+            case APPSetConfirmOrResponse::SetResponseType::set_response_with_first_datablock :
+                throw std::logic_error("set_response_with_first_datablock Not Implemented!");
+
+            case APPSetConfirmOrResponse::SetResponseType::set_response_with_datablock :
+                throw std::logic_error("set_response_with_datablock Not Implemented!");
+
+            case APPSetConfirmOrResponse::SetResponseType::set_response_with_list :
+                throw std::logic_error("set_response_with_list Not Implemented!");
+
+            case APPSetConfirmOrResponse::SetResponseType::set_response_with_list_and_first_datablock :
+                throw std::logic_error("set_response_with_list_and_first_datablock Not Implemented!");            }
+                
+            pTransport->DataRequest(TransportParam);
+            
+        }            
         
     }
     //
@@ -322,6 +394,39 @@ namespace EPRI
     }
     
     bool COSEMServer::GET_Response_Handler(const IAPDUPtr& pAPDU)
+    {
+        return false;
+    }
+
+    bool COSEMServer::SET_Request_Handler(const IAPDUPtr& pAPDU)
+    {
+        SetRequestEventData * pEvent = nullptr;
+        Set_Request_Normal *  pNormalRequest = dynamic_cast<Set_Request_Normal *>(pAPDU.get());
+        if (pNormalRequest)
+        {
+            pEvent = new SetRequestEventData(APPSetRequestOrIndication(
+                pAPDU->GetSourceAddress(),
+                pAPDU->GetDestinationAddress(),
+                pNormalRequest->invoke_id_and_priority,
+                pNormalRequest->cosem_attribute_descriptor,
+                pNormalRequest->value));
+        }
+        if (pEvent)
+        {
+            bool bAllowed = false;
+            BEGIN_TRANSITION_MAP
+                TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATED)
+            END_TRANSITION_MAP(bAllowed, pEvent);
+            return bAllowed;
+        }
+        return false;
+    }
+    
+    bool COSEMServer::SET_Response_Handler(const IAPDUPtr& pAPDU)
     {
         return false;
     }

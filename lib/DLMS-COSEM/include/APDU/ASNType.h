@@ -148,7 +148,9 @@ namespace EPRI
                     DLMSVariant(std::initializer_list<uint32_t>(__VA_ARGS__)) },
 #define ASN_BOOLEAN_TYPE(OPTIONS)\
             { (EPRI::ASN::DataTypes::BOOLEAN | (OPTIONS)) },
-#define ASN_ENUM_TYPE(OPTIONS)\
+#define ASN_ENUM_TYPE\
+            { (EPRI::ASN::DataTypes::ENUM) },
+#define ASN_ENUM_TYPE_WITH_OPTIONS(OPTIONS)\
             { (EPRI::ASN::DataTypes::ENUM | (OPTIONS)) },
 #define ASN_REAL_TYPE(OPTIONS)\
             { (EPRI::ASN::DataTypes::REAL | (OPTIONS)) },

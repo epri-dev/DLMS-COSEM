@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 namespace EPRI
 {
 	class modcounter
@@ -64,5 +66,19 @@ namespace EPRI
 		modcounter& operator=(mod8counter &RightHandSide);
 
 	};	
+    
+    template <uint8_t Base>
+        class ModCounter : public modcounter
+        {
+        public:
+            ModCounter()
+                : modcounter(Base)
+            {
+            }
+            ModCounter(uint8_t InitialValue)
+                : modcounter(Base, InitialValue)
+            {
+            }
+        };
 
 } /* namespace EPRI */

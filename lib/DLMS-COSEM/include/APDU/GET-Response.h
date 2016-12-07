@@ -2,6 +2,7 @@
 
 #include "APDU.h"
 #include "APDUConstants.h"
+#include "COSEMTypes.h"
 
 namespace EPRI
 {
@@ -41,8 +42,8 @@ namespace EPRI
         //
         // Attributes
         //
-        uint8_t          invoke_id_and_priority;
-        Get_Data_Result  result;
+        InvokeIdAndPriorityType invoke_id_and_priority;
+        Get_Data_Result         result;
         //
         virtual bool Parse(COSEMAddressType SourceAddress,
             COSEMAddressType DestinationAddress,

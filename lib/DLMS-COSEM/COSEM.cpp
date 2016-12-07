@@ -1,10 +1,5 @@
 #include "COSEM.h"
-#include "APDU/AARQ.h"
-#include "APDU/AARE.h"
-#include "APDU/GET-Request.h"
-#include "APDU/GET-Response.h"
-#include "APDU/RLRQ.h"
-#include "APDU/RLRE.h"
+#include "APDU/APDUDefs.h"
 
 namespace EPRI
 {
@@ -59,6 +54,10 @@ namespace EPRI
             std::bind(&COSEM::GET_Request_Handler, this, std::placeholders::_1));
         pXPort->RegisterAPDUHandler(m_Address, Get_Response_Base::Tag,
             std::bind(&COSEM::GET_Response_Handler, this, std::placeholders::_1));
+        pXPort->RegisterAPDUHandler(m_Address, Set_Request_Base::Tag,
+            std::bind(&COSEM::SET_Request_Handler, this, std::placeholders::_1));
+        pXPort->RegisterAPDUHandler(m_Address, Set_Response_Base::Tag,
+            std::bind(&COSEM::SET_Response_Handler, this, std::placeholders::_1));
         pXPort->RegisterAPDUHandler(m_Address, RLRQ::Tag,
             std::bind(&COSEM::RLRQ_Handler, this, std::placeholders::_1));
         pXPort->RegisterAPDUHandler(m_Address, RLRE::Tag,

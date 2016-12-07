@@ -200,8 +200,10 @@ namespace EPRI
         virtual ~COSEMType();
         
         virtual void GetBytes(DLMSVector * pDestination) const;
+        virtual std::vector<uint8_t> GetBytes() const;
         virtual bool Parse(DLMSVector * pData);
-
+        virtual bool Parse(const DLMSVector& Data);
+        
         virtual bool IsEmpty() const;
         virtual void Clear();
         virtual void Rewind();
@@ -241,6 +243,7 @@ namespace EPRI
         bool operator==(const std::vector<uint8_t>& rhs) const;
         bool operator==(const COSEMType& rhs) const;
         COSEMType& operator=(const DLMSVector& rhs);
+        operator const DLMSVector&();
 
     protected:
         COSEMType(SchemaBaseType DT);

@@ -194,8 +194,9 @@ protected:
         PrintLine("\t1 - TCP Connect\n");
         PrintLine("\t2 - COSEM Open\n");
         PrintLine("\t3 - COSEM Get\n");
-        PrintLine("\t4 - COSEM Release\n");
-        PrintLine("\t5 - TCP Disconnect\n\n"); 
+        PrintLine("\t4 - COSEM Set\n");
+        PrintLine("\t5 - COSEM Release\n");
+        PrintLine("\t9 - TCP Disconnect\n\n"); 
         PrintLine("Select: ");
         ReadLine(std::bind(&ClientApp::ClientMenu_Handler, this, std::placeholders::_1));
     }
@@ -265,12 +266,41 @@ protected:
         }
         else if (RetVal == "4")
         {
+            if (m_pSocket && m_pSocket->IsConnected() && m_pClientEngine->IsOpen())
+            {
+                Cosem_Attribute_Descriptor Descriptor;
+                
+                Descriptor.class_id = (ClassIDType) GetNumericInput("Class ID (Default: 1)", CLSID_IData);
+                Descriptor.attribute_id = (ObjectAttributeIdType) GetNumericInput("Attribute (Default: 2)", 2);
+                if (Descriptor.instance_id.Parse(GetStringInput("OBIS Code (Default: 0-0:96.1.0*255)", "0-0:96.1.0*255")))
+                {
+                    COSEMType MyData(COSEMDataType::VISIBLE_STRING, GetStringInput("Value (Default: LINUXDATA)", "LINUXDATA#"));
+                    if (m_pClientEngine->Set(Descriptor,
+                                             MyData,
+                                             &m_SetToken))
+                    {
+                        
+                    }
+                }
+                else
+                {
+                    PrintLine("Malformed OBIS Code!\n");
+                }
+            }
+            else
+            {
+                PrintLine("Not Connected!\n");
+            }
+            
+        }        
+        else if (RetVal == "5")
+        {
             if (!m_pClientEngine->Release())
             {
                 PrintLine("Problem submitting COSEM Release!\n");
             }
         }
-        else if (RetVal == "5")
+        else if (RetVal == "9")
         {
             if (m_pSocket)
             {
@@ -290,6 +320,7 @@ protected:
     LinuxClientEngine *         m_pClientEngine = nullptr;
     ISocket *                   m_pSocket = nullptr;
     COSEMClientEngine::GetToken m_GetToken;
+    COSEMClientEngine::SetToken m_SetToken;
    
 };
 

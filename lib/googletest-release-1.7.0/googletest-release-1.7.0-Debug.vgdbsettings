@@ -7,16 +7,16 @@
       <PathStyle>RemoteUnix</PathStyle>
     </CustomSourceDirectories>
     <BuildHost>
-      <HostName>192.168.11.133</HostName>
-      <Transport>SSH</Transport>
-      <UserName>gbarrett</UserName>
+      <HostName>LinuxVM</HostName>
+      <Transport>Alias</Transport>
+      <UserName />
     </BuildHost>
     <MainSourceTransferCommand>
       <SkipWhenRunningCommandList>false</SkipWhenRunningCommandList>
       <RemoteHost>
-        <HostName>192.168.11.133</HostName>
-        <Transport>SSH</Transport>
-        <UserName>gbarrett</UserName>
+        <HostName>LinuxVM</HostName>
+        <Transport>Alias</Transport>
+        <UserName />
       </RemoteHost>
       <LocalDirectory>$(ProjectDir)</LocalDirectory>
       <RemoteDirectory>/tmp/VisualGDB/$(ProjectDirUnixStyle)</RemoteDirectory>

@@ -121,6 +121,12 @@
     <ClCompile Include="APDU\RLRQ.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="APDU\SET-Request.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="APDU\SET-Response.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ERROR_TYPE.h">
@@ -298,6 +304,12 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="include\APDU\APDUDefs.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\APDU\SET-Request.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\APDU\SET-Response.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

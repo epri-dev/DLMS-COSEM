@@ -72,6 +72,8 @@
     <ClCompile Include="APDU\GET-Response.cpp" />
     <ClCompile Include="APDU\RLRE.cpp" />
     <ClCompile Include="APDU\RLRQ.cpp" />
+    <ClCompile Include="APDU\SET-Request.cpp" />
+    <ClCompile Include="APDU\SET-Response.cpp" />
     <ClCompile Include="COSEMEngine.cpp" />
     <ClCompile Include="DLMS-COSEM.cpp" />
     <ClCompile Include="hdlc\HDLCAddress.cpp" />
@@ -111,6 +113,8 @@
     <ClInclude Include="include\APDU\GET-Response.h" />
     <ClInclude Include="include\APDU\RLRE.h" />
     <ClInclude Include="include\APDU\RLRQ.h" />
+    <ClInclude Include="include\APDU\SET-Request.h" />
+    <ClInclude Include="include\APDU\SET-Response.h" />
     <ClInclude Include="include\Callback.h" />
     <ClInclude Include="include\COSEM.h" />
     <ClInclude Include="include\COSEMAddress.h" />

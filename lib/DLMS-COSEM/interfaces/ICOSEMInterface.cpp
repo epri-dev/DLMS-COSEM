@@ -116,6 +116,7 @@ namespace EPRI
                 break;
             default:
                 RetVal = InternalGet(pAttribute, Descriptor, pSelectiveAccess);
+                break;
             }
             if (RetVal)
             {
@@ -124,5 +125,43 @@ namespace EPRI
         }
         return RetVal;
     }
+    
+    bool ICOSEMObject::Set(const Cosem_Attribute_Descriptor& Descriptor, 
+        const DLMSVector& Data,
+        SelectiveAccess * pSelectiveAccess /*= nullptr*/)
+    {
+        bool              RetVal = false;
+        ICOSEMAttribute * pAttribute = FindAttribute(Descriptor.attribute_id);
+        if (pAttribute)
+        {
+            pAttribute->Clear();
+            switch (Descriptor.attribute_id)
+            {
+            case ICOSEMInterface::ATTRIBUTE_0:
+                //
+                // UNSUPPORTED
+                //
+                return false;
+            case ICOSEMInterface::LOGICAL_NAME:
+                //
+                // READ-ONLY
+                //
+                return false;
+            default:
+                RetVal = InternalSet(pAttribute, Descriptor, Data, pSelectiveAccess);
+                break;
+            }
+        }
+        return RetVal;
+    }    
+    
+    bool ICOSEMObject::InternalSet(ICOSEMAttribute * pAttribute, 
+        const Cosem_Attribute_Descriptor& /*Descriptor*/, 
+        const DLMSVector& Data,
+        SelectiveAccess * /*pSelectiveAccess*/)
+    {
+        return pAttribute->Parse(Data);
+    }
+
     
 }

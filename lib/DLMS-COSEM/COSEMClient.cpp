@@ -61,6 +61,26 @@ namespace EPRI
         RegisterCallback(APPGetConfirmOrResponse::ID, Callback);
     }
     //
+    // COSEM-SET Service
+    //
+    bool COSEMClient::SetRequest(const APPSetRequestOrIndication& Parameters)
+    {
+        bool bAllowed = false;
+        BEGIN_TRANSITION_MAP
+            TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATED)
+        END_TRANSITION_MAP(bAllowed, new SetRequestEventData(Parameters));
+        return bAllowed;
+    }
+    
+    void COSEMClient::RegisterSetConfirm(CallbackFunction Callback)
+    {
+        RegisterCallback(APPSetConfirmOrResponse::ID, Callback);
+    }
+    //
     // COSEM-RELEASE Service
     //
     bool COSEMClient::ReleaseRequest(const APPReleaseRequestOrIndication& Parameters)
@@ -281,6 +301,57 @@ namespace EPRI
             FireCallback(APPGetConfirmOrResponse::ID, pGetResponse->Data, &RetVal);
             return;            
         }
+        // 
+        // Transmit SET Request
+        //
+        SetRequestEventData * pSetRequest = dynamic_cast<SetRequestEventData *>(pData);
+        if (pTransport && pSetRequest)
+        {
+            Transport::DataRequestParameter TransportParam;
+                
+            switch (pSetRequest->Data.m_Type)
+            {
+            case APPSetRequestOrIndication::SetRequestType::set_request_normal:
+                {
+                    Set_Request_Normal               Request;
+                    const APPSetRequestOrIndication& Parameters = pSetRequest->Data;
+                    Request.invoke_id_and_priority = Parameters.m_InvokeIDAndPriority;
+                    Request.cosem_attribute_descriptor = 
+                        Parameters.m_Parameter.get<Cosem_Attribute_Descriptor>();
+                    Request.value = Parameters.m_Value;
+                    
+                    TransportParam.SourceAddress = GetAddress();
+                    TransportParam.DestinationAddress = Parameters.m_SourceAddress;
+                    TransportParam.Data = Request.GetBytes();
+                }
+                break;
+                
+            case APPSetRequestOrIndication::SetRequestType::set_request_with_first_datablock :
+                throw std::logic_error("set_request_with_first_datablock Not Implemented!");
+
+            case APPSetRequestOrIndication::SetRequestType::set_request_with_datablock :
+                throw std::logic_error("set_request_with_datablock Not Implemented!");
+
+            case APPSetRequestOrIndication::SetRequestType::set_request_with_list :
+                throw std::logic_error("set_request_with_list Not Implemented!");
+
+            case APPSetRequestOrIndication::SetRequestType::set_request_with_list_and_first_datablock :
+                throw std::logic_error("set_request_with_list_and_first_datablock Not Implemented!");
+
+            }
+                
+            pTransport->DataRequest(TransportParam);
+        }
+        //
+        // Receive SET Response
+        //
+        SetResponseEventData * pSetResponse = dynamic_cast<SetResponseEventData *>(pData);
+        if (pSetResponse)
+        {
+            bool  RetVal = false;
+            FireCallback(APPSetConfirmOrResponse::ID, pSetResponse->Data, &RetVal);
+            return;            
+        }        
     }
     //
     // APDU Handlers
@@ -339,6 +410,33 @@ namespace EPRI
                                         pGetResponse->GetDestinationAddress(),
                                         pGetResponse->invoke_id_and_priority,
                                         pGetResponse->result.get<DLMSVector>())));
+        }
+        return RetVal;
+    }
+    
+    bool COSEMClient::SET_Request_Handler(const IAPDUPtr& pAPDU)
+    {
+        return false;
+    }
+    
+    bool COSEMClient::SET_Response_Handler(const IAPDUPtr& pAPDU)
+    {
+        bool                  RetVal = false;
+        Set_Response_Normal * pSetResponse = dynamic_cast<Set_Response_Normal *>(pAPDU.get());
+        if (pSetResponse)
+        {
+            BEGIN_TRANSITION_MAP
+                TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATED)
+            END_TRANSITION_MAP(RetVal,
+                new SetResponseEventData(
+                    APPSetConfirmOrResponse(pSetResponse->GetSourceAddress(),
+                        pSetResponse->GetDestinationAddress(),
+                        pSetResponse->invoke_id_and_priority,
+                        pSetResponse->result)));
         }
         return RetVal;
     }

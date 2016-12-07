@@ -10,14 +10,15 @@ namespace EPRI
     // COSEMClientEngine
     //
     COSEMClientEngine::COSEMClientEngine(const Options& Opt, Transport * pXPort) :
-        COSEMEngine(pXPort), m_Client(Opt.m_Address), m_Options(Opt),
-        m_InvokeID(ALLOWED_INVOCATION_IDS, 0)
+        COSEMEngine(pXPort), m_Client(Opt.m_Address), m_Options(Opt)
     {
         m_Client.RegisterTransport(pXPort);
         m_Client.RegisterOpenConfirm(
             std::bind(&COSEMClientEngine::Client_OpenConfirmation, this, std::placeholders::_1));
         m_Client.RegisterGetConfirm(
             std::bind(&COSEMClientEngine::Client_GetConfirmation, this, std::placeholders::_1));
+        m_Client.RegisterSetConfirm(
+            std::bind(&COSEMClientEngine::Client_SetConfirmation, this, std::placeholders::_1));
         m_Client.RegisterReleaseConfirm(
             std::bind(&COSEMClientEngine::Client_ReleaseConfirmation, this, std::placeholders::_1));
         m_Client.RegisterAbortIndication(
@@ -32,7 +33,9 @@ namespace EPRI
     {
         return true;
     }
-    
+    //
+    // COSEM.Open Service
+    //
     bool COSEMClientEngine::Open(COSEMAddressType DestinationAddress, const COSEMSecurityOptions& Security)
     {
         return m_Client.OpenRequest(APPOpenRequestOrIndication(m_Options.m_Address, DestinationAddress, 
@@ -51,17 +54,19 @@ namespace EPRI
     {
         return m_Client.IsOpen();
     }
-
+    //
+    // COSEM.Get Service
+    //
     bool COSEMClientEngine::Get(const Cosem_Attribute_Descriptor& Descriptor,
                                 GetToken * pToken)
     {
-        bool RetVal = m_Client.IsOpen();
+        bool                    RetVal = m_Client.IsOpen();
         if (RetVal)
         {
             RetVal = m_Client.GetRequest(
                            APPGetRequestOrIndication(m_Options.m_Address,
                                                      m_Client.GetAssociatedAddress(),
-                                                     m_InvokeID, 
+                                                     CurrentInvokeID(SERVICE_GET), 
                                                      COSEMPriority::COSEM_PRIORITY_NORMAL,
                                                      COSEMServiceClass::COSEM_SERVICE_CONFIRMED,
                                                      Descriptor));
@@ -69,8 +74,7 @@ namespace EPRI
         }
         if (RetVal)
         {
-            *pToken = m_InvokeID;
-            ++m_InvokeID;
+            *pToken = GetAndIncrementInvokeID(SERVICE_GET);
         }
         return RetVal;
     }
@@ -83,7 +87,43 @@ namespace EPRI
         //
         return true;
     }
+    //
+    // COSEM.Set Service
+    //
+    bool COSEMClientEngine::Set(const Cosem_Attribute_Descriptor& Descriptor,
+                                const DLMSVector& Value,
+                                SetToken * pToken)    
+    {
+        bool RetVal = m_Client.IsOpen();
+        if (RetVal)
+        {
+            RetVal = m_Client.SetRequest(
+                           APPSetRequestOrIndication(m_Options.m_Address,
+                                m_Client.GetAssociatedAddress(),
+                                CurrentInvokeID(SERVICE_SET), 
+                                COSEMPriority::COSEM_PRIORITY_NORMAL,
+                                COSEMServiceClass::COSEM_SERVICE_CONFIRMED,
+                                Descriptor,
+                                Value));
+           
+        }
+        if (RetVal)
+        {
+            *pToken = GetAndIncrementInvokeID(SERVICE_SET);
+        }
+        return RetVal;
+    }
     
+    bool COSEMClientEngine::OnSetConfirmation(SetToken Token)
+    {
+        //
+        // Default Handler Does Nothing
+        //
+        return true;
+    }    
+    //
+    // COSEM.Release Service
+    //
     bool COSEMClientEngine::Release()
     {
         if (m_Client.IsOpen())
@@ -102,7 +142,9 @@ namespace EPRI
         //
         return true;
     }
-    
+    //
+    // COSEM.Abort Service
+    //
     bool COSEMClientEngine::OnAbortIndication(COSEMAddressType /*ServerAddress*/)
     {
         //
@@ -110,7 +152,19 @@ namespace EPRI
         //
         return true;
     }
-
+    //
+    // Protected Methods
+    //
+    InvokeIdAndPriorityType COSEMClientEngine::CurrentInvokeID(ServiceID Service) const
+    {
+        return m_InvokeID[Service];
+    }
+    
+    InvokeIdAndPriorityType COSEMClientEngine::GetAndIncrementInvokeID(ServiceID Service)
+    {
+        return m_InvokeID[Service]++;
+    }
+    
     bool COSEMClientEngine::Client_OpenConfirmation(const BaseCallbackParameter& Parameters)
     {
         const APPOpenConfirmOrResponse& Confirmation = 
@@ -125,6 +179,12 @@ namespace EPRI
                                  Confirmation.m_Data);
     }
 
+    bool COSEMClientEngine::Client_SetConfirmation(const BaseCallbackParameter& Parameters)
+    {
+        const APPSetConfirmOrResponse& Confirmation = dynamic_cast<const APPSetConfirmOrResponse&>(Parameters);
+        return OnSetConfirmation(COSEM_GET_INVOKE_ID(Confirmation.m_InvokeIDAndPriority));
+    }
+    
     bool COSEMClientEngine::Client_ReleaseConfirmation(const BaseCallbackParameter& Parameters)
     {
         const APPReleaseConfirmOrResponse& Confirmation = dynamic_cast<const APPReleaseConfirmOrResponse&>(Parameters);

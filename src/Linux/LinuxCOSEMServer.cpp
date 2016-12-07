@@ -1,5 +1,3 @@
-#include <sstream>
-
 #include "LinuxCOSEMServer.h"
 #include "COSEMAddress.h"
 
@@ -11,17 +9,41 @@ namespace EPRI
     LinuxData::LinuxData()
         : IDataObject({ 0, 0, 96, 1, {0, 9}, 255 })
     {
+        for (int Index = 0; Index < 10; ++Index)
+        {
+            m_Values[Index] = "LINUXDATA" + std::to_string(Index);
+        }
     }
 
     bool LinuxData::InternalGet(ICOSEMAttribute * pAttribute, 
         const Cosem_Attribute_Descriptor& Descriptor, 
         SelectiveAccess * pSelectiveAccess)
     {
-        std::stringstream Output;
-        Output << "LINUXDATA" << std::to_string(Descriptor.instance_id.GetValueGroup(EPRI::COSEMObjectInstanceID::VALUE_GROUP_E));
         pAttribute->SelectChoice(COSEMDataType::VISIBLE_STRING);
-        pAttribute->Append(Output.str());
+        pAttribute->Append(m_Values[Descriptor.instance_id.GetValueGroup(EPRI::COSEMObjectInstanceID::VALUE_GROUP_E)]);
         return true;
+    }
+    
+    bool LinuxData::InternalSet(ICOSEMAttribute * pAttribute, 
+        const Cosem_Attribute_Descriptor& Descriptor, 
+        const DLMSVector& Data,
+        SelectiveAccess * pSelectiveAccess)
+    {
+        try
+        {
+            DLMSValue Value;
+            if (ICOSEMObject::InternalSet(pAttribute, Descriptor, Data, pSelectiveAccess) &&
+                pAttribute->GetNextValue(&Value) == COSEMType::GetNextResult::VALUE_RETRIEVED)
+            {
+                m_Values[Descriptor.instance_id.GetValueGroup(EPRI::COSEMObjectInstanceID::VALUE_GROUP_E)] =
+                    DLMSValueGet<std::string>(Value);
+                return true;
+            }
+        }
+        catch (...) 
+        {
+        }
+        return false;
     }
     //
     // Clock
@@ -50,6 +72,7 @@ namespace EPRI
         }
         return false;
     }
+    
     //
     // Logical Device
     //

@@ -17,6 +17,12 @@ namespace EPRI
         virtual bool InternalGet(ICOSEMAttribute * pAttribute, 
             const Cosem_Attribute_Descriptor& Descriptor, 
             SelectiveAccess * pSelectiveAccess) final;
+        virtual bool InternalSet(ICOSEMAttribute * pAttribute, 
+            const Cosem_Attribute_Descriptor& Descriptor, 
+            const DLMSVector& Data,
+            SelectiveAccess * pSelectiveAccess) final;
+        
+        std::string m_Values[10];
         
     };
 
@@ -28,7 +34,8 @@ namespace EPRI
     protected:
         virtual bool InternalGet(ICOSEMAttribute * pAttribute, 
             const Cosem_Attribute_Descriptor& Descriptor, 
-            SelectiveAccess * pSelectiveAccess) final;        
+            SelectiveAccess * pSelectiveAccess) final; 
+        
     };
     
     class LinuxManagementDevice : public COSEMServer

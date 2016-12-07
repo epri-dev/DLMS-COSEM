@@ -77,12 +77,19 @@ namespace EPRI
         virtual bool Get(DLMSVector * pData,
             const Cosem_Attribute_Descriptor& Descriptor, 
             SelectiveAccess * pSelectiveAccess = nullptr);
+        virtual bool Set(const Cosem_Attribute_Descriptor& Descriptor, 
+            const DLMSVector& Data,
+            SelectiveAccess * pSelectiveAccess = nullptr);
             
     protected:
         virtual ICOSEMAttribute * FindAttribute(ObjectAttributeIdType AttributeId) const;
         virtual bool InternalGet(ICOSEMAttribute * pAttribute, 
             const Cosem_Attribute_Descriptor& Descriptor, 
             SelectiveAccess * pSelectiveAccess) = 0;
+        virtual bool InternalSet(ICOSEMAttribute * pAttribute, 
+            const Cosem_Attribute_Descriptor& Descriptor, 
+            const DLMSVector& Data,
+            SelectiveAccess * pSelectiveAccess);
 
         const COSEMObjectInstanceCriteria m_InstanceCriteria;
         const uint16_t                    m_ShortNameBase;

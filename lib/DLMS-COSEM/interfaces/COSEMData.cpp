@@ -60,6 +60,11 @@ namespace EPRI
     {
         pDestination->Append(m_Data.GetBytes());
     }
+    
+    std::vector<uint8_t> COSEMType::GetBytes() const
+    {
+        return m_Data.GetBytes();
+    }
         
     bool COSEMType::IsEmpty() const
     {
@@ -89,6 +94,11 @@ namespace EPRI
     bool COSEMType::Parse(DLMSVector * pData)
     {
         return m_Data.Append(pData) >= 0;
+    }
+
+    bool COSEMType::Parse(const DLMSVector& Data)
+    {
+        return m_Data.Append(Data) >= 0;
     }
     
 #define CURRENT_APPEND_STATE m_AppendStates.top()
@@ -353,6 +363,12 @@ namespace EPRI
         m_Data = rhs;
         return *this;
     }
+
+    COSEMType::operator const DLMSVector&()
+    {
+        return m_Data;
+    }
+    
     //
     // Protected Methods
     //
