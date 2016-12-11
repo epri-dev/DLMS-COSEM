@@ -82,7 +82,6 @@
     <ClInclude Include="include\LinuxMemory.h" />
     <ClInclude Include="include\LinuxSerial.h" />
     <ClInclude Include="include\LinuxSimpleTimer.h" />
-    <ClInclude Include="include\optional.h" />
     <ClInclude Include="include\LinuxCOSEMServer.h" />
     <ClInclude Include="include\LinuxDebug.h" />
     <ClInclude Include="include\LinuxSocket.h" />

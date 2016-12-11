@@ -137,23 +137,50 @@ public:
         return true;
     }
 
-    virtual bool OnGetConfirmation(GetToken Token,
-                                   const DLMSVector& Data)
+    virtual bool OnGetConfirmation(RequestToken Token, const GetResponse& Response)
     {
-        Base()->GetDebug()->TRACE("\n\nGet Confirmation for Token %d...\n\n", Token);
-        
-        IData     SerialNumbers;
-        DLMSValue Value;
-        
-        SerialNumbers.value = Data;
-            
-        if (COSEMType::VALUE_RETRIEVED == SerialNumbers.value.GetNextValue(&Value))
+        Base()->GetDebug()->TRACE("\n\nGet Confirmation for Token %d...\n", Token);
+        if (Response.ResultValid && Response.Result.which() == Get_Data_Result_Choice::data_access_result)
         {
-            Base()->GetDebug()->TRACE("%s\n", DLMSValueGet<VISIBLE_STRING_CType>(Value).c_str());
+            Base()->GetDebug()->TRACE("\tReturned Error Code %d...\n", 
+                Response.Result.get<APDUConstants::Data_Access_Result>());
+            return false;
         }
         
-        Base()->GetDebug()->TRACE_VECTOR("GET", Data);
+        if (CLSID_IData == Response.Descriptor.class_id)
+        {
+            IData     SerialNumbers;
+            DLMSValue Value;
         
+            SerialNumbers.value = Response.Result.get<DLMSVector>();
+            if (COSEMType::VALUE_RETRIEVED == SerialNumbers.value.GetNextValue(&Value))
+            {
+                Base()->GetDebug()->TRACE("%s\n", DLMSValueGet<VISIBLE_STRING_CType>(Value).c_str());
+            }
+           
+        }
+        return true;
+    }
+    
+    virtual bool OnSetConfirmation(RequestToken Token, const SetResponse& Response)
+    {
+        Base()->GetDebug()->TRACE("\n\nSet Confirmation for Token %d...\n", Token);
+        if (Response.ResultValid)
+        {
+            Base()->GetDebug()->TRACE("\tResponse Code %d...\n", 
+                Response.Result);
+        }
+        return true;
+    }
+
+    virtual bool OnActionConfirmation(RequestToken Token, const ActionResponse& Response)
+    {
+        Base()->GetDebug()->TRACE("\n\nAction Confirmation for Token %d...\n", Token);
+        if (Response.ResultValid)
+        {
+            Base()->GetDebug()->TRACE("\tResponse Code %d...\n", 
+                Response.Result);
+        }
         return true;
     }
     
@@ -195,7 +222,8 @@ protected:
         PrintLine("\t2 - COSEM Open\n");
         PrintLine("\t3 - COSEM Get\n");
         PrintLine("\t4 - COSEM Set\n");
-        PrintLine("\t5 - COSEM Release\n");
+        PrintLine("\t5 - COSEM Action\n");
+        PrintLine("\t6 - COSEM Release\n");
         PrintLine("\t9 - TCP Disconnect\n\n"); 
         PrintLine("Select: ");
         ReadLine(std::bind(&ClientApp::ClientMenu_Handler, this, std::placeholders::_1));
@@ -249,8 +277,9 @@ protected:
                 if (Descriptor.instance_id.Parse(GetStringInput("OBIS Code (Default: 0-0:96.1.0*255)", "0-0:96.1.0*255")))
                 {
                     if (m_pClientEngine->Get(Descriptor,
-                        &m_GetToken))
+                                             &m_GetToken))
                     {
+                        PrintLine(std::string("\tGet Request Sent: Token ") + std::to_string(m_GetToken) + "\n");
                     }
                 }
                 else
@@ -279,7 +308,7 @@ protected:
                                              MyData,
                                              &m_SetToken))
                     {
-                        
+                        PrintLine(std::string("\tSet Request Sent: Token ") + std::to_string(m_SetToken) + "\n");
                     }
                 }
                 else
@@ -292,8 +321,37 @@ protected:
                 PrintLine("Not Connected!\n");
             }
             
-        }        
+        }    
         else if (RetVal == "5")
+        {
+            if (m_pSocket && m_pSocket->IsConnected() && m_pClientEngine->IsOpen())
+            {
+                Cosem_Method_Descriptor Descriptor;
+
+                Descriptor.class_id = (ClassIDType) GetNumericInput("Class ID (Default: 8)", CLSID_IClock);
+                Descriptor.method_id = (ObjectAttributeIdType) GetNumericInput("Method (Default: 1)", 1);
+                if (Descriptor.instance_id.Parse(GetStringInput("OBIS Code (Default: 0-0:1.0.0*255)", "0-0:1.0.0*255")))
+                {
+                    COSEMType MyData(COSEMDataType::INTEGER, GetNumericInput("Parameter (Default: 1)", 1));
+                    if (m_pClientEngine->Action(Descriptor,
+                                            DLMSOptional<DLMSVector>(MyData),
+                                            &m_ActionToken))
+                    {
+                        PrintLine(std::string("\tAction Request Sent: Token ") + std::to_string(m_ActionToken) + "\n");
+                    }
+                }
+                else
+                {
+                    PrintLine("Malformed OBIS Code!\n");
+                }
+            }
+            else
+            {
+                PrintLine("Not Connected!\n");
+            }
+            
+        }         
+        else if (RetVal == "6")
         {
             if (!m_pClientEngine->Release())
             {
@@ -317,10 +375,11 @@ protected:
         m_Base.get_io_service().post(std::bind(&ClientApp::ClientMenu, this));
     }
     
-    LinuxClientEngine *         m_pClientEngine = nullptr;
-    ISocket *                   m_pSocket = nullptr;
-    COSEMClientEngine::GetToken m_GetToken;
-    COSEMClientEngine::SetToken m_SetToken;
+    LinuxClientEngine *             m_pClientEngine = nullptr;
+    ISocket *                       m_pSocket = nullptr;
+    COSEMClientEngine::RequestToken m_GetToken;
+    COSEMClientEngine::RequestToken m_SetToken;
+    COSEMClientEngine::RequestToken m_ActionToken;
    
 };
 

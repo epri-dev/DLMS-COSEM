@@ -58,6 +58,10 @@ namespace EPRI
             std::bind(&COSEM::SET_Request_Handler, this, std::placeholders::_1));
         pXPort->RegisterAPDUHandler(m_Address, Set_Response_Base::Tag,
             std::bind(&COSEM::SET_Response_Handler, this, std::placeholders::_1));
+        pXPort->RegisterAPDUHandler(m_Address, Action_Request_Base::Tag,
+            std::bind(&COSEM::ACTION_Request_Handler, this, std::placeholders::_1));
+        pXPort->RegisterAPDUHandler(m_Address, Action_Response_Base::Tag,
+            std::bind(&COSEM::ACTION_Response_Handler, this, std::placeholders::_1));
         pXPort->RegisterAPDUHandler(m_Address, RLRQ::Tag,
             std::bind(&COSEM::RLRQ_Handler, this, std::placeholders::_1));
         pXPort->RegisterAPDUHandler(m_Address, RLRE::Tag,

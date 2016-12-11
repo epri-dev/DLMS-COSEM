@@ -89,6 +89,28 @@ namespace EPRI
         //
         return true;
     }
+    // COSEM-ACTION Service
+    //
+    bool COSEMServer::ActionResponse(const APPActionConfirmOrResponse& Parameters)
+    {
+        bool bAllowed = false;
+        BEGIN_TRANSITION_MAP
+            TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATED)
+        END_TRANSITION_MAP(bAllowed, new ActionResponseEventData(Parameters));
+        return bAllowed;
+    }
+    
+    bool COSEMServer::OnActionIndication(const APPActionRequestOrIndication& Parameters)
+    {
+        //
+        // Default Handler Does Nothing
+        //
+        return true;
+    }
     //
     // COSEM-RELEASE Service
     //
@@ -267,7 +289,8 @@ namespace EPRI
                 {
                     Get_Response_Normal Response;
                     Response.invoke_id_and_priority = pGetResponse->Data.m_InvokeIDAndPriority;
-                    Response.result.set<DLMSVector>(pGetResponse->Data.m_Data);
+                    Response.result = pGetResponse->Data.m_Result;
+                    
                     TransportParam.SourceAddress = GetAddress();
                     TransportParam.DestinationAddress = pGetResponse->Data.m_SourceAddress;
                     TransportParam.Data = Response.GetBytes();
@@ -283,6 +306,7 @@ namespace EPRI
                 
             pTransport->DataRequest(TransportParam);
             
+            return;
         } 
         // 
         // Received SET Request
@@ -332,6 +356,50 @@ namespace EPRI
                 
             pTransport->DataRequest(TransportParam);
             
+            return;
+        }         
+        // 
+        // Received ACTION Request
+        //
+        ActionRequestEventData * pActionRequest = dynamic_cast<ActionRequestEventData *>(pData);
+        if (pActionRequest)
+        {
+            InitiateAction(pActionRequest->Data,
+                OnActionIndication(pActionRequest->Data));
+            return;
+        }    
+        // 
+        // Transmit ACTION Response
+        //
+        ActionResponseEventData * pActionResponse = dynamic_cast<ActionResponseEventData *>(pData);
+        if (pTransport && pActionResponse)
+        {
+            Transport::DataRequestParameter TransportParam;
+
+            switch (pActionResponse->Data.m_Type)
+            {
+            case APPActionConfirmOrResponse::ActionResponseType::action_response_normal:
+                {
+                    Action_Response_Normal            Response;
+                    const APPActionConfirmOrResponse& Parameters = pActionResponse->Data;
+                    
+                    Response.invoke_id_and_priority = Parameters.m_InvokeIDAndPriority;
+                    Response.single_response.result = Parameters.m_Result;
+
+                    TransportParam.SourceAddress = GetAddress();
+                    TransportParam.DestinationAddress = Parameters.m_SourceAddress;
+                    TransportParam.Data = Response.GetBytes();
+                }
+                break;
+                
+            default:
+                throw std::logic_error("Action Response Not Implemented!");
+
+            }
+                
+            pTransport->DataRequest(TransportParam);
+            
+            return;
         }            
         
     }
@@ -431,6 +499,39 @@ namespace EPRI
         return false;
     }
 
+    bool COSEMServer::ACTION_Request_Handler(const IAPDUPtr& pAPDU)
+    {
+        ActionRequestEventData * pEvent = nullptr;
+        Action_Request_Normal *  pNormalRequest = dynamic_cast<Action_Request_Normal *>(pAPDU.get());
+        if (pNormalRequest)
+        {
+            pEvent = new ActionRequestEventData(APPActionRequestOrIndication(
+                pAPDU->GetSourceAddress(),
+                pAPDU->GetDestinationAddress(),
+                pNormalRequest->invoke_id_and_priority,
+                pNormalRequest->cosem_method_descriptor,
+                pNormalRequest->method_invocation_parameters));
+        }
+        if (pEvent)
+        {
+            bool bAllowed = false;
+            BEGIN_TRANSITION_MAP
+                TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATED)
+            END_TRANSITION_MAP(bAllowed, pEvent);
+            return bAllowed;
+        }
+        return false;
+    }
+    
+    bool COSEMServer::ACTION_Response_Handler(const IAPDUPtr& pAPDU)
+    {
+        return false;
+    }
+    
     bool COSEMServer::RLRQ_Handler(const IAPDUPtr& pAPDU)
     {
         RLRQ *  pRLRQ = dynamic_cast<RLRQ *>(pAPDU.get());

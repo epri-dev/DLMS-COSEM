@@ -285,8 +285,21 @@ namespace EPRI
         return RetVal;
     }
     
+    ASNType::GetNextResult ASNType::InternalGetOptional(DLMSVariant * pValue)
+    {
+        pValue->set<blank>();
+        m_Data.Skip(sizeof(uint8_t));
+        return VALUE_RETRIEVED;
+    }
+    
     ASNType::GetNextResult ASNType::InternalSimpleGet(ASN::SchemaEntryPtr SchemaEntry, DLMSVariant * pValue)
     {
+        // Optional and Empty tag?  Then return blank
+        //
+        if (ASN_IS_OPTIONAL(SchemaEntry) && m_Data.PeekByte() == OPTIONAL_PLACEHOLDER)
+        {
+            return InternalGetOptional(pValue);
+        }
         GetNextResult RetVal = INVALID_CONDITION;
         if (ASN::INTEGER_LIST_T == 
            ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
@@ -316,6 +329,7 @@ namespace EPRI
             case ASN::DT_Integer8:
                 RetVal = m_Data.Get<int8_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
                 break;
+            case ASN::ENUM:
             case ASN::DT_Unsigned8:
                 RetVal = m_Data.Get<uint8_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
                 break;
@@ -354,6 +368,12 @@ namespace EPRI
         return RetVal;
     }
     
+    bool ASNType::IsGettingOptional(const ParseState& State) const
+    {
+        return (ASN_IS_OPTIONAL(State.m_SchemaEntry) && 
+                         m_Data.PeekByte() == OPTIONAL_PLACEHOLDER);
+    }
+    
     ASNType::GetNextResult ASNType::GetNextValue(DLMSValue * pValue)
     {
         GetNextResult       GetNextRetVal = INVALID_CONDITION;
@@ -378,16 +398,29 @@ namespace EPRI
             switch (CURRENT_GET_STATE.m_State)
             {
             case ST_SIMPLE:
-                if (ASN::BEGIN_CHOICE_T == 
+                if (IsGettingOptional(CURRENT_GET_STATE))
+                {
+                    DLMSVariant Value;
+                    GetNextRetVal = InternalGetOptional(&Value);
+                    if (VALUE_RETRIEVED == GetNextRetVal)
+                    {
+                        *pValue = Value;
+                    }
+                    SkipOptionalSchemaEntry(CURRENT_GET_STATE.m_SchemaEntry);
+                    return GetNextRetVal;
+                }
+                else if (ASN::BEGIN_CHOICE_T == 
                     ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
                 {
-                    m_GetStates.emplace(nullptr, ST_CHOICE, INVALID_CHOICE);
+                    m_GetStates.emplace(nullptr, ST_CHOICE, 
+                                        INVALID_CHOICE);
                     break;
                 }
                 else if (ASN::BEGIN_SEQUENCE_T == 
                          ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
                 {
-                    m_GetStates.emplace(nullptr, ST_SEQUENCE, INVALID_CHOICE);
+                    m_GetStates.emplace(nullptr, ST_SEQUENCE, 
+                        INVALID_CHOICE);
                     break;
                 }
                 else
@@ -414,14 +447,27 @@ namespace EPRI
                     int8_t Choice = m_Data.Get<uint8_t>() & 0b00011111;
                     if (ASN_SCHEMA_DATA_TYPE_SIZE(CURRENT_GET_STATE.m_SchemaEntry) == Choice)
                     {
-                        m_GetStates.emplace(nullptr, ST_CHOICE_ENTRY, Choice);
+                        m_GetStates.emplace(nullptr,
+                            ST_CHOICE_ENTRY,
+                            Choice);
                         break;
                     }
                 }
                 return SCHEMA_MISMATCH;
             case ST_CHOICE_ENTRY:
-                if (ASN::END_CHOICE_ENTRY_T == 
-                    ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
+                if (IsGettingOptional(CURRENT_GET_STATE))
+                {
+                    DLMSVariant Value;
+                    GetNextRetVal = InternalGetOptional(&Value);
+                    if (VALUE_RETRIEVED == GetNextRetVal)
+                    {
+                        *pValue = Value;
+                    }
+                    SkipOptionalSchemaEntry(CURRENT_GET_STATE.m_SchemaEntry);
+                    return GetNextRetVal;
+                }
+                else if (ASN::END_CHOICE_ENTRY_T == 
+                         ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
                 {
                     m_GetStates.pop();
                     break;
@@ -429,13 +475,15 @@ namespace EPRI
                 else if (ASN::BEGIN_CHOICE_T == 
                          ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
                 {
-                    m_GetStates.emplace(nullptr, ST_CHOICE, INVALID_CHOICE);
+                    m_GetStates.emplace(nullptr, ST_CHOICE,
+                        INVALID_CHOICE);
                     break;
                 }
                 else if (ASN::BEGIN_SEQUENCE_T == 
                          ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
                 {
-                    m_GetStates.emplace(nullptr, ST_SEQUENCE, INVALID_CHOICE);
+                    m_GetStates.emplace(nullptr, ST_SEQUENCE, 
+                        CURRENT_GET_STATE.m_Choice);
                     break;
                 }
                 else
@@ -455,7 +503,18 @@ namespace EPRI
                 }
                 return SCHEMA_MISMATCH;
             case ST_SEQUENCE:
-                if (ASN::END_SEQUENCE_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
+                if (IsGettingOptional(CURRENT_GET_STATE))
+                {
+                    DLMSVariant Value;
+                    GetNextRetVal = InternalGetOptional(&Value);
+                    if (VALUE_RETRIEVED == GetNextRetVal)
+                    {
+                        Sequence.push_back(Value);
+                    }
+                    SkipOptionalSchemaEntry(CURRENT_GET_STATE.m_SchemaEntry);
+                    break;
+                }
+                else if (ASN::END_SEQUENCE_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
                 {
                     m_GetStates.pop();
                     *pValue = Sequence;
@@ -467,7 +526,8 @@ namespace EPRI
                 }
                 else if (ASN::BEGIN_CHOICE_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_GET_STATE.m_SchemaEntry))
                 {
-                    m_GetStates.emplace(nullptr, ST_CHOICE, INVALID_CHOICE);
+                    m_GetStates.emplace(nullptr, ST_CHOICE, 
+                        INVALID_CHOICE);
                     break;
                 }
                 else
@@ -486,6 +546,7 @@ namespace EPRI
                     }
                 }
                 return SCHEMA_MISMATCH;
+                
             default:
                 throw std::out_of_range("GetNextValue Not implemented.");
             }
@@ -509,6 +570,7 @@ namespace EPRI
         switch (ASN_SCHEMA_DATA_TYPE(SchemaEntry))
         {
         case ASN::OBJECT_IDENTIFIER:
+        case ASN::ENUM:
         case ASN::INTEGER:
         case ASN::OCTET_STRING:
         case ASN::BIT_STRING:
@@ -545,6 +607,11 @@ namespace EPRI
     bool ASNType::Append(const DLMSValue& Value)
     {
         return InternalAppend(Value);
+    }
+    
+    bool ASNType::Append()
+    {
+        return InternalAppend(DLMSBlank);
     }
     
     bool ASNType::AppendLength(size_t Length, DLMSVector * pData)
@@ -664,7 +731,8 @@ namespace EPRI
         {
             return INVALID_CONDITION;
         }
-        if (ASN::END_SCHEMA_T != m_pCurrentSchema->m_SchemaType)
+        
+        if (!ASN_IS_SCHEMA_END(m_pCurrentSchema))
         {
             ++m_pCurrentSchema;
             return VALUE_RETRIEVED;
@@ -672,8 +740,55 @@ namespace EPRI
         return END_OF_SCHEMA;
     }
     
+    void ASNType::SkipOptionalSchemaEntry(ASN::SchemaEntryPtr pSchemaEntry)
+    {
+        size_t              Level = 0;
+        ASN::SchemaEntryPtr pEntry = pSchemaEntry;
+        //
+        // PRECONDITIONS
+        //
+        if (ASN_IS_OPTIONAL(pEntry))
+        {
+            while (!ASN_IS_SCHEMA_END(pEntry))
+            {
+                if (ASN_IS_BEGINNING(pEntry))
+                {
+                    ++Level;
+                }
+                else if (ASN_IS_ENDING(pEntry))
+                {
+                    --Level;
+                }
+                if (0 == Level)
+                {
+                    if (pEntry != pSchemaEntry)
+                    {
+                        // Current is post-incremented
+                        //
+                        m_pCurrentSchema = ++pEntry;
+                    }
+                    break;
+                }
+                ++pEntry;
+            }
+        }
+    }
+    
+    bool ASNType::InternalSimpleAppend()
+    {
+        m_Data.Append(OPTIONAL_PLACEHOLDER);
+        return true;
+    }
+    
     bool ASNType::InternalSimpleAppend(ASN::SchemaEntryPtr SchemaEntry, const DLMSVariant& Value)
     {
+        // Optional and empty?  We are DONE!
+        //
+        if (ASN_IS_OPTIONAL(SchemaEntry) && IsBlank(Value))
+        {
+            return InternalSimpleAppend();
+        }
+        
         ASN::DataTypes DT = ASN_SCHEMA_DATA_TYPE(SchemaEntry);
         if (ASN::INTEGER_LIST_T == 
             ASN_SCHEMA_INTERNAL_DATA_TYPE(SchemaEntry))
@@ -758,6 +873,7 @@ namespace EPRI
                 }
             }
             return true;
+        case ASN::ENUM:
         case ASN::DT_Integer8:
         case ASN::DT_Unsigned8:
         case ASN::DT_Integer16:
@@ -782,6 +898,11 @@ namespace EPRI
         return false;
     }
     
+    bool ASNType::IsAppendingOptional(const ParseState& State, const DLMSValue& Value) const
+    {
+        return ASN_IS_OPTIONAL(State.m_SchemaEntry) && IsBlank(Value);
+    }
+
     bool ASNType::InternalAppend(const DLMSValue& Value)
     {
         if (m_AppendStates.empty())
@@ -793,16 +914,23 @@ namespace EPRI
             switch (CURRENT_APPEND_STATE.m_State)
             {
             case ST_SIMPLE:
-                if (ASN::BEGIN_CHOICE_T == 
-                    ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
+                if (IsAppendingOptional(CURRENT_APPEND_STATE, Value))
                 {
-                    m_AppendStates.emplace(nullptr, ST_CHOICE, CURRENT_APPEND_STATE.m_Choice);
+                    SkipOptionalSchemaEntry(CURRENT_APPEND_STATE.m_SchemaEntry);
+                    return InternalSimpleAppend();
+                }
+                else if (ASN::BEGIN_CHOICE_T == 
+                         ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
+                {
+                    m_AppendStates.emplace(nullptr, ST_CHOICE, 
+                        CURRENT_APPEND_STATE.m_Choice);
                     break;
                 }
                 else if (ASN::BEGIN_SEQUENCE_T == 
                          ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
                 {
-                    m_AppendStates.emplace(nullptr, ST_SEQUENCE, CURRENT_APPEND_STATE.m_Choice);
+                    m_AppendStates.emplace(nullptr, ST_SEQUENCE, 
+                        CURRENT_APPEND_STATE.m_Choice);
                     break;
                 }
                 else 
@@ -828,7 +956,12 @@ namespace EPRI
                 }
                 break;
             case ST_CHOICE_ENTRY:
-                if (ASN::END_CHOICE_ENTRY_T == 
+                if (IsAppendingOptional(CURRENT_APPEND_STATE, Value))
+                {
+                    SkipOptionalSchemaEntry(CURRENT_APPEND_STATE.m_SchemaEntry);
+                    return InternalSimpleAppend();
+                }
+                else if (ASN::END_CHOICE_ENTRY_T == 
                     ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
                 {
                     m_AppendStates.pop();
@@ -836,13 +969,15 @@ namespace EPRI
                 else if (ASN::BEGIN_CHOICE_T == 
                          ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
                 {
-                    m_AppendStates.emplace(nullptr, ST_CHOICE, CURRENT_APPEND_STATE.m_Choice);
+                    m_AppendStates.emplace(nullptr, ST_CHOICE, 
+                        CURRENT_APPEND_STATE.m_Choice);
                     break;
                 }
                 else if (ASN::BEGIN_SEQUENCE_T == 
                          ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
                 {
-                    m_AppendStates.emplace(nullptr, ST_SEQUENCE, CURRENT_APPEND_STATE.m_Choice);
+                    m_AppendStates.emplace(nullptr, ST_SEQUENCE, 
+                        CURRENT_APPEND_STATE.m_Choice);
                     break;
                 }
                 else
@@ -869,15 +1004,21 @@ namespace EPRI
                 }
                 return false;
             case ST_SEQUENCE:
-                if (ASN::END_SEQUENCE_T == 
-                    ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
+                if (IsAppendingOptional(CURRENT_APPEND_STATE, Value))
+                {
+                    SkipOptionalSchemaEntry(CURRENT_APPEND_STATE.m_SchemaEntry);
+                    return InternalSimpleAppend();
+                }
+                else if (ASN::END_SEQUENCE_T == 
+                         ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
                 {
                     m_AppendStates.pop();
                     return true;
                 }
                 else if (ASN::BEGIN_CHOICE_T == ASN_SCHEMA_INTERNAL_DATA_TYPE(CURRENT_APPEND_STATE.m_SchemaEntry))
                 {
-                    m_AppendStates.emplace(nullptr, ST_CHOICE, CURRENT_APPEND_STATE.m_Choice);
+                    m_AppendStates.emplace(nullptr, ST_CHOICE, 
+                        CURRENT_APPEND_STATE.m_Choice);
                     break;
                 }
                 else

@@ -75,6 +75,12 @@
     <ClCompile Include="UnitTest-APDU-RLRE.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="UnitTest-APDU-ACTION-Request.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnitTest-APDU-ACTION-Response.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt">

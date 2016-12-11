@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include "mapbox/variant.hpp"
+#include "optional.h"
 
 using namespace mapbox::util;
 
@@ -17,7 +18,13 @@ namespace EPRI
     struct blank
     {};
     
+    const blank DLMSBlank;
+    
     class DLMSVector;
+    
+    template <typename T>
+        using DLMSOptional = std::experimental::optional<T>;
+    #define DLMSOptionalNone std::experimental::nullopt;
     
     using DLMSVariantInitList = std::initializer_list<uint32_t>;
     using DLMSBitSet = std::bitset<64>;
@@ -279,6 +286,29 @@ namespace EPRI
     {
         return Value.which() == 1;
     }
+    
+    inline bool IsBlank(const DLMSVariant& Value)
+    {
+        return Value.which() == VAR_BLANK;
+    }
+    
+    inline bool IsBlank(const DLMSValue& Value)
+    {
+        return !IsSequence(Value) && IsBlank(Value.get<DLMSVariant>());
+    }
+    
+    template <typename T>
+        inline DLMSVariant MakeVariant(const DLMSOptional<T>& Optional)
+        {
+            if (Optional)
+            {
+                return Optional.value();
+            }
+            else
+            {
+                return blank();
+            }
+        }
     
     inline DLMSSequence& DLMSValueGetSequence(DLMSValue& V)
     {

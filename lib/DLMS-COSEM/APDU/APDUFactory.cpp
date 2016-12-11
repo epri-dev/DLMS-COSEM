@@ -42,6 +42,15 @@ namespace EPRI
         case Set_Response_Base::Tag:
             pRetVal.reset(new Set_Response_Normal());
             break;
+        case Action_Request_Base::Tag:
+            //
+            // TODO - Appropriate ACTION types...
+            //
+            pRetVal.reset(new Action_Request_Normal());
+            break;
+        case Action_Response_Base::Tag:
+            pRetVal.reset(new Action_Response_Normal());
+            break;
         case RLRQ::Tag:
             pRetVal.reset(new RLRQ());
             break;

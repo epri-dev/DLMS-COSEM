@@ -18,6 +18,7 @@ namespace EPRI
     class ICOSEMInterface
     {
         using COSEMAttributeMap = std::map<ObjectAttributeIdType, ICOSEMAttribute *>;
+        using COSEMMethodMap = std::map<ObjectAttributeIdType, ICOSEMMethod *>;
         friend class ICOSEMObject;
         
     public:
@@ -48,10 +49,16 @@ namespace EPRI
             
     protected:
         virtual void RegisterAttribute(ICOSEMAttribute * pAttribute);
+        virtual void RegisterMethod(ICOSEMMethod * pMethod);
         virtual ICOSEMAttribute * FindAttribute(ObjectAttributeIdType AttributeId) const;
+        virtual ICOSEMMethod * FindMethod(ObjectAttributeIdType MethodId) const;
         inline bool HasAttribute(ObjectAttributeIdType AttributeId) const
         {
             return FindAttribute(AttributeId) != nullptr;
+        }
+        inline bool HasMethod(ObjectAttributeIdType MethodId) const
+        {
+            return FindMethod(MethodId) != nullptr;
         }
 
         const uint16_t    m_class_id;
@@ -60,7 +67,7 @@ namespace EPRI
         const uint16_t    m_CardinalityMax;
         static uint16_t   m_CardinalityCounter;
         COSEMAttributeMap m_Attributes;
-            
+        COSEMMethodMap    m_Methods;
     };
     
     class ICOSEMObject;
@@ -74,22 +81,32 @@ namespace EPRI
             uint16_t ShortNameBase = std::numeric_limits<uint16_t>::max());
         virtual ~ICOSEMObject();
         virtual bool Supports(const Cosem_Attribute_Descriptor& Descriptor) const;
-        virtual bool Get(DLMSVector * pData,
+        virtual bool Supports(const Cosem_Method_Descriptor& Descriptor) const;
+        virtual APDUConstants::Data_Access_Result Get(DLMSVector * pData,
             const Cosem_Attribute_Descriptor& Descriptor, 
             SelectiveAccess * pSelectiveAccess = nullptr);
-        virtual bool Set(const Cosem_Attribute_Descriptor& Descriptor, 
+        virtual APDUConstants::Data_Access_Result Set(const Cosem_Attribute_Descriptor& Descriptor, 
             const DLMSVector& Data,
             SelectiveAccess * pSelectiveAccess = nullptr);
+        virtual APDUConstants::Action_Result Action(const Cosem_Method_Descriptor& Descriptor, 
+            const DLMSOptional<DLMSVector>& Parameters,
+            DLMSVector * pReturnValue = nullptr);
             
     protected:
         virtual ICOSEMAttribute * FindAttribute(ObjectAttributeIdType AttributeId) const;
-        virtual bool InternalGet(ICOSEMAttribute * pAttribute, 
+        virtual ICOSEMMethod * FindMethod(ObjectAttributeIdType MethodId) const;
+        
+        virtual APDUConstants::Data_Access_Result InternalGet(ICOSEMAttribute * pAttribute, 
             const Cosem_Attribute_Descriptor& Descriptor, 
             SelectiveAccess * pSelectiveAccess) = 0;
-        virtual bool InternalSet(ICOSEMAttribute * pAttribute, 
+        virtual APDUConstants::Data_Access_Result InternalSet(ICOSEMAttribute * pAttribute, 
             const Cosem_Attribute_Descriptor& Descriptor, 
             const DLMSVector& Data,
             SelectiveAccess * pSelectiveAccess);
+        virtual APDUConstants::Action_Result InternalAction(ICOSEMMethod * pMethod, 
+            const Cosem_Method_Descriptor& Descriptor, 
+            const DLMSOptional<DLMSVector>& Parameters,
+            DLMSVector * pReturnValue = nullptr);
 
         const COSEMObjectInstanceCriteria m_InstanceCriteria;
         const uint16_t                    m_ShortNameBase;

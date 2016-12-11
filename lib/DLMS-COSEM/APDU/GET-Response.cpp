@@ -7,11 +7,7 @@ namespace EPRI
         ASN_BEGIN_CHOICE
             ASN_BEGIN_CHOICE_ENTRY_WITH_OPTIONS(Get_Response::Get_Response_Choice::get_response_normal, ASN::IMPLICIT)
                 ASN_INVOKE_ID_AND_PRIORITY
-                ASN_BEGIN_CHOICE
-                    ASN_BEGIN_CHOICE_ENTRY_WITH_OPTIONS(Get_Response::Get_Data_Result_Choice::data, ASN::IMPLICIT)
-                        ASN_DATA_TYPE
-                    ASN_END_CHOICE_ENTRY
-                ASN_END_CHOICE
+                ASN_GET_DATA_RESULT(ASN::NO_OPTIONS)
             ASN_END_CHOICE_ENTRY
         ASN_END_CHOICE
         //

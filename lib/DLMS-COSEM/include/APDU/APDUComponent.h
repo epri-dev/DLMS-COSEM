@@ -37,6 +37,7 @@ namespace EPRI
         }
         virtual bool IsValid() const = 0;
         virtual bool Parse(DLMSVector * pData) = 0;
+        virtual void Clear() = 0;
         
     protected:
         virtual bool AppendToVector(DLMSVector * pVector) = 0;
@@ -118,6 +119,11 @@ namespace EPRI
             }
             return RetVal;
 
+        }
+        
+        virtual void Clear()
+        {
+            m_Data.Clear();
         }
         
         virtual bool IsValid() const

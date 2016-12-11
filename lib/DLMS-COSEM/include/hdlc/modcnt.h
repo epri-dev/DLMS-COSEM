@@ -72,7 +72,7 @@ namespace EPRI
         {
         public:
             ModCounter()
-                : modcounter(Base)
+                : modcounter(Base, 0)
             {
             }
             ModCounter(uint8_t InitialValue)

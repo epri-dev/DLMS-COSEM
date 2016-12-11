@@ -139,6 +139,8 @@ namespace EPRI
         virtual bool GET_Response_Handler(const IAPDUPtr& pAPDU) = 0;
         virtual bool SET_Request_Handler(const IAPDUPtr& pAPDU) = 0;
         virtual bool SET_Response_Handler(const IAPDUPtr& pAPDU) = 0;
+        virtual bool ACTION_Request_Handler(const IAPDUPtr& pAPDU) = 0;
+        virtual bool ACTION_Response_Handler(const IAPDUPtr& pAPDU) = 0;
         virtual bool RLRQ_Handler(const IAPDUPtr& pAPDU) = 0;
         virtual bool RLRE_Handler(const IAPDUPtr& pAPDU) = 0;
         //
@@ -259,16 +261,16 @@ namespace EPRI
         APPGetConfirmOrResponse(COSEMAddressType SourceAddress,
                                 COSEMAddressType DestinationAddress,
                                 InvokeIdAndPriorityType InvokeID,
-                                const DLMSVector& Data) : 
+                                const Get_Data_Result& Result) : 
             APPBaseCallbackParameter(SourceAddress, DestinationAddress),
             m_Type(GetResponseType::get_response_normal),
             m_InvokeIDAndPriority(InvokeID), 
-            m_Data(Data)
+            m_Result(Result)
         {
         }
         GetResponseType         m_Type;        
         InvokeIdAndPriorityType m_InvokeIDAndPriority;
-        DLMSVector              m_Data;
+        Get_Data_Result         m_Result;
     };
     
     using GetRequestEventData = COSEMEventData<APPGetRequestOrIndication>;
@@ -337,11 +339,75 @@ namespace EPRI
     using SetRequestEventData = COSEMEventData<APPSetRequestOrIndication>;
     using SetResponseEventData = COSEMEventData<APPSetConfirmOrResponse>;    
     //
+    // ACTION Service
+    //
+    struct APPActionRequestOrIndication : public APPBaseCallbackParameter
+    {
+        static const uint16_t ID = 0x2007;
+        typedef variant<Cosem_Method_Descriptor, uint32_t> RequestParameter;
+        using ActionRequestType = Action_Request::Action_Request_Choice;
+
+        APPActionRequestOrIndication(COSEMAddressType SourceAddress,
+            COSEMAddressType DestinationAddress,
+            InvokeIdAndPriorityType InvokeID,
+            COSEMPriority Priority,
+            COSEMServiceClass ServiceClass,
+            const Cosem_Method_Descriptor& MethodDescriptor,
+            const DLMSOptional<DLMSVector>& ActionParams) : 
+            APPBaseCallbackParameter(SourceAddress, DestinationAddress), 
+            m_Type(ActionRequestType::action_request_normal), 
+            m_InvokeIDAndPriority(InvokeID | Priority | ServiceClass), 
+            m_ActionParameters(ActionParams)
+        {
+            m_Parameter = MethodDescriptor;
+        }
+        APPActionRequestOrIndication(COSEMAddressType SourceAddress,
+            COSEMAddressType DestinationAddress,
+            InvokeIdAndPriorityType InvokeIDAndPriority,
+            const Cosem_Method_Descriptor& MethodDescriptor,
+            const DLMSOptional<DLMSVector>& ActionParams) : 
+            APPBaseCallbackParameter(SourceAddress, DestinationAddress), 
+            m_Type(ActionRequestType::action_request_normal), 
+            m_InvokeIDAndPriority(InvokeIDAndPriority), 
+            m_ActionParameters(ActionParams)
+        {
+            m_Parameter = MethodDescriptor;
+        }
+        
+        ActionRequestType              m_Type;        
+        InvokeIdAndPriorityType        m_InvokeIDAndPriority;
+        RequestParameter               m_Parameter;
+        DLMSOptional<DLMSVector>       m_ActionParameters;
+    };
+
+    struct APPActionConfirmOrResponse : public APPBaseCallbackParameter
+    {
+        static const uint16_t ID = 0x2008;
+        using ActionResponseType = Action_Response::Action_Response_Choice;
+        
+        APPActionConfirmOrResponse(COSEMAddressType SourceAddress,
+            COSEMAddressType DestinationAddress,
+            InvokeIdAndPriorityType InvokeID,
+            APDUConstants::Action_Result Result) : 
+            APPBaseCallbackParameter(SourceAddress, DestinationAddress), 
+            m_Type(ActionResponseType::action_response_normal), 
+            m_InvokeIDAndPriority(InvokeID), 
+            m_Result(Result)
+        {
+        }
+        ActionResponseType                m_Type;        
+        InvokeIdAndPriorityType           m_InvokeIDAndPriority;
+        APDUConstants::Action_Result      m_Result;
+    };
+    
+    using ActionRequestEventData = COSEMEventData<APPActionRequestOrIndication>;
+    using ActionResponseEventData = COSEMEventData<APPActionConfirmOrResponse>;      
+    //
     // RELEASE Service
     //
     struct APPReleaseConfirmOrResponse : public APPBaseCallbackParameter
     {
-        static const uint16_t ID = 0x2007;
+        static const uint16_t ID = 0x2009;
         using ReleaseReason = RLRE::ReleaseResponseReason;
         
         APPReleaseConfirmOrResponse(COSEMAddressType SourceAddress,
@@ -361,7 +427,7 @@ namespace EPRI
     
     struct APPReleaseRequestOrIndication : public APPBaseCallbackParameter
     {
-        static const uint16_t ID = 0x2008;
+        static const uint16_t ID = 0x200A;
         using ReleaseReason = RLRQ::ReleaseRequestReason;
         
         APPReleaseRequestOrIndication(COSEMAddressType SourceAddress,
@@ -408,6 +474,11 @@ namespace EPRI
         bool SetRequest(const APPSetRequestOrIndication& Parameters);
         void RegisterSetConfirm(CallbackFunction Callback);
         //
+        // COSEM-ACTION Service
+        //
+        bool ActionRequest(const APPActionRequestOrIndication& Parameters);
+        void RegisterActionConfirm(CallbackFunction Callback);
+        //
         // COSEM-RELEASE Service
         //
         bool ReleaseRequest(const APPReleaseRequestOrIndication& Parameters);
@@ -431,6 +502,8 @@ namespace EPRI
         virtual bool GET_Response_Handler(const IAPDUPtr& pAPDU);
         virtual bool SET_Request_Handler(const IAPDUPtr& pAPDU);
         virtual bool SET_Response_Handler(const IAPDUPtr& pAPDU);
+        virtual bool ACTION_Request_Handler(const IAPDUPtr& pAPDU);
+        virtual bool ACTION_Response_Handler(const IAPDUPtr& pAPDU);
         virtual bool RLRQ_Handler(const IAPDUPtr& pAPDU);
         virtual bool RLRE_Handler(const IAPDUPtr& pAPDU);
        
@@ -459,6 +532,10 @@ namespace EPRI
         //
         bool SetResponse(const APPSetConfirmOrResponse& Parameters);
         //
+        // COSEM-ACTION Service
+        //
+        bool ActionResponse(const APPActionConfirmOrResponse& Parameters);
+        //
         // COSEM-RELEASE Service
         //
         bool ReleaseResponse(const APPReleaseConfirmOrResponse& Parameters);
@@ -479,6 +556,10 @@ namespace EPRI
         // COSEM-SET Service
         //
         bool OnSetIndication(const APPSetRequestOrIndication& Parameters);
+        //
+        // COSEM-ACTION Service
+        //
+        bool OnActionIndication(const APPActionRequestOrIndication& Parameters);
         //
         // COSEM-RELEASE Service
         //
@@ -504,6 +585,8 @@ namespace EPRI
         virtual bool GET_Response_Handler(const IAPDUPtr& pAPDU);
         virtual bool SET_Request_Handler(const IAPDUPtr& pAPDU);
         virtual bool SET_Response_Handler(const IAPDUPtr& pAPDU);
+        virtual bool ACTION_Request_Handler(const IAPDUPtr& pAPDU);
+        virtual bool ACTION_Response_Handler(const IAPDUPtr& pAPDU);
         virtual bool RLRQ_Handler(const IAPDUPtr& pAPDU);
         virtual bool RLRE_Handler(const IAPDUPtr& pAPDU);
        

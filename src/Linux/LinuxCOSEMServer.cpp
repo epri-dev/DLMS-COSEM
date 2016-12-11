@@ -15,35 +15,43 @@ namespace EPRI
         }
     }
 
-    bool LinuxData::InternalGet(ICOSEMAttribute * pAttribute, 
+    APDUConstants::Data_Access_Result LinuxData::InternalGet(ICOSEMAttribute * pAttribute, 
         const Cosem_Attribute_Descriptor& Descriptor, 
         SelectiveAccess * pSelectiveAccess)
     {
         pAttribute->SelectChoice(COSEMDataType::VISIBLE_STRING);
         pAttribute->Append(m_Values[Descriptor.instance_id.GetValueGroup(EPRI::COSEMObjectInstanceID::VALUE_GROUP_E)]);
-        return true;
+        return APDUConstants::Data_Access_Result::success;
     }
     
-    bool LinuxData::InternalSet(ICOSEMAttribute * pAttribute, 
+    APDUConstants::Data_Access_Result LinuxData::InternalSet(ICOSEMAttribute * pAttribute, 
         const Cosem_Attribute_Descriptor& Descriptor, 
         const DLMSVector& Data,
         SelectiveAccess * pSelectiveAccess)
     {
+        APDUConstants::Data_Access_Result RetVal = APDUConstants::Data_Access_Result::temporary_failure;
         try
         {
             DLMSValue Value;
-            if (ICOSEMObject::InternalSet(pAttribute, Descriptor, Data, pSelectiveAccess) &&
+            
+            RetVal = ICOSEMObject::InternalSet(pAttribute, Descriptor, Data, pSelectiveAccess);
+            if (APDUConstants::Data_Access_Result::success == RetVal &&
                 pAttribute->GetNextValue(&Value) == COSEMType::GetNextResult::VALUE_RETRIEVED)
             {
                 m_Values[Descriptor.instance_id.GetValueGroup(EPRI::COSEMObjectInstanceID::VALUE_GROUP_E)] =
                     DLMSValueGet<std::string>(Value);
-                return true;
+                RetVal = APDUConstants::Data_Access_Result::success;
+            }
+            else
+            {
+                RetVal = APDUConstants::Data_Access_Result::type_unmatched;
             }
         }
         catch (...) 
         {
+            RetVal = APDUConstants::Data_Access_Result::type_unmatched;
         }
-        return false;
+        return RetVal;
     }
     //
     // Clock
@@ -53,7 +61,7 @@ namespace EPRI
     {
     }
 
-    bool LinuxClock::InternalGet(ICOSEMAttribute * pAttribute, 
+    APDUConstants::Data_Access_Result LinuxClock::InternalGet(ICOSEMAttribute * pAttribute, 
         const Cosem_Attribute_Descriptor& Descriptor, 
         SelectiveAccess * pSelectiveAccess)
     {
@@ -70,9 +78,33 @@ namespace EPRI
         default:
             break;
         }
-        return false;
+        //
+        // TODO
+        //
+        return APDUConstants::Data_Access_Result::object_unavailable;
     }
-    
+
+    APDUConstants::Action_Result LinuxClock::InternalAction(ICOSEMMethod * pMethod, 
+        const Cosem_Method_Descriptor& Descriptor, 
+        const DLMSOptional<DLMSVector>& Parameters,
+        DLMSVector * pReturnValue /*= nullptr*/)
+    {
+        switch (pMethod->MethodID)
+        {
+        case METHOD_ADJUST_TO_QUARTER:
+        case METHOD_ADJUST_TO_MEAS_PERIOD:
+        case METHOD_ADJUST_TO_MINUTE:
+        case METHOD_ADJUST_TO_PRESET_TIME:
+        case METHOD_PRESET_ADJUSTING_TIME:
+        case METHOD_SHIFT_TIME:
+        default:
+            break;
+        }
+        //
+        // TODO
+        //
+        return APDUConstants::Action_Result::object_unavailable;
+    }
     //
     // Logical Device
     //

@@ -81,6 +81,26 @@ namespace EPRI
         RegisterCallback(APPSetConfirmOrResponse::ID, Callback);
     }
     //
+    // COSEM-ACTION Service
+    //
+    bool COSEMClient::ActionRequest(const APPActionRequestOrIndication& Parameters)
+    {
+        bool bAllowed = false;
+        BEGIN_TRANSITION_MAP
+            TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATED)
+        END_TRANSITION_MAP(bAllowed, new ActionRequestEventData(Parameters));
+        return bAllowed;
+    }
+    
+    void COSEMClient::RegisterActionConfirm(CallbackFunction Callback)
+    {
+        RegisterCallback(APPActionConfirmOrResponse::ID, Callback);
+    }    
+    //
     // COSEM-RELEASE Service
     //
     bool COSEMClient::ReleaseRequest(const APPReleaseRequestOrIndication& Parameters)
@@ -290,6 +310,8 @@ namespace EPRI
             }
                 
             pTransport->DataRequest(TransportParam);
+            
+            return;
         }
         //
         // Receive GET Response
@@ -341,6 +363,8 @@ namespace EPRI
             }
                 
             pTransport->DataRequest(TransportParam);
+            
+            return;
         }
         //
         // Receive SET Response
@@ -350,6 +374,50 @@ namespace EPRI
         {
             bool  RetVal = false;
             FireCallback(APPSetConfirmOrResponse::ID, pSetResponse->Data, &RetVal);
+            return;            
+        }        
+        // 
+        // Transmit ACTION Request
+        //
+        ActionRequestEventData * pActionRequest = dynamic_cast<ActionRequestEventData *>(pData);
+        if (pTransport && pActionRequest)
+        {
+            Transport::DataRequestParameter TransportParam;
+                
+            switch (pActionRequest->Data.m_Type)
+            {
+            case APPActionRequestOrIndication::ActionRequestType::action_request_normal:
+                {
+                    Action_Request_Normal               Request;
+                    const APPActionRequestOrIndication& Parameters = pActionRequest->Data;
+                    Request.invoke_id_and_priority = Parameters.m_InvokeIDAndPriority;
+                    Request.cosem_method_descriptor = 
+                        Parameters.m_Parameter.get<Cosem_Method_Descriptor>();
+                    Request.method_invocation_parameters = Parameters.m_ActionParameters;
+                    
+                    TransportParam.SourceAddress = GetAddress();
+                    TransportParam.DestinationAddress = Parameters.m_SourceAddress;
+                    TransportParam.Data = Request.GetBytes();
+                }
+                break;
+                
+            default:
+                throw std::logic_error("Action Request Type Not Implemented!");
+
+            }
+                
+            pTransport->DataRequest(TransportParam);
+            
+            return;
+        }
+        //
+        // Receive ACTION Response
+        //
+        ActionResponseEventData * pActionResponse = dynamic_cast<ActionResponseEventData *>(pData);
+        if (pActionResponse)
+        {
+            bool  RetVal = false;
+            FireCallback(APPActionConfirmOrResponse::ID, pActionResponse->Data, &RetVal);
             return;            
         }        
     }
@@ -395,8 +463,17 @@ namespace EPRI
     bool COSEMClient::GET_Response_Handler(const IAPDUPtr& pAPDU)
     {
         bool                  RetVal = false;
+        EventData *           pEvent = nullptr;
         Get_Response_Normal * pGetResponse = dynamic_cast<Get_Response_Normal *>(pAPDU.get());
-        if (pGetResponse && (Get_Response::data == pGetResponse->result.which()))
+        if (pGetResponse)
+        {
+            pEvent = 
+                new GetResponseEventData(APPGetConfirmOrResponse(pGetResponse->GetSourceAddress(),
+                                            pGetResponse->GetDestinationAddress(),
+                                            pGetResponse->invoke_id_and_priority,
+                                            pGetResponse->result));
+        }
+        if (pEvent)
         {
             BEGIN_TRANSITION_MAP
                 TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
@@ -404,12 +481,7 @@ namespace EPRI
                 TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
                 TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
                 TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATED)
-            END_TRANSITION_MAP(RetVal,
-                                new GetResponseEventData(
-                                    APPGetConfirmOrResponse(pGetResponse->GetSourceAddress(),
-                                        pGetResponse->GetDestinationAddress(),
-                                        pGetResponse->invoke_id_and_priority,
-                                        pGetResponse->result.get<DLMSVector>())));
+            END_TRANSITION_MAP(RetVal, pEvent);
         }
         return RetVal;
     }
@@ -422,8 +494,16 @@ namespace EPRI
     bool COSEMClient::SET_Response_Handler(const IAPDUPtr& pAPDU)
     {
         bool                  RetVal = false;
+        EventData *           pEvent = nullptr;
         Set_Response_Normal * pSetResponse = dynamic_cast<Set_Response_Normal *>(pAPDU.get());
         if (pSetResponse)
+        {
+            pEvent = new SetResponseEventData(APPSetConfirmOrResponse(pSetResponse->GetSourceAddress(),
+                                                pSetResponse->GetDestinationAddress(),
+                                                pSetResponse->invoke_id_and_priority,
+                                                pSetResponse->result));
+        }
+        if (pEvent)
         {
             BEGIN_TRANSITION_MAP
                 TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
@@ -431,12 +511,37 @@ namespace EPRI
                 TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
                 TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
                 TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATED)
-            END_TRANSITION_MAP(RetVal,
-                new SetResponseEventData(
-                    APPSetConfirmOrResponse(pSetResponse->GetSourceAddress(),
-                        pSetResponse->GetDestinationAddress(),
-                        pSetResponse->invoke_id_and_priority,
-                        pSetResponse->result)));
+            END_TRANSITION_MAP(RetVal, pEvent);
+        }
+        return RetVal;
+    }
+
+    bool COSEMClient::ACTION_Request_Handler(const IAPDUPtr& pAPDU)
+    {
+        return false;
+    }
+    
+    bool COSEMClient::ACTION_Response_Handler(const IAPDUPtr& pAPDU)
+    {
+        bool                     RetVal = false;
+        EventData *             pEvent = nullptr;
+        Action_Response_Normal * pActionResponse = dynamic_cast<Action_Response_Normal *>(pAPDU.get());
+        if (pActionResponse)
+        {
+            pEvent = new ActionResponseEventData(APPActionConfirmOrResponse(pActionResponse->GetSourceAddress(),
+                                                    pActionResponse->GetDestinationAddress(),
+                                                    pActionResponse->invoke_id_and_priority,
+                                                    pActionResponse->single_response.result));
+        }
+        if (pEvent)
+        {
+            BEGIN_TRANSITION_MAP
+                TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATED)
+            END_TRANSITION_MAP(RetVal, pEvent);
         }
         return RetVal;
     }

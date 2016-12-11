@@ -6,6 +6,8 @@
 
 namespace EPRI
 {
+#define MAKE_TOKEN(SERVICE, INVOKEID)\
+    ((SERVICE << 8) | INVOKEID)
     //
     // COSEMClientEngine
     //
@@ -19,6 +21,8 @@ namespace EPRI
             std::bind(&COSEMClientEngine::Client_GetConfirmation, this, std::placeholders::_1));
         m_Client.RegisterSetConfirm(
             std::bind(&COSEMClientEngine::Client_SetConfirmation, this, std::placeholders::_1));
+        m_Client.RegisterActionConfirm(
+            std::bind(&COSEMClientEngine::Client_ActionConfirmation, this, std::placeholders::_1));
         m_Client.RegisterReleaseConfirm(
             std::bind(&COSEMClientEngine::Client_ReleaseConfirmation, this, std::placeholders::_1));
         m_Client.RegisterAbortIndication(
@@ -58,7 +62,7 @@ namespace EPRI
     // COSEM.Get Service
     //
     bool COSEMClientEngine::Get(const Cosem_Attribute_Descriptor& Descriptor,
-                                GetToken * pToken)
+                                RequestToken * pToken)
     {
         bool                    RetVal = m_Client.IsOpen();
         if (RetVal)
@@ -74,13 +78,14 @@ namespace EPRI
         }
         if (RetVal)
         {
-            *pToken = GetAndIncrementInvokeID(SERVICE_GET);
+            *pToken = MAKE_TOKEN(SERVICE_GET,
+                                 GetAndIncrementInvokeID(SERVICE_GET));
+            m_Responses.emplace(std::make_pair(*pToken, GetResponse(Descriptor)));
         }
         return RetVal;
     }
     
-    bool COSEMClientEngine::OnGetConfirmation(GetToken Token,
-                                              const DLMSVector& Data)
+    bool COSEMClientEngine::OnGetConfirmation(RequestToken Token, const GetResponse& Response)
     {
         //
         // Default Handler Does Nothing
@@ -92,7 +97,7 @@ namespace EPRI
     //
     bool COSEMClientEngine::Set(const Cosem_Attribute_Descriptor& Descriptor,
                                 const DLMSVector& Value,
-                                SetToken * pToken)    
+                                RequestToken * pToken)    
     {
         bool RetVal = m_Client.IsOpen();
         if (RetVal)
@@ -109,18 +114,56 @@ namespace EPRI
         }
         if (RetVal)
         {
-            *pToken = GetAndIncrementInvokeID(SERVICE_SET);
+            *pToken = MAKE_TOKEN(SERVICE_SET,
+                                 GetAndIncrementInvokeID(SERVICE_SET));
+            m_Responses.emplace(std::make_pair(*pToken, SetResponse(Descriptor)));
         }
         return RetVal;
     }
     
-    bool COSEMClientEngine::OnSetConfirmation(SetToken Token)
+    bool COSEMClientEngine::OnSetConfirmation(RequestToken Token, const SetResponse& Response)
     {
         //
         // Default Handler Does Nothing
         //
         return true;
     }    
+    //
+    // COSEM.Action Service
+    //
+    bool COSEMClientEngine::Action(const Cosem_Method_Descriptor& Descriptor,
+        const DLMSOptional<DLMSVector>& Parameters,
+        RequestToken * pToken)    
+    {
+        bool RetVal = m_Client.IsOpen();
+        if (RetVal)
+        {
+            RetVal = m_Client.ActionRequest(
+                           APPActionRequestOrIndication(m_Options.m_Address,
+                                m_Client.GetAssociatedAddress(),
+                                CurrentInvokeID(SERVICE_SET), 
+                                COSEMPriority::COSEM_PRIORITY_NORMAL,
+                                COSEMServiceClass::COSEM_SERVICE_CONFIRMED,
+                                Descriptor,
+                                Parameters));
+           
+        }
+        if (RetVal)
+        {
+            *pToken = MAKE_TOKEN(SERVICE_ACTION,
+                                 GetAndIncrementInvokeID(SERVICE_ACTION));
+            m_Responses.emplace(std::make_pair(*pToken, ActionResponse(Descriptor)));
+        }
+        return RetVal;
+    }
+    
+    bool COSEMClientEngine::OnActionConfirmation(RequestToken Token, const ActionResponse& Response)
+    {
+        //
+        // Default Handler Does Nothing
+        //
+        return true;
+    } 
     //
     // COSEM.Release Service
     //
@@ -175,14 +218,59 @@ namespace EPRI
     bool COSEMClientEngine::Client_GetConfirmation(const BaseCallbackParameter& Parameters)
     {
         const APPGetConfirmOrResponse& Confirmation = dynamic_cast<const APPGetConfirmOrResponse&>(Parameters);
-        return OnGetConfirmation(COSEM_GET_INVOKE_ID(Confirmation.m_InvokeIDAndPriority),
-                                 Confirmation.m_Data);
+        RequestToken                   Token = MAKE_TOKEN(SERVICE_GET, 
+                                                          COSEM_GET_INVOKE_ID(Confirmation.m_InvokeIDAndPriority));
+        try
+        {
+            GetResponse& Response = PickupResponse<GetResponse>(Token);
+            Response.Result = Confirmation.m_Result;
+            Response.ResultValid = true;
+            
+            return OnGetConfirmation(Token, Response);
+        }
+        catch (...)
+        {
+        }
+        return false;        
     }
 
     bool COSEMClientEngine::Client_SetConfirmation(const BaseCallbackParameter& Parameters)
     {
         const APPSetConfirmOrResponse& Confirmation = dynamic_cast<const APPSetConfirmOrResponse&>(Parameters);
-        return OnSetConfirmation(COSEM_GET_INVOKE_ID(Confirmation.m_InvokeIDAndPriority));
+        RequestToken                   Token = MAKE_TOKEN(SERVICE_SET, 
+                                                          COSEM_GET_INVOKE_ID(Confirmation.m_InvokeIDAndPriority));
+        try
+        {
+            SetResponse& Response = PickupResponse<SetResponse>(Token);
+            Response.Result = Confirmation.m_Result;
+            Response.ResultValid = true;
+            
+            return OnSetConfirmation(Token, Response);
+        }
+        catch (...)
+        {
+        }
+        return false;        
+    }
+
+    bool COSEMClientEngine::Client_ActionConfirmation(const BaseCallbackParameter& Parameters)
+    {
+        const APPActionConfirmOrResponse& Confirmation = dynamic_cast<const APPActionConfirmOrResponse&>(Parameters);
+        RequestToken                   Token = MAKE_TOKEN(SERVICE_ACTION, 
+                                                          COSEM_GET_INVOKE_ID(Confirmation.m_InvokeIDAndPriority));
+        try
+        {
+            ActionResponse& Response = PickupResponse<ActionResponse>(Token);
+            Response.Result = Confirmation.m_Result;
+            Response.ResultValid = true;
+            
+            return OnActionConfirmation(Token, Response);
+        }
+        catch (...)
+        {
+        }
+        return false;        
+        
     }
     
     bool COSEMClientEngine::Client_ReleaseConfirmation(const BaseCallbackParameter& Parameters)

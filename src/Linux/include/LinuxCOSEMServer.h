@@ -14,10 +14,10 @@ namespace EPRI
         LinuxData();
   
     protected:
-        virtual bool InternalGet(ICOSEMAttribute * pAttribute, 
+        virtual APDUConstants::Data_Access_Result InternalGet(ICOSEMAttribute * pAttribute, 
             const Cosem_Attribute_Descriptor& Descriptor, 
             SelectiveAccess * pSelectiveAccess) final;
-        virtual bool InternalSet(ICOSEMAttribute * pAttribute, 
+        virtual APDUConstants::Data_Access_Result InternalSet(ICOSEMAttribute * pAttribute, 
             const Cosem_Attribute_Descriptor& Descriptor, 
             const DLMSVector& Data,
             SelectiveAccess * pSelectiveAccess) final;
@@ -32,9 +32,14 @@ namespace EPRI
         LinuxClock();
         
     protected:
-        virtual bool InternalGet(ICOSEMAttribute * pAttribute, 
+        virtual APDUConstants::Data_Access_Result InternalGet(ICOSEMAttribute * pAttribute, 
             const Cosem_Attribute_Descriptor& Descriptor, 
             SelectiveAccess * pSelectiveAccess) final; 
+        virtual APDUConstants::Action_Result InternalAction(ICOSEMMethod * pMethod, 
+            const Cosem_Method_Descriptor& Descriptor, 
+            const DLMSOptional<DLMSVector>& Parameters,
+            DLMSVector * pReturnValue = nullptr) final;
+        
         
     };
     

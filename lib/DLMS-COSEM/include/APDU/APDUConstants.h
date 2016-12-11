@@ -20,7 +20,7 @@ namespace EPRI
             other = 3
         };
         
-        typedef enum _Data_Access_Result : uint8_t
+        enum class Data_Access_Result : uint8_t
         {
             success = 0,
             hardware_fault = 1,
@@ -38,7 +38,24 @@ namespace EPRI
             no_long_set_in_progress = 18,
             data_block_number_invalid = 19,
             other_reason = 255
-        } Data_Access_Result;
+        };
+        
+        enum class Action_Result : uint8_t
+        {
+            success                    = 0,
+            hardware_fault             = 1,
+            temporary_failure          = 2,
+            read_write_denied          = 3,
+            object_unidentified        = 4,
+            object_class_inconsistent  = 9,
+            object_unavailable         = 11,
+            type_unmatched             = 12,
+            scope_of_access_violated   = 13,
+            data_block_unavailable     = 14,
+            long_action_aborted        = 15,
+            no_long_action_in_progress = 16,
+            other_reason               = 255
+        };
         
     };
 

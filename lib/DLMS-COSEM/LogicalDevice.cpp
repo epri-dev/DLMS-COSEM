@@ -34,29 +34,25 @@ namespace EPRI
                             FindObject(Request.m_Parameter.get<Cosem_Attribute_Descriptor>());
                         if (ObjectIndex != -1)
                         {
-                            DLMSVector Data;
+                            DLMSVector                        Data;
+                            APDUConstants::Data_Access_Result Result = 
+                                m_Objects[ObjectIndex]->Get(&Data, Request.m_Parameter.get<Cosem_Attribute_Descriptor>());
                             //
                             // Get the data for this attribute and object
                             //
-                            if (m_Objects[ObjectIndex]->Get(&Data, Request.m_Parameter.get<Cosem_Attribute_Descriptor>()))
-                            {
-                                //
-                                // TODO - Add error cases...
-                                //
-                                return m_pServer->GetResponse(APPGetConfirmOrResponse(SAP(),
-                                                                                      Request.m_SourceAddress,
-                                                                                      Request.m_InvokeIDAndPriority,
-                                                                                      Data));
-                            }
+                            return m_pServer->GetResponse(
+                                APPGetConfirmOrResponse(SAP(),
+                                                        Request.m_SourceAddress,
+                                                        Request.m_InvokeIDAndPriority,
+                                                        (Result == APDUConstants::Data_Access_Result::success ? 
+                                                            Get_Data_Result(Data) : 
+                                                            Result)));
                         }
                     }
                     break;
                     
-                case APPGetRequestOrIndication::GetRequestType::get_request_next:
-                    throw std::logic_error("get_request_next Not Implemented!");
-                    
-                case APPGetRequestOrIndication::GetRequestType::get_request_with_list:
-                    throw std::logic_error("get_request_with_list Not Implemented!");
+                default:
+                    throw std::logic_error("InitiateGet Type Not Implemented!");
                 }
             }
         }
@@ -85,39 +81,68 @@ namespace EPRI
                             FindObject(Request.m_Parameter.get<Cosem_Attribute_Descriptor>());
                         if (ObjectIndex != -1)
                         {
-                            DLMSVector Data;
                             //
                             // Get the data for this attribute and object
                             //
-                            if (m_Objects[ObjectIndex]->Set(Request.m_Parameter.get<Cosem_Attribute_Descriptor>(), Request.m_Value))
-                            {
-                                //
-                                // TODO - Add error cases...
-                                //
-                                return m_pServer->SetResponse(APPSetConfirmOrResponse(SAP(),
-                                    Request.m_SourceAddress,
-                                    Request.m_InvokeIDAndPriority,
-                                    APDUConstants::Data_Access_Result::success));
-                            }
+                            return m_pServer->SetResponse(APPSetConfirmOrResponse(SAP(),
+                                Request.m_SourceAddress,
+                                Request.m_InvokeIDAndPriority,
+                                m_Objects[ObjectIndex]->Set(Request.m_Parameter.get<Cosem_Attribute_Descriptor>(), Request.m_Value)));
                         }
                     }
                     break;
-                case APPSetRequestOrIndication::SetRequestType::set_request_with_first_datablock :
-                    throw std::logic_error("set_request_with_first_datablock Not Implemented!");
 
-                case APPSetRequestOrIndication::SetRequestType::set_request_with_datablock :
-                    throw std::logic_error("set_request_with_datablock Not Implemented!");
-                    
-                case APPSetRequestOrIndication::SetRequestType::set_request_with_list :
-                    throw std::logic_error("set_request_with_list Not Implemented!");
+                default:
+                    throw std::logic_error("InitiateSet Type Not Implemented!");
 
-                case APPSetRequestOrIndication::SetRequestType::set_request_with_list_and_first_datablock :
-                    throw std::logic_error("set_request_with_list_and_first_datablock Not Implemented!");
                 }
             }
         }
         return false;
     }
+    
+    bool LogicalDevice::InitiateAction(const APPActionRequestOrIndication& Request, bool UpperLayerAllowed)
+    {
+        if (SAP() == Request.m_DestinationAddress ||
+            Request.m_DestinationAddress == ReservedAddresses::BROADCAST)
+        {
+            InvokeIdAndPriorityType InvokeID = COSEM_GET_INVOKE_ID(Request.m_InvokeIDAndPriority);
+
+            // Check to see if we already have this invoke_id running
+            if (IsRunning(InvokeID))
+            {
+                // TODO - Return some error
+            }
+            else 
+            {
+                switch (Request.m_Type)
+                {
+                case APPActionRequestOrIndication::ActionRequestType::action_request_normal:
+                    {
+                        ssize_t ObjectIndex = 
+                            FindObject(Request.m_Parameter.get<Cosem_Method_Descriptor>());
+                        if (ObjectIndex != -1)
+                        {
+                            DLMSVector Data;
+                            //
+                            // Get the data for this attribute and object
+                            //
+                            return m_pServer->ActionResponse(APPActionConfirmOrResponse(SAP(),
+                                Request.m_SourceAddress,
+                                Request.m_InvokeIDAndPriority,
+                                m_Objects[ObjectIndex]->Action(Request.m_Parameter.get<Cosem_Method_Descriptor>(), Request.m_ActionParameters)));
+                        }
+                    }
+                    break;
+                    
+                default:
+                    throw std::logic_error("InitiateAction Type Not Implemented!");
+
+                }
+            }
+        }
+        return false;
+    }    
     
     bool LogicalDevice::InitiateRelease(const APPReleaseRequestOrIndication& Request, bool UpperLayerAllowed)
     {
@@ -162,5 +187,19 @@ namespace EPRI
         }
         return -1;
     }
+    
+    ssize_t LogicalDevice::FindObject(const Cosem_Method_Descriptor& Descriptor) const
+    {
+        ssize_t RetVal = 0;
+        for (; RetVal < m_Objects.size(); ++RetVal)
+        {
+            if (m_Objects[RetVal]->Supports(Descriptor))
+            {
+                return RetVal;
+            }
+        }
+        return -1;
+    }
+    
 
 }

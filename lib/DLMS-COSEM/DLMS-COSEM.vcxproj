@@ -65,6 +65,8 @@
   <ItemGroup>
     <ClCompile Include="APDU\AARE.cpp" />
     <ClCompile Include="APDU\AARQ.cpp" />
+    <ClCompile Include="APDU\ACTION-Request.cpp" />
+    <ClCompile Include="APDU\ACTION-Response.cpp" />
     <ClCompile Include="APDU\APDUConstants.cpp" />
     <ClCompile Include="APDU\APDUFactory.cpp" />
     <ClCompile Include="APDU\ASNType.cpp" />
@@ -103,6 +105,8 @@
   <ItemGroup>
     <ClInclude Include="include\APDU\AARE.h" />
     <ClInclude Include="include\APDU\AARQ.h" />
+    <ClInclude Include="include\APDU\ACTION-Request.h" />
+    <ClInclude Include="include\APDU\ACTION-Response.h" />
     <ClInclude Include="include\APDU\APDU.h" />
     <ClInclude Include="include\APDU\APDUComponent.h" />
     <ClInclude Include="include\APDU\APDUConstants.h" />
@@ -157,6 +161,7 @@
     <ClInclude Include="include\mapbox\recursive_wrapper.hpp" />
     <ClInclude Include="include\mapbox\variant.hpp" />
     <ClInclude Include="include\mapbox\variant_io.hpp" />
+    <ClInclude Include="include\optional.h" />
     <ClInclude Include="include\serialwrapper\SerialWrapper.h" />
     <ClInclude Include="include\StateMachine.h" />
     <ClInclude Include="include\tcpwrapper\TCPWrapper.h" />

@@ -15,11 +15,19 @@ namespace EPRI
             }
         )
     COSEM_END_SCHEMA
+        
+    COSEM_BEGIN_SCHEMA(IClock_0::Adjusting_Time_Schema)
+        COSEM_BEGIN_STRUCTURE
+            COSEM_OCTET_STRING_TYPE
+            COSEM_OCTET_STRING_TYPE
+            COSEM_OCTET_STRING_TYPE
+        COSEM_END_STRUCTURE
+    COSEM_END_SCHEMA
     //
     // IClock_0
     //
     IClock_0::IClock_0()
-        : ICOSEMInterface(CLASS_ID_CLOCK, 0, 0, 1)
+        : ICOSEMInterface(CLSID_IClock, 0, 0, 1)
     {
         COSEM_BEGIN_ATTRIBUTES
             COSEM_ATTRIBUTE(time)
@@ -31,6 +39,15 @@ namespace EPRI
             COSEM_ATTRIBUTE(daylight_savings_enabled)
             COSEM_ATTRIBUTE(clock_base)
         COSEM_END_ATTRIBUTES
+            
+        COSEM_BEGIN_METHODS
+            COSEM_METHOD(adjust_to_quarter)
+            COSEM_METHOD(adjust_to_measuring_period)
+            COSEM_METHOD(adjust_to_minute)
+            COSEM_METHOD(adjust_to_preset_time)
+            COSEM_METHOD(preset_adjusting_time)
+            COSEM_METHOD(shift_time)
+        COSEM_END_METHODS         
     }
         
     IClock_0::~IClock_0()

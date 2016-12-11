@@ -4,11 +4,12 @@
 
 namespace EPRI
 {
-    const uint16_t CLASS_ID_CLOCK = 8;
+    const uint16_t CLSID_IClock = 8;
     
     class IClock_0 : public ICOSEMInterface
     {
         COSEM_DEFINE_SCHEMA(Clock_Base_Schema)
+        COSEM_DEFINE_SCHEMA(Adjusting_Time_Schema)
 
     public :
         IClock_0();
@@ -36,39 +37,50 @@ namespace EPRI
             RADIO = 5
         };
         
-        COSEMAttribute<ATTR_TIME, OctetStringSchema, 0x08>       time;
-        COSEMAttribute<ATTR_TIME_ZONE, LongSchema, 0x10>         time_zone;
-        COSEMAttribute<ATTR_STATUS, UnsignedSchema, 0x18>        status;
-        COSEMAttribute<ATTR_DST_BEGIN, OctetStringSchema, 0x20>  daylight_savings_begin;
-        COSEMAttribute<ATTR_DST_END, OctetStringSchema, 0x28>    daylight_savings_end;
-        COSEMAttribute<ATTR_DST_DEVIATION, IntegerSchema, 0x30>  daylight_savings_deviation;
-        COSEMAttribute<ATTR_DST_ENABLED, BooleanSchema, 0x38>    daylight_savings_enabled;
-        COSEMAttribute<ATTR_CLOCK_BASE, Clock_Base_Schema, 0x40> clock_base;
-//        
-//        BEGIN_SCHEMA(AdjustingTimeSchema)
-//            STRUCTURE_TYPE
-//                OCTET_STRING_TYPE
-//                OCTET_STRING_TYPE
-//                OCTET_STRING_TYPE
-//            END_STRUCTURE_TYPE
-//        END_SCHEMA
-//        
-//        DLMSMethod<EmptySchema, IntegerSchema, 0x60>            adjust_to_quarter;
-//        DLMSMethod<EmptySchema, IntegerSchema, 0x68>            adjust_to_measuring_period;
-//        DLMSMethod<EmptySchema, IntegerSchema, 0x70>            adjust_to_minute;
-//        DLMSMethod<EmptySchema, IntegerSchema, 0x78>            adjust_to_preset_time;
-//        DLMSMethod<EmptySchema, AdjustingTimeSchema, 0x80>      preset_adjusting_time;
-//        DLMSMethod<EmptySchema, LongSchema, 0x88>               shift_time;
+        COSEMAttribute<ATTR_TIME, OctetStringSchema, 0x08>                     time;
+        COSEMAttribute<ATTR_TIME_ZONE, LongSchema, 0x10>                       time_zone;
+        COSEMAttribute<ATTR_STATUS, UnsignedSchema, 0x18>                      status;
+        COSEMAttribute<ATTR_DST_BEGIN, OctetStringSchema, 0x20>                daylight_savings_begin;
+        COSEMAttribute<ATTR_DST_END, OctetStringSchema, 0x28>                  daylight_savings_end;
+        COSEMAttribute<ATTR_DST_DEVIATION, IntegerSchema, 0x30>                daylight_savings_deviation;
+        COSEMAttribute<ATTR_DST_ENABLED, BooleanSchema, 0x38>                  daylight_savings_enabled;
+        COSEMAttribute<ATTR_CLOCK_BASE, Clock_Base_Schema, 0x40>               clock_base;
+        
+        enum Methods : ObjectAttributeIdType
+        {
+            METHOD_ADJUST_TO_QUARTER          = 1,
+            METHOD_ADJUST_TO_MEAS_PERIOD      = 2,
+            METHOD_ADJUST_TO_MINUTE           = 3,
+            METHOD_ADJUST_TO_PRESET_TIME      = 4,
+            METHOD_PRESET_ADJUSTING_TIME      = 5,
+            METHOD_SHIFT_TIME                 = 6,
+        };
+        
+        COSEMMethod<METHOD_ADJUST_TO_QUARTER, IntegerSchema, 0x60>             adjust_to_quarter;
+        COSEMMethod<METHOD_ADJUST_TO_MEAS_PERIOD, IntegerSchema, 0x68>         adjust_to_measuring_period;
+        COSEMMethod<METHOD_ADJUST_TO_MINUTE, IntegerSchema, 0x70>              adjust_to_minute;
+        COSEMMethod<METHOD_ADJUST_TO_PRESET_TIME, IntegerSchema, 0x78>         adjust_to_preset_time;
+        COSEMMethod<METHOD_PRESET_ADJUSTING_TIME, Adjusting_Time_Schema, 0x80> preset_adjusting_time;
+        COSEMMethod<METHOD_SHIFT_TIME, LongSchema, 0x88>                       shift_time;
         
     };
     
-    class IClockObject : public IClock_0, public ICOSEMObject
+    typedef IClock_0 IClock;
+    
+    class IClockObject : public IClock, public ICOSEMObject
     {
     public:
         IClockObject() = delete;
         IClockObject(const COSEMObjectInstanceCriteria& OIDCriteria, 
             uint16_t ShortNameBase = std::numeric_limits<uint16_t>::max());
         virtual ~IClockObject();
+        
+    protected:
+        virtual APDUConstants::Action_Result InternalAction(ICOSEMMethod * pMethod, 
+            const Cosem_Method_Descriptor& Descriptor, 
+            const DLMSOptional<DLMSVector>& Parameters,
+            DLMSVector * pReturnValue = nullptr) = 0;
+        
     };
 
 }

@@ -2,6 +2,7 @@
 
 #include <cstdint>
 
+#include "APDU/APDUConstants.h"
 #include "COSEMObjectInstanceID.h"
 
 namespace EPRI
@@ -17,6 +18,13 @@ namespace EPRI
         COSEMObjectInstanceID  instance_id;
         ObjectAttributeIdType  attribute_id;
     }               Cosem_Attribute_Descriptor;
+    
+    typedef struct __Cosem_Method_Descriptor
+    {
+        ClassIDType            class_id;
+        COSEMObjectInstanceID  instance_id;
+        ObjectAttributeIdType  method_id;
+    }               Cosem_Method_Descriptor;
     
     enum COSEMPriority : uint8_t
     {
@@ -38,5 +46,21 @@ namespace EPRI
     COSEMPriority(VAL & 0b01000000)
 
     const InvokeIdAndPriorityType ALLOWED_INVOCATION_IDS = 16;
+
+    //
+    // Get Data Result
+    //
+    enum Get_Data_Result_Choice : int8_t
+    {
+        data               = 0,
+        data_access_result = 1
+    };
+    typedef variant<DLMSVector, APDUConstants::Data_Access_Result> Get_Data_Result;
+#define ASN_GET_DATA_RESULT(OPTIONS)\
+    ASN_BEGIN_CHOICE_WITH_OPTIONS(OPTIONS)\
+        ASN_BEGIN_CHOICE_ENTRY_WITH_OPTIONS(EPRI::Get_Data_Result_Choice::data, ASN::IMPLICIT)\
+            ASN_DATA_TYPE\
+        ASN_END_CHOICE_ENTRY\
+    ASN_END_CHOICE
     
 }

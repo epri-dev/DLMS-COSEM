@@ -79,7 +79,7 @@ namespace EPRI
         typedef const SchemaEntry *    SchemaEntryPtr;
         typedef SchemaEntryPtr         SchemaType;
         typedef uint8_t                TagIDType;
-        
+       
 #define ASN_SCHEMA_INTERNAL_DATA_TYPE(SCH)\
         ((SCH)->m_SchemaType & 0xF0000000)
 
@@ -89,11 +89,28 @@ namespace EPRI
 #define ASN_SCHEMA_OPTIONS(SCH)\
         ASN::ComponentOptionType((SCH)->m_SchemaType & 0x0F000000)
 
+#define ASN_IS_BEGINNING(SCH)\
+        (\
+            ASN_SCHEMA_INTERNAL_DATA_TYPE(SCH) == EPRI::ASN::InternalDataType::BEGIN_CHOICE_T ||\
+            ASN_SCHEMA_INTERNAL_DATA_TYPE(SCH) == EPRI::ASN::InternalDataType::BEGIN_CHOICE_ENTRY_T ||\
+            ASN_SCHEMA_INTERNAL_DATA_TYPE(SCH) == EPRI::ASN::InternalDataType::BEGIN_SEQUENCE_T\
+        )
+            
+#define ASN_IS_ENDING(SCH)\
+        (\
+            ASN_SCHEMA_INTERNAL_DATA_TYPE(SCH) == EPRI::ASN::InternalDataType::END_CHOICE_T ||\
+            ASN_SCHEMA_INTERNAL_DATA_TYPE(SCH) == EPRI::ASN::InternalDataType::END_CHOICE_ENTRY_T ||\
+            ASN_SCHEMA_INTERNAL_DATA_TYPE(SCH) == EPRI::ASN::InternalDataType::END_SEQUENCE_T\
+        )
+
 #define ASN_IS_IMPLICIT(SCH)\
         (ASN_SCHEMA_OPTIONS(SCH) & ASN::IMPLICIT)
 
 #define ASN_IS_CONSTRUCTED(SCH)\
         (ASN_SCHEMA_OPTIONS(SCH) & ASN::CONSTRUCTED)
+
+#define ASN_IS_OPTIONAL(SCH)\
+        (ASN_SCHEMA_OPTIONS(SCH) & ASN::OPTIONAL)
 
 #define ASN_SCHEMA_DATA_TYPE(SCH)\
         ASN::DataTypes((SCH)->m_SchemaType & 0x0000FFFF)
@@ -109,6 +126,8 @@ namespace EPRI
         { 
 #define ASN_BEGIN_CHOICE\
             { EPRI::ASN::InternalDataType::BEGIN_CHOICE_T },
+#define ASN_BEGIN_CHOICE_WITH_OPTIONS(OPTIONS)\
+            { EPRI::ASN::InternalDataType::BEGIN_CHOICE_T | (OPTIONS) },
 #define ASN_END_CHOICE\
             { EPRI::ASN::InternalDataType::END_CHOICE_T },
 #define ASN_BEGIN_CHOICE_ENTRY(E)\
@@ -160,6 +179,8 @@ namespace EPRI
             { DT },
 #define ASN_DATA_TYPE\
             { EPRI::ASN::DataTypes::DT_Data },
+#define ASN_DATA_TYPE_WITH_OPTIONS(OPTIONS)\
+            { (EPRI::ASN::DataTypes::DT_Data | (OPTIONS)) },
 #define ASN_END_SCHEMA\
             { EPRI::ASN::InternalDataType::END_SCHEMA_T }\
         };
@@ -204,6 +225,7 @@ namespace EPRI
         virtual bool SelectChoice(int8_t Choice);
         virtual bool GetChoice(int8_t * pChoice);
         virtual bool Append(const DLMSValue& Value);
+        virtual bool Append();
         
         enum GetNextResult
         {
@@ -258,17 +280,22 @@ namespace EPRI
         }
         
         GetNextResult GetNextSchemaEntry(ASN::SchemaEntryPtr * ppSchemaEntry);
+        void SkipOptionalSchemaEntry(ASN::SchemaEntryPtr pSchemaEntry);
         
         bool InternalAppend(const DLMSValue& Value);
         bool InternalAppend(ASNType * pValue);
         bool InternalSimpleAppend(ASN::SchemaEntryPtr SchemaEntry, const DLMSVariant& Value);
+        bool InternalSimpleAppend();
         bool InternalAppend(const DLMSVector& Value);
 
         GetNextResult InternalSimpleGet(ASN::SchemaEntryPtr SchemaEntry, DLMSVariant * pValue);
         GetNextResult GetINTEGER(ASN::SchemaEntryPtr SchemaEntry, DLMSVariant * pValue);
         GetNextResult GetSTRING(ASN::SchemaEntryPtr SchemaEntry, DLMSVariant * pValue);
+        GetNextResult InternalGetOptional(DLMSVariant * pValue);
      
         const int8_t                  INVALID_CHOICE = std::numeric_limits<int8_t>::lowest();
+        const uint8_t                 OPTIONAL_PLACEHOLDER = 0x00;
+
         enum ParseStates
         {
             ST_SIMPLE,
@@ -280,10 +307,10 @@ namespace EPRI
         {
             ParseState(ASN::SchemaEntryPtr SchemaEntry,
                 ParseStates State,
-                int8_t Choice)
-                : m_SchemaEntry(SchemaEntry)
-                , m_State(State)
-                , m_Choice(Choice)
+                int8_t Choice) : 
+                m_SchemaEntry(SchemaEntry), 
+                m_State(State), 
+                m_Choice(Choice)
             {
             }
             ASN::SchemaEntryPtr        m_SchemaEntry;
@@ -292,6 +319,11 @@ namespace EPRI
         };
         std::stack<ParseState>         m_GetStates;
         std::stack<ParseState>         m_AppendStates;
+
+        bool IsGettingOptional(const ParseState& State) const;
+        bool IsAppendingOptional(const ParseState& State, const DLMSValue& Value) const;
+        
+        
         //
         ASN::SchemaEntry               m_SingleDataType[2] = { { ASN::VOID }, { ASN::END_SCHEMA_T } };
         ASN::SchemaEntryPtr            m_pSchema = nullptr;

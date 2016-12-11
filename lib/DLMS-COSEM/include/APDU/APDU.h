@@ -22,6 +22,7 @@ namespace EPRI
             DLMSVector * pData) = 0;
         virtual bool IsValid() const = 0;
         virtual ASN::TagIDType GetTag() = 0;
+        virtual void Clear() = 0;
         virtual COSEMAddressType GetSourceAddress()
         {
             return m_SourceAddress;
@@ -57,6 +58,14 @@ namespace EPRI
         virtual ASN::TagIDType GetTag()
         {
             return Tag;
+        }
+        
+        virtual void Clear()
+        {
+            for (int Index = 0; Index < m_Components.size(); ++Index)
+            {
+                m_Components[Index]->Clear();
+            }
         }
 
         virtual void RegisterComponent(IAPDUComponent * pComponent)
@@ -153,6 +162,11 @@ namespace EPRI
         virtual ASN::TagIDType GetTag()
         {
             return Tag;
+        }
+        
+        virtual void Clear()
+        {
+            m_Type.Clear();
         }
         
         virtual std::vector<uint8_t> GetBytes()

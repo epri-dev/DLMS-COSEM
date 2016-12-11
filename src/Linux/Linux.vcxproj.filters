@@ -61,9 +61,6 @@
     <ClInclude Include="include\LinuxSerial.h">
       <Filter>Header files</Filter>
     </ClInclude>
-    <ClInclude Include="include\optional.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
     <ClInclude Include="include\LinuxSimpleTimer.h">
       <Filter>Header files</Filter>
     </ClInclude>

@@ -23,13 +23,6 @@ namespace EPRI
             get_response_with_list = 3
         };
         
-        enum Get_Data_Result_Choice : int8_t
-        {
-            data = 0,
-            data_access_result = 1
-        };
-        typedef variant<DLMSVector, APDUConstants::Data_Access_Result> Get_Data_Result;
-        
         virtual bool IsValid() const;
         
     };

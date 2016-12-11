@@ -66,6 +66,8 @@
     <ClCompile Include="DLMS-COSEM-TEST.cpp" />
     <ClCompile Include="UnitTest-APDU-AARE.cpp" />
     <ClCompile Include="UnitTest-APDU-AARQ.cpp" />
+    <ClCompile Include="UnitTest-APDU-ACTION-Request.cpp" />
+    <ClCompile Include="UnitTest-APDU-ACTION-Response.cpp" />
     <ClCompile Include="UnitTest-APDU-GET-Request.cpp" />
     <ClCompile Include="UnitTest-APDU-GET-Response.cpp" />
     <ClCompile Include="UnitTest-APDU-RLRE.cpp" />
