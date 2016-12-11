@@ -25,8 +25,6 @@ namespace EPRI
         COSEMAttribute<ATTR_SIMPLE, OctetStringSchema, 0x08>     simple;
         COSEMAttribute<ATTR_SIMPLE_TWO, OctetStringSchema, 0x10> simple2;
         
-        //DLMSMethod<EmptySchema, IntegerSchema, 0x20>            do_simple;
-        
     };
     
     class ISimpleObject : public ISimpleClass, public ICOSEMObject
@@ -41,12 +39,13 @@ namespace EPRI
         }
         
     protected:
-        virtual bool InternalGet(ICOSEMAttribute * pAttribute, 
+        virtual APDUConstants::Data_Access_Result InternalGet(ICOSEMAttribute * pAttribute, 
             const Cosem_Attribute_Descriptor& Descriptor, 
             SelectiveAccess * pSelectiveAccess) final
         {
-            return false;
+            return APDUConstants::Data_Access_Result::other_reason;
         }
+        
 
     };
     
