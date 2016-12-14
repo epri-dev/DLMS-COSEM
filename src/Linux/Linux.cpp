@@ -230,7 +230,7 @@ protected:
         PrintLine("\t4 - COSEM Action\n");
         PrintLine("\t5 - COSEM Release\n");
         PrintLine("\n");
-        PrintLine("\tD - TCP Disconnect\n\n"); 
+        PrintLine("\tD - TCP Disconnect\n"); 
         PrintLine("\tE - HDLC Disconnect\n");
         PrintLine("\tF - Serial Wrapper Disconnect\n");
         PrintLine("\nSelect: ");

@@ -15,7 +15,7 @@ To run:
 
 Open a console.
 
-	socat PTY,link=/tmp/ttyS10 PTY,link=/tmp/ttyS11
+	socat -v -x PTY,link=/tmp/ttyS10 PTY,link=/tmp/ttyS11
 
 Open another console for the Server.
 
