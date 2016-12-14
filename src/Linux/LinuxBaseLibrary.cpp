@@ -4,7 +4,7 @@
 namespace EPRI
 {
 	LinuxBaseLibrary::LinuxBaseLibrary() :
-        m_Core(m_IO), m_Debug(m_IO)
+        m_Core(m_IO), m_Debug(m_IO), m_Scheduler(m_IO)
 	{
 		SetBase(this);
 	}
@@ -28,7 +28,7 @@ namespace EPRI
 
 	IScheduler * LinuxBaseLibrary::GetScheduler()
 	{
-		return nullptr;
+		return &m_Scheduler;
 	}
 
 	ISynchronization * LinuxBaseLibrary::GetSynchronization()

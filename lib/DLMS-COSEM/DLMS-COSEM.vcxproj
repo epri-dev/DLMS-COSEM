@@ -153,6 +153,7 @@
     <ClInclude Include="include\interfaces\IClock.h" />
     <ClInclude Include="include\interfaces\IData.h" />
     <ClInclude Include="include\interfaces\ICOSEMInterface.h" />
+    <ClInclude Include="include\IScheduler.h" />
     <ClInclude Include="include\ISerial.h" />
     <ClInclude Include="include\ISimpleTimer.h" />
     <ClInclude Include="include\ISocket.h" />

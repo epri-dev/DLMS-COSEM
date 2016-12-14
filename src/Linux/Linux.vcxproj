@@ -63,6 +63,7 @@
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="include\LinuxScheduler.cpp" />
     <ClCompile Include="Linux.cpp" />
     <ClCompile Include="LinuxBaseLibrary.cpp" />
     <ClCompile Include="LinuxCore.cpp" />
@@ -80,6 +81,7 @@
     <ClInclude Include="include\LinuxBaseLibrary.h" />
     <ClInclude Include="include\LinuxCore.h" />
     <ClInclude Include="include\LinuxMemory.h" />
+    <ClInclude Include="include\LinuxScheduler.h" />
     <ClInclude Include="include\LinuxSerial.h" />
     <ClInclude Include="include\LinuxSimpleTimer.h" />
     <ClInclude Include="include\LinuxCOSEMServer.h" />

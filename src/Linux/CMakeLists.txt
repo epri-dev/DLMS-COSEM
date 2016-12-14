@@ -11,5 +11,5 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_DEBUG -DASIO_STANDALONE -DASIO_HAS_STD_CH
 
 link_directories(${CMAKE_CURRENT_LIST_DIR}/../../lib/DLMS-COSEM/Debug/)
 
-add_executable(Linux Linux.cpp LinuxBaseLibrary.cpp LinuxCore.cpp LinuxCOSEMServer.cpp LinuxDebug.cpp LinuxMemory.cpp LinuxSerial.cpp LinuxSimpleTimer.cpp LinuxSocket.cpp)
+add_executable(Linux include/LinuxScheduler.cpp Linux.cpp LinuxBaseLibrary.cpp LinuxCore.cpp LinuxCOSEMServer.cpp LinuxDebug.cpp LinuxMemory.cpp LinuxSerial.cpp LinuxSimpleTimer.cpp LinuxSocket.cpp)
 target_link_libraries(Linux -lpthread DLMS-COSEM "${LIBRARIES_FROM_REFERENCES}")

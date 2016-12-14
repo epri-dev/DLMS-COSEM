@@ -22,40 +22,62 @@
 
 namespace EPRI
 {
-    enum HDLCRunResult : uint16_t
-    {
-        RUN_WAIT,
-        NOTHING_TO_DO,
-        NOT_CONNECTED
-    };
+    class ISerialSocket;
+    class DLDataRequestParameter;
 
-    class HDLCMAC : public Callback<bool, uint16_t>
+    class HDLCMAC : public Callback<bool, uint16_t>, public StateMachine
 	{
     	using PacketCallback = Callback<bool, HDLCControl::Control, Packet>;
     	
 	public:
     	HDLCMAC() = delete;
     	HDLCMAC(const HDLCAddress& MyAddress, 
-        	ISerial * pSerial, 
+        	ISerialSocket * pSerial, 
         	const HDLCOptions& Options,
         	uint8_t MaxPreallocatedPacketBuffers);
     	virtual ~HDLCMAC();
     	
-    	virtual HDLCRunResult Process() = 0;
-
     	HDLCAddress MyAddress() const;
     	const HDLCStatistics& Statistics() const;
     	void ClearStatistics();
+    	bool IsConnected() const;
+        //
+        // DL-DATA Service
+        //
+    	virtual bool DataRequest(const DLDataRequestParameter& Parameters);
     	
 	protected:
+        //
+        // State Machine
+        //
+    	enum States : uint8_t
+    	{
+        	ST_DISCONNECTED    = 0,
+        	ST_IEC_CONNECT,
+        	ST_CONNECTING_WAIT,
+        	ST_CONNECTED,
+        	ST_MAX_STATES
+    	};
+
+    	virtual void ST_Disconnected_Handler(EventData * pData) = 0;
+    	virtual void ST_IEC_Connect_Handler(EventData * pData) = 0;
+    	virtual void ST_Connecting_Wait_Handler(EventData * pData) = 0;
+    	virtual void ST_Connected_Handler(EventData * pData);
+    	//
+    	// Packet Handlers
+    	//
+    	virtual bool I_Handler(const Packet& RXPacket);
+    	
     	using PacketPtr = std::unique_ptr<Packet>;
 
-    	virtual HDLCErrorCode ProcessSerialReception();
+    	virtual void Process() = 0;
+    	
+    	virtual HDLCErrorCode ProcessSerialReception(ERROR_TYPE Error, size_t BytesReceived);
     	Packet * GetWorkingRXPacket();
     	void ReleaseWorkingRXPacket();
     	void EnqueueWorkingRXPacket();            
 
-    	virtual HDLCErrorCode ProcessSerialTransmission();
+    	virtual void ProcessSerialTransmission();
     	Packet * GetWorkingTXPacket();
     	void ReleaseWorkingTXPacket();
     	void EnqueueWorkingTXPacket();            
@@ -66,9 +88,14 @@ namespace EPRI
     	Packet * GetIncomingPacket();
     	void ReleaseIncomingPacket();
     	
-       	
-    	HDLCAddress							m_MyAddress;
-    	ISerial *                           m_pSerial;
+    	void Serial_Connect(ERROR_TYPE Error);
+        void Serial_Receive(ERROR_TYPE Error, size_t BytesReceived);
+    	void Serial_Close(ERROR_TYPE Error);
+
+    	bool ArmAsyncRead(uint32_t TimeOutInMs = 0, size_t MinimumSize = sizeof(uint8_t));
+      	
+        HDLCAddress							m_MyAddress;
+    	ISerialSocket *                     m_pSerial;
     	HDLCOptions                         m_CurrentOptions;
 		std::shared_ptr<EPRI::ISimpleTimer>	m_pTimer;
 		HDLCStatistics					    m_Statistics;
@@ -76,6 +103,7 @@ namespace EPRI
     	std::queue<PacketPtr>               m_RXPackets;
     	std::queue<PacketPtr>               m_TXPackets;
     	PacketCallback                      m_PacketCallback;
+    	DLMSVector                          m_RXVector;
     	
 	private:
     	void LockPackets();
@@ -161,12 +189,12 @@ namespace EPRI
     using PacketEventData = MACEventData<Packet>;
     using DataEventData = MACEventData<DLDataRequestParameter>;
     
-    class HDLCClient : public HDLCMAC, public StateMachine
+    class HDLCClient : public HDLCMAC
     {
     public:
         HDLCClient() = delete;
         HDLCClient(const HDLCAddress& MyAddress, 
-            ISerial * pSerial, 
+            ISerialSocket * pSerial, 
             const HDLCOptions& Opt,
             uint8_t MaxPreallocatedPacketBuffers);
         virtual ~HDLCClient();
@@ -174,48 +202,32 @@ namespace EPRI
         // MA-CONNECT Service
         //
         bool ConnectRequest(const DLConnectRequestOrIndication& Parameters);
+        
+    protected:
         //
-        // MA-CONNECT Service
+        // HDLCMAC
         //
-        bool DataRequest(const DLDataRequestParameter& Parameters);
-
-        HDLCRunResult Process();
+        void Process();
   
     private:
-        //
-        // State Machine
-        //
-        enum States : uint8_t
-        {
-            ST_DISCONNECTED = 0,
-            ST_CONNECTING,
-            ST_CONNECTING_WAIT,
-            ST_CONNECTED,
-            ST_CONNECTED_SEND,
-            ST_CONNECTED_RECEIVE,
-            ST_MAX_STATES
-        };
-
-        void ST_Disconnected_Handler(EventData * pData);
-        void ST_Connecting_Handler(EventData * pData);
-        void ST_Connecting_Wait_Handler(EventData * pData);
-        void ST_Connected_Handler(EventData * pData);
-        void ST_Connected_Send_Handler(EventData * pData);
-        void ST_Connected_Receive_Handler(EventData * pData);
+        virtual void ST_Disconnected_Handler(EventData * pData) final;
+        virtual void ST_IEC_Connect_Handler(EventData * pData) final;
+        virtual void ST_Connecting_Wait_Handler(EventData * pData) final;
+        virtual void ST_Connected_Handler(EventData * pData) final;
         //
         // Packet Handlers
         //
         bool UI_Handler(const Packet& RXPacket);
         bool UA_Handler(const Packet& RXPacket);
-       
+      
     };
     
-    class HDLCServer : public HDLCMAC, public StateMachine
+    class HDLCServer : public HDLCMAC
     {
     public:
         HDLCServer() = delete;
         HDLCServer(const HDLCAddress& MyAddress, 
-            ISerial * pSerial, 
+            ISerialSocket * pSerial, 
             const HDLCOptions& Opt,
             uint8_t MaxPreallocatedPacketBuffers);
         virtual ~HDLCServer();
@@ -223,39 +235,22 @@ namespace EPRI
         // MA-CONNECT Service
         //
         bool ConnectResponse(const DLConnectConfirmOrResponse& Parameters);
+        
+    protected:
         //
-        // MA-CONNECT Service
+        // HDLCMAC
         //
-        bool DataRequest(const DLDataRequestParameter& Parameters);
-
-        HDLCRunResult Process();
+        void Process();
         
     private:
-        //
-        // State Machine
-        //
-        enum States : uint8_t
-        {
-            ST_DISCONNECTED = 0,
-            ST_CONNECTING,
-            ST_CONNECTING_RESPONSE,
-            ST_CONNECTED,
-            ST_CONNECTED_SEND,
-            ST_CONNECTED_RECEIVE,
-            ST_MAX_STATES
-        };
-        
-        void ST_Disconnected_Handler(EventData * pData);
-        void ST_Connecting_Handler(EventData * pData);
-        void ST_Connecting_Response_Handler(EventData * pData);
-        void ST_Connected_Handler(EventData * pData);
-        void ST_Connected_Send_Handler(EventData * pData);
-        void ST_Connected_Receive_Handler(EventData * pData);
+        virtual void ST_Disconnected_Handler(EventData * pData) final;
+        virtual void ST_IEC_Connect_Handler(EventData * pData) final;
+        virtual void ST_Connecting_Wait_Handler(EventData * pData) final;
+        virtual void ST_Connected_Handler(EventData * pData) final;
         //
         // Packet Handlers
         //
         bool SNRM_Handler(const Packet& Packet);
-        bool I_Handler(const Packet& RXPacket);
         
     };
 

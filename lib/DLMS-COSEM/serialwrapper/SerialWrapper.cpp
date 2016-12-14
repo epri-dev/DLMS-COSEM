@@ -3,7 +3,7 @@
 namespace EPRI
 {
 
-    SerialWrapper::SerialWrapper(ISerial * pSerial) :
+    SerialWrapper::SerialWrapper(ISerialSocket * pSerial) :
         m_pSerial(pSerial)
     {
     }
@@ -31,7 +31,7 @@ namespace EPRI
     bool SerialWrapper::Send(const DLMSVector& Data)
     {
         ERROR_TYPE     RetVal = SUCCESSFUL;
-        if ((RetVal = m_pSerial->Write(Data.GetData(), Data.Size())) != SUCCESSFUL) 
+        if ((RetVal = m_pSerial->Write(Data)) != SUCCESSFUL) 
         {
             return false;
         }
@@ -40,19 +40,17 @@ namespace EPRI
     
     bool SerialWrapper::Receive(DLMSVector * pData)
     {
-        uint8_t		   Byte;
         uint32_t       CharacterTimeout = 400;
         size_t         BytesReceived = 0;
         //
         // Check to see if there is a byte available.  If so, then we can just stream 
         // until we hit a character timeout.
         //
-        ERROR_TYPE     RetVal = m_pSerial->Read(&Byte, sizeof(Byte), 0);
+        ERROR_TYPE     RetVal = m_pSerial->Read(pData, sizeof(uint8_t), 0);
         while (SUCCESSFUL == RetVal)
         {
-            pData->Append<uint8_t>(Byte);
-            BytesReceived++;
-            RetVal = m_pSerial->Read(&Byte, sizeof(Byte), CharacterTimeout);
+            ++BytesReceived;
+            RetVal = m_pSerial->Read(pData, sizeof(uint8_t), CharacterTimeout);
         }
         return BytesReceived;
     }

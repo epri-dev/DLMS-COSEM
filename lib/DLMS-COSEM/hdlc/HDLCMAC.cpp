@@ -8,17 +8,43 @@
 namespace EPRI
 {
     HDLCMAC::HDLCMAC(const HDLCAddress& MyAddress, 
-        ISerial * pSerial, 
+        ISerialSocket * pSerial, 
         const HDLCOptions& Options,
         uint8_t MaxPreallocatedPacketBuffers) :
         m_MyAddress(MyAddress),
         m_pSerial(pSerial),
-        m_CurrentOptions(Options)
+        m_CurrentOptions(Options),
+        StateMachine(ST_MAX_STATES)
     {
+        //
+        // State Machine
+        //
+        BEGIN_STATE_MAP
+            STATE_MAP_ENTRY(ST_DISCONNECTED, HDLCMAC::ST_Disconnected_Handler)
+            STATE_MAP_ENTRY(ST_IEC_CONNECT, HDLCMAC::ST_IEC_Connect_Handler)
+            STATE_MAP_ENTRY(ST_CONNECTING_WAIT, HDLCMAC::ST_Connecting_Wait_Handler)
+            STATE_MAP_ENTRY(ST_CONNECTED, HDLCMAC::ST_Connected_Handler)
+        END_STATE_MAP
+        //
         while (MaxPreallocatedPacketBuffers--)
         {
             m_Packets.push(std::unique_ptr<Packet>(new Packet));
         }
+        //
+        // Physical Layer Handlers
+        //
+        m_pSerial->RegisterConnectHandler(
+            std::bind(&HDLCMAC::Serial_Connect, this, std::placeholders::_1));
+        m_pSerial->RegisterReadHandler(
+            std::bind(&HDLCMAC::Serial_Receive, this, std::placeholders::_1, std::placeholders::_2));
+        pSerial->RegisterCloseHandler(
+            std::bind(&HDLCMAC::Serial_Close, this, std::placeholders::_1));
+        //
+        // Packet Handlers
+        //
+        m_PacketCallback.RegisterCallback(HDLCControl::INFO, 
+            std::bind(&HDLCMAC::I_Handler, this, std::placeholders::_1));
+        
     }
     
     HDLCMAC::~HDLCMAC()
@@ -37,6 +63,89 @@ namespace EPRI
     void HDLCMAC::ClearStatistics()
     {
         m_Statistics.Clear();
+    }
+    
+    bool HDLCMAC::IsConnected() const
+    {
+        return m_CurrentState == ST_CONNECTED;
+    }   
+    //
+    // DA-DATA Service Implementation
+    //
+    bool HDLCMAC::DataRequest(const DLDataRequestParameter& Parameters)
+    {
+        bool bAllowed = false;
+        BEGIN_TRANSITION_MAP
+            TRANSITION_MAP_ENTRY(ST_DISCONNECTED, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_IEC_CONNECT, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_CONNECTING_WAIT, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_CONNECTED, ST_CONNECTED)
+        END_TRANSITION_MAP(bAllowed, new DataEventData(Parameters));
+        return bAllowed;
+    }
+    
+    void HDLCMAC::ST_Connected_Handler(EventData * pData)
+    {
+        //
+        // Data Request
+        //
+        DataEventData * pDataEvent = dynamic_cast<DataEventData *>(pData);
+        if (pDataEvent)
+        {
+            Packet *           pInfo = GetWorkingTXPacket();
+            if (pInfo)
+            {
+                HDLCErrorCode ReturnCode = pInfo->MakePacket(Packet::NO_SEGMENT,
+                    pDataEvent->Data.DestinationAddress,
+                    m_MyAddress,
+                    HDLCControl(HDLCControl::INFO),
+                    pDataEvent->Data.Data.GetData(),
+                    pDataEvent->Data.Data.Size());
+                if (SUCCESS == ReturnCode)
+                {
+                    EnqueueWorkingTXPacket();
+                }
+                else
+                {
+                    ReleaseWorkingTXPacket();
+                }
+            }
+            Process();
+            return;
+        }
+        //
+        // I Packet
+        //
+        PacketEventData * pPacketData = dynamic_cast<PacketEventData *>(pData);
+        if (pPacketData && pPacketData->Data.GetControl().PacketType() == HDLCControl::INFO)
+        {
+            bool            RetVal = false;
+            size_t          InfoLength = 0;
+            const uint8_t * pInformation = pPacketData->Data.GetInformation(InfoLength);
+            
+            FireCallback(DLDataRequestParameter::ID, 
+                DLDataRequestParameter(pPacketData->Data.GetSourceAddress(),
+                    HDLCControl::INFO,
+                    DLMSVector(pInformation, InfoLength)),
+                &RetVal);
+            
+            Process();
+            return;
+        }        
+    }    
+    //
+    // Packet Handlers
+    //
+    bool HDLCMAC::I_Handler(const Packet& RXPacket)
+    {
+        bool bAllowed = false;
+        BEGIN_TRANSITION_MAP
+            TRANSITION_MAP_ENTRY(ST_DISCONNECTED, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_IEC_CONNECT, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_CONNECTING_WAIT, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_CONNECTED, ST_CONNECTED)
+        END_TRANSITION_MAP(bAllowed, new PacketEventData(RXPacket));
+        return bAllowed;
     }
 
     void HDLCMAC::LockPackets()
@@ -86,42 +195,44 @@ namespace EPRI
         UnlockPackets();
     }
 
-    HDLCErrorCode HDLCMAC::ProcessSerialReception()
+    HDLCErrorCode HDLCMAC::ProcessSerialReception(ERROR_TYPE Error, size_t BytesReceived)
     {
-        uint8_t		   Byte;
         HDLCErrorCode  ReturnValue = NEED_MORE;
-        Packet *       pPacket = nullptr;
-        ERROR_TYPE     ReadRet;
-        uint32_t       CharacterTimeout = 0;
-
-        while (m_pSerial->Read(&Byte, sizeof(Byte), CharacterTimeout) == SUCCESSFUL)
-        {
-            if (!pPacket)
-            {
-                pPacket = GetWorkingRXPacket();
-                if (!pPacket)
-                {
-                    return NO_PACKETS;
-                }
-                //
-                // We've locked on, now we need to wait for the ICT.
-                //
-                CharacterTimeout = m_CurrentOptions.InterOctetTimeoutInMs;
-            }
-            ReturnValue = pPacket->MakeByByte(Byte);
-            if (ReturnValue != NEED_MORE)
-            {
-                break;
-            }
-        }
-    	
-        if (SUCCESS == ReturnValue)
-        {
-            EnqueueWorkingRXPacket();            
-        }
-        else
+        
+        if (ERR_TIMEOUT == Error && !BytesReceived)
         {
             ReleaseWorkingRXPacket();
+            m_RXVector.Clear();
+            ArmAsyncRead();
+        }
+        else if (m_pSerial->AppendAsyncReadResult(&m_RXVector, BytesReceived))
+        {
+            Packet * pPacket = GetWorkingRXPacket();
+            if (pPacket)
+            {
+                ReturnValue = pPacket->MakeByVector(&m_RXVector);
+                if (SUCCESS == ReturnValue)
+                {
+                    EnqueueWorkingRXPacket(); 
+                    ProcessPacketReception();
+                    m_RXVector.Clear();
+                    ArmAsyncRead();
+                }
+                else if (NEED_MORE == ReturnValue)
+                {
+                    ArmAsyncRead(m_CurrentOptions.InterOctetTimeoutInMs);
+                }
+                else
+                {
+                    //
+                    // Parsing Error.  Try to flush and resync.
+                    //
+                    ReleaseWorkingRXPacket();
+                    m_RXVector.Clear();
+                    m_pSerial->Flush(EPRI::ISerialSocket::RECEIVE);
+                    ArmAsyncRead();
+                }          
+            }
         }
         return ReturnValue;
     }
@@ -185,22 +296,19 @@ namespace EPRI
         UnlockPackets();
     }
 
-    HDLCErrorCode HDLCMAC::ProcessSerialTransmission()
+    void HDLCMAC::ProcessSerialTransmission()
     {
-        HDLCErrorCode  ReturnValue = NEED_MORE;
         Packet *       pTXPacket = GetOutgoingPacket();
         if (pTXPacket)
         {
-            if (m_pSerial->Write(*pTXPacket, pTXPacket->GetPacketLength()) != SUCCESSFUL) 
+            if (m_pSerial->Write(*pTXPacket) != SUCCESSFUL) 
             {
-                ReturnValue = TX_FAILURE;
                 //
                 // RETRY - STILL IN TX QUEUE
                 //
             }
             ReleaseOutgoingPacket();
         }
-        return ReturnValue;
     }
 
     Packet * HDLCMAC::GetIncomingPacket()
@@ -249,5 +357,30 @@ namespace EPRI
         }
         return ReturnValue;
     }
-
+    
+    bool HDLCMAC::ArmAsyncRead(uint32_t TimeOutInMs /*= 0*/, size_t MinimumSize /* = sizeof(uint8_t) */)
+    {
+        return SUCCESSFUL == m_pSerial->Read(nullptr, MinimumSize, TimeOutInMs);
+    }
+    
+    void HDLCMAC::Serial_Receive(ERROR_TYPE Error, size_t BytesReceived)
+    {
+        ProcessSerialReception(Error, BytesReceived);
+    }
+    
+    void HDLCMAC::Serial_Connect(ERROR_TYPE Error)
+    {
+        if (!Error)
+        {
+            //
+            // Arm read to catch a header at least
+            //
+            ArmAsyncRead();
+        }
+    }
+    
+    void HDLCMAC::Serial_Close(ERROR_TYPE Error)
+    {
+    }
+    
 } /* namespace EPRI */

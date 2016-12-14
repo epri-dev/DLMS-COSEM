@@ -60,5 +60,6 @@ namespace EPRI
 		}
 	
 	const ERROR_TYPE SUCCESSFUL = 0L;
+    const ERROR_TYPE ERR_TIMEOUT = 0L;
 
 }

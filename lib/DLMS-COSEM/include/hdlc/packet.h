@@ -7,6 +7,7 @@
 #include "linkdefs.h"
 #include "HDLCControl.h"
 #include "HDLCAddress.h"
+#include "DLMSVector.h"
 
 namespace EPRI
 {
@@ -26,6 +27,7 @@ namespace EPRI
 		static const size_t MAX_PACKET_SIZE = 60;
 		static const size_t STATIC_HEADER_SIZE = (FRAME_FORMAT + CONTROL_FIELD + HCS_FIELD);
     	static const size_t MAX_HDLC_FRAME_SIZE = STATIC_HEADER_SIZE + (2 * MAX_ADDRESS_FIELD) + MAX_PACKET_SIZE + FLAG_FIELDS + CRC_FIELD;
+    	static const size_t HEADER_START_SIZE = (sizeof(uint8_t) + FRAME_FORMAT);
 
 		enum Segmentation : uint8_t
 		{
@@ -41,6 +43,7 @@ namespace EPRI
     	void Clear();
    	
     	virtual uint16_t GetPacketLength() const;
+    	virtual uint16_t GetRemainingPacketLength() const;
     	virtual Segmentation GetSegmentation() const;
     	virtual HDLCAddress GetDestinationAddress() const;
     	virtual HDLCAddress GetSourceAddress() const;
@@ -55,8 +58,13 @@ namespace EPRI
         	const uint8_t * Information = nullptr,
         	size_t InformationSize = 0);
     	virtual HDLCErrorCode MakeByByte(uint8_t Byte);
+    	virtual HDLCErrorCode MakeByVector(DLMSVector * pVector);
     	
     	operator const uint8_t *() const;
+    	//
+    	// TODO - Rework to Base Packet on DLMSVector
+    	//
+    	operator DLMSVector() const;
 
 	protected:
     	enum PACKET_RX_STATE

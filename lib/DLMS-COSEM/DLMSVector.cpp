@@ -78,6 +78,12 @@ namespace EPRI
     {
         m_Data = Value;    
     }
+
+    DLMSVector::DLMSVector(const void * pBuffer, size_t Size)
+    {
+        const uint8_t * p = static_cast<const uint8_t *>(pBuffer);
+        m_Data.insert(m_Data.end(), p, p + Size);
+    }
     
     DLMSVector::~DLMSVector()
     {
@@ -447,6 +453,16 @@ namespace EPRI
         }
         return -1;
     }
+    
+    int DLMSVector::PeekByteAtEnd(size_t OffsetFromEndOfVector /* = 0*/) const
+    {
+        ssize_t Index = (ssize_t) m_Data.size() - (ssize_t) OffsetFromEndOfVector - 1;
+        if (Index >= 0)
+        {
+            return m_Data[Index];
+        }
+        return -1;
+    }  
     
     bool DLMSVector::PeekBuffer(uint8_t * pValue, size_t Count) const
     {

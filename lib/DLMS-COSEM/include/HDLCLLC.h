@@ -21,15 +21,32 @@ namespace EPRI
     	HDLCAddress MyAddress() const;
     	const HDLCStatistics& Statistics() const;
     	void ClearStatistics();
+    	
+    	virtual HDLCAddress ConnectedAddress() const;
+    	virtual bool IsConnected() const;
     	//
         // DL-DATA Service
         //
-    	virtual HDLCRunResult DataRequest(const DLDataRequestParameter& Parameters) = 0;
-    	virtual void RegisterDataIndication(CallbackFunction Callback) = 0;
+    	virtual bool DataRequest(const DLDataRequestParameter& Parameters);
+        //
+        // Transport
+        //
+    	bool DataRequest(const DataRequestParameter& Parameters);
 	
 	protected:
+        //
+        // DL-CONNECT Service
+        //
+    	virtual bool MACConnectConfirmOrIndication(const BaseCallbackParameter& Paramters);
+        //
+        // DL-DATA Service
+        //
+    	virtual bool MACDataIndication(const BaseCallbackParameter& Parameters);
+        //
     	DLDataRequestParameter& AddLLCHeader(DLDataRequestParameter * pParameters);
     	
+    	HDLCAddress             m_ConnectedAddress;
+
 	private:
       	HDLCMAC *				 m_pMAC;
 	};
@@ -38,35 +55,32 @@ namespace EPRI
     {
     public:
         HDLCClientLLC(const HDLCAddress& MyAddress, 
-            ISerial * pSerial, 
+            ISerialSocket * pSerial, 
             const HDLCOptions& Options,
             uint8_t MaxPreallocatedPacketBuffers = 10);
         virtual ~HDLCClientLLC();
-        
-        bool IsConnected() const;
-        HDLCAddress ConnectedAddress() const;
         //
         // DL-CONNECT Service
         //
-        HDLCRunResult ConnectRequest(const DLConnectRequestOrIndication& Parameters);
+        bool ConnectRequest(const DLConnectRequestOrIndication& Parameters);
         void RegisterConnectConfirm(CallbackFunction Callback);
         //
         // DL-DATA Service
         //
-        HDLCRunResult DataRequest(const DLDataRequestParameter& Parameters);
         void RegisterDataIndication(CallbackFunction Callback);
-        //
-        // Transport
-        //
-        bool DataRequest(const DataRequestParameter& Parameters);
 
     protected:
-        bool MACConnectConfirm(const BaseCallbackParameter& Paramters);
-        bool MACDataIndication(const BaseCallbackParameter& Parameters);
+        //
+        // DL-CONNECT Service
+        //
+        virtual bool MACConnectConfirm(const BaseCallbackParameter& Paramters);
+    	//
+        // DL-DATA Service
+        //
+        virtual bool MACDataIndication(const BaseCallbackParameter& Parameters) final;
         
     private:
         HDLCClient              m_MAC;
-        HDLCAddress             m_ConnectedAddress;
         
     };
     
@@ -74,32 +88,24 @@ namespace EPRI
     {
     public:
         HDLCServerLLC(const HDLCAddress& MyAddress, 
-            ISerial * pSerial, 
+            ISerialSocket * pSerial, 
             const HDLCOptions& Options,
             uint8_t MaxPreallocatedPacketBuffers = 10);
         virtual ~HDLCServerLLC();
         //
         // DL-CONNECT Service
         //
-        void RegisterConnectIndication(CallbackFunction Callback);
-        HDLCRunResult ConnectResponse(const DLConnectConfirmOrResponse& Parameters);
-        //
-        // DL-DATA Service
-        //
-        HDLCRunResult DataRequest(const DLDataRequestParameter& Parameters);
-        void RegisterDataIndication(CallbackFunction Callback);
-        //
-        // Transport
-        //
-        bool DataRequest(const DataRequestParameter& Parameters);
+        bool ConnectResponse(const DLConnectConfirmOrResponse& Parameters);
         
     protected:
-        bool MACConnectIndication(const BaseCallbackParameter& Parameters);
-        bool MACDataIndication(const BaseCallbackParameter& Parameters);
+        //
+        // DL-CONNECT Service
+        //
+        virtual bool OnConnectIndication(COSEMAddressType Address);
+        virtual bool MACConnectIndication(const BaseCallbackParameter& Parameters);
         
     private:
         HDLCServer              m_MAC;
-        
     };
 
 	

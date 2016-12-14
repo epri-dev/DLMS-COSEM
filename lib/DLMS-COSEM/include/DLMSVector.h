@@ -63,6 +63,7 @@ namespace EPRI
         DLMSVector(const std::initializer_list<uint8_t>& Value);
         DLMSVector(const DLMSVector& Value);
         DLMSVector(const std::vector<uint8_t>& Value);
+        DLMSVector(const void * pBuffer, size_t Size);
         ~DLMSVector();
 
         size_t Size() const;
@@ -166,6 +167,7 @@ namespace EPRI
         const uint8_t * GetData() const;
         
         int PeekByte(size_t OffsetFromGetPosition = 0) const;
+        int PeekByteAtEnd(size_t OffsetFromEndOfVector = 0) const;
         bool PeekBuffer(uint8_t * pValue, size_t Count) const;
         
         template <typename _VariantType, uint8_t BitsToPeek = 0>

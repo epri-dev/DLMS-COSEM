@@ -51,7 +51,6 @@ namespace EPRI
                 return &Socket == pSocket;
             });
     }
-
     //
     // LinuxTCPSocket
     //

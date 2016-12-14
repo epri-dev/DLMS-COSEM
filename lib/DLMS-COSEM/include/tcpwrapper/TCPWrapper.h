@@ -18,6 +18,14 @@ namespace EPRI
         virtual ProcessResultType Process();
 	
     protected:
+        //
+        // Transport
+        //
+        virtual bool OnConnect(COSEMAddressType Address)
+        {
+            return true;
+        }
+        
         bool Send(const DLMSVector& Data);
         bool Receive(DLMSVector * pData);
         

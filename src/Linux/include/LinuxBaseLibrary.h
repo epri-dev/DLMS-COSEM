@@ -6,6 +6,7 @@
 #include "LinuxMemory.h"
 #include "LinuxCore.h"
 #include "LinuxDebug.h"
+#include "LinuxScheduler.h"
 
 namespace EPRI
 {
@@ -36,6 +37,8 @@ namespace EPRI
 		LinuxMemory	        m_Memory;
 		LinuxCore           m_Core;
     	LinuxDebug          m_Debug;
+    	LinuxScheduler      m_Scheduler;
+
 	};
 	
 }

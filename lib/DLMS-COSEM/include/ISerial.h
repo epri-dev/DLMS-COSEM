@@ -2,18 +2,19 @@
 
 #include <stddef.h>
 #include "ERROR_TYPE.h"
+#include "ISocket.h"
 
 namespace EPRI
 {
-	class ISerial
-	{
-
-	public:
-		enum SerialError : uint16_t
-		{
-			E_SUCCESS
-		};
-		
+    class ISerialSocket;
+    
+    class ISerial
+    {
+    public:
+        virtual ~ISerial()
+        {
+        }
+        
 		typedef struct _Options
 		{
 			enum BaudRate : uint8_t
@@ -66,26 +67,30 @@ namespace EPRI
 			}
 
 		} Options;
-		
-		enum FlushDirection
-		{
-			RECEIVE = 0,
-			TRANSMIT, 
-			BOTH
-		};
 
-		virtual ~ISerial()
-		{
-		}
-		virtual ERROR_TYPE Open(const char * PortName) = 0;
-		virtual Options GetOptions() = 0;
-		virtual ERROR_TYPE SetOptions(const Options& Opt) = 0;
-		virtual ERROR_TYPE Write(const uint8_t * pBuffer, size_t Bytes) = 0;
-		virtual ERROR_TYPE Read(uint8_t * pBuffer, size_t MaxBytes, uint32_t TimeOutInMS = 0, size_t * pActualBytes = nullptr) = 0;
-		virtual ERROR_TYPE Close() = 0;
-		virtual ERROR_TYPE Flush(FlushDirection Direction) = 0;
-		virtual bool IsConnected() = 0;
-
-	};
+        virtual ISerialSocket * CreateSocket(const Options& Opt) = 0;
+        virtual void ReleaseSocket(ISerialSocket * pSocket) = 0;
+        virtual bool Process() = 0;
+        
+    };   
+    
+    class ISerialSocket : public ISocket
+    {
+    public:
+        enum FlushDirection
+        {
+            RECEIVE  = 0,
+            TRANSMIT, 
+            BOTH
+        };
+        
+        virtual ~ISerialSocket()
+        {
+        }
+        
+        virtual ERROR_TYPE Flush(FlushDirection Direction) = 0;
+        virtual ERROR_TYPE SetOptions(const ISerial::Options& Opt) = 0;
+        
+    };
 	
 }

@@ -18,10 +18,13 @@ namespace EPRI
         LinuxTCPSocket() = delete;
         LinuxTCPSocket(const IIP::Options& Opt, asio::io_service& IO);
         virtual ~LinuxTCPSocket();
-
+        
+        IIP::Options GetOptions();
+        //
+        // ISocket
+        //
         virtual ERROR_TYPE Open(const char * DestinationAddress = nullptr, int Port = DEFAULT_DLMS_PORT);
         virtual ConnectCallbackFunction RegisterConnectHandler(ConnectCallbackFunction Callback);
-        virtual IIP::Options GetOptions();
         virtual ERROR_TYPE Write(const DLMSVector& Data, bool Asynchronous = false);
         virtual WriteCallbackFunction RegisterWriteHandler(WriteCallbackFunction Callback);
         virtual ERROR_TYPE Read(DLMSVector * pData, size_t ReadAtLeast = 0,
@@ -32,6 +35,7 @@ namespace EPRI
         virtual ERROR_TYPE Close();
         virtual CloseCallbackFunction RegisterCloseHandler(CloseCallbackFunction Callback);
         virtual bool IsConnected();
+
         
     private:
         void ASIO_Accept_Handler(const asio::error_code& Error);

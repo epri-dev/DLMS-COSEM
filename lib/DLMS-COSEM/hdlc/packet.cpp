@@ -276,10 +276,14 @@ namespace EPRI
         return Get16BigEndianHelper(&m_Information[Index]);
     }
     
+    uint16_t Packet::GetRemainingPacketLength() const
+    {
+        return (GetU16(m_PacketMappings.m_Format) & 0b0000011111111111);
+    }
+    
     uint16_t Packet::GetPacketLength() const
     {
-        return (GetU16(m_PacketMappings.m_Format) & 0b0000011111111111) +
-            FLAG_FIELDS;
+        return GetRemainingPacketLength() + FLAG_FIELDS;
     }
 
     Packet::Segmentation Packet::GetSegmentation() const
@@ -544,6 +548,20 @@ namespace EPRI
 
     }
     
+    HDLCErrorCode Packet::MakeByVector(DLMSVector * pVector)
+    {
+        HDLCErrorCode ReturnValue = NEED_MORE;
+        while (pVector->GetReadPosition() < pVector->Size())
+        {
+            ReturnValue = MakeByByte(pVector->Get<uint8_t>());
+            if (SUCCESS == ReturnValue)
+            {
+                break;
+            }
+        }
+        return ReturnValue;
+    }
+    
     void Packet::Clear()
     {
         m_PacketState = STATE_RX_NO_PACKET;
@@ -556,6 +574,11 @@ namespace EPRI
     Packet::operator const uint8_t *() const
     {
         return m_Information;
+    }
+    
+    Packet::operator DLMSVector() const
+    {
+        return DLMSVector(m_Information, GetPacketLength());
     }
     
 } /* namespace EPRI */

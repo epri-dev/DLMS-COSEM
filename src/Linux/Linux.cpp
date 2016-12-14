@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <iomanip>
 #include <asio.hpp>
+#include <algorithm>
+#include <string>
 
 #include "LinuxBaseLibrary.h"
 #include "LinuxCOSEMServer.h"
@@ -218,24 +220,30 @@ protected:
     {
         PrintLine("\nClient Menu:\n\n");
         PrintLine("\t0 - Exit Application\n");
-        PrintLine("\t1 - TCP Connect\n");
-        PrintLine("\t2 - COSEM Open\n");
-        PrintLine("\t3 - COSEM Get\n");
-        PrintLine("\t4 - COSEM Set\n");
-        PrintLine("\t5 - COSEM Action\n");
-        PrintLine("\t6 - COSEM Release\n");
-        PrintLine("\t9 - TCP Disconnect\n\n"); 
-        PrintLine("Select: ");
+        PrintLine("\tA - TCP Connect\n");
+        PrintLine("\tB - HDLC Connect\n");
+        PrintLine("\tC - Serial Wrapper Connect\n");
+        PrintLine("\n");
+        PrintLine("\t1 - COSEM Open\n");
+        PrintLine("\t2 - COSEM Get\n");
+        PrintLine("\t3 - COSEM Set\n");
+        PrintLine("\t4 - COSEM Action\n");
+        PrintLine("\t5 - COSEM Release\n");
+        PrintLine("\n");
+        PrintLine("\tD - TCP Disconnect\n\n"); 
+        PrintLine("\tE - HDLC Disconnect\n");
+        PrintLine("\tF - Serial Wrapper Disconnect\n");
+        PrintLine("\nSelect: ");
         ReadLine(std::bind(&ClientApp::ClientMenu_Handler, this, std::placeholders::_1));
     }
     
-    void ClientMenu_Handler(const std::string& RetVal)
+    void ClientMenu_Handler(const std::string& RetVal) 
     {
         if (RetVal == "0")
         {
             exit(0);
         }
-        else if (RetVal == "1")
+        else if (toupper(RetVal[0]) == 'A')
         {
             int         SourceAddress = GetNumericInput("Client Address (Default: 1)", 1);
             std::string TCPAddress = GetStringInput("Destination TCP Address (Default: localhost)", "localhost");
@@ -247,9 +255,64 @@ protected:
                 PrintLine("Failed to initiate connect\n");
             }
         }
-        else if (RetVal == "2")
+        else if (toupper(RetVal[0]) == 'B')
         {
-            if (m_pSocket && m_pSocket->IsConnected())
+            int         SourceAddress = GetNumericInput("Client Address (Default: 1)", 1);
+            int         DestinationAddress = GetNumericInput("Destination Address (Default: 1)", 1);
+            std::string SerialPort = GetStringInput("Serial Port (Default: /tmp/ttyS11)", "/tmp/ttyS11");
+            
+            PrintLine("Initial Baud Rate Selection\n");
+            PrintLine("\t6  - 9600\n");
+            PrintLine("\t10 - 115200\n");
+            int         BaudRate = GetNumericInput("(Default: 6 - 9600)", 6);
+            //
+            // Engine
+            //
+            m_pClientEngine = new LinuxClientEngine(COSEMClientEngine::Options(SourceAddress), 
+                                (m_pHDLC = new HDLCClientLLC(HDLCAddress(SourceAddress), 
+                                    (m_pSerialSocket = 
+                                        Base()->GetCore()->GetSerial()->CreateSocket(LinuxSerial::Options(ISerial::Options::BaudRate(BaudRate)))),
+                                           HDLCOptions())));
+            //
+            // Physical
+            //
+            if (m_pSerialSocket->Open(SerialPort.c_str()) != SUCCESS)
+            {
+                PrintLine("Failed to initiate connect\n");
+            }
+            else
+            {
+                //
+                // Datalink
+                //
+                m_pHDLC->ConnectRequest(DLConnectRequestOrIndication(HDLCAddress(DestinationAddress)));
+                m_pSocket = m_pSerialSocket;
+            }
+        }        
+        else if (toupper(RetVal[0]) == 'C')
+        {
+            int         SourceAddress = GetNumericInput("Client Address (Default: 1)", 1);
+            std::string SerialPort = GetStringInput("Serial Port (Default: /tmp/ttyS11)", "/tmp/ttyS11");
+            
+            PrintLine("Initial Baud Rate Selection\n");
+            PrintLine("\t6  - 9600\n");
+            PrintLine("\t10 - 115200\n");
+            int         BaudRate = GetNumericInput("(Default: 6 - 9600)", 6);
+            
+            m_pClientEngine = new LinuxClientEngine(COSEMClientEngine::Options(SourceAddress), 
+                    new SerialWrapper(
+                        (m_pSerialSocket = 
+                            Base()->GetCore()->GetSerial()->CreateSocket(LinuxSerial::Options(ISerial::Options::BaudRate(BaudRate))))));
+            if (m_pSerialSocket->Open(SerialPort.c_str()) != SUCCESS)
+            {
+                PrintLine("Failed to initiate connect\n");
+            }
+            m_pSocket = m_pSerialSocket;
+            
+        }            
+        else if (RetVal == "1")
+        {
+            if (m_pSocket && m_pSocket->IsConnected()) 
             {
                 int                  DestinationAddress = GetNumericInput("Server Address (Default: 1)", 1);
                 COSEM::SecurityLevel Security = (COSEM::SecurityLevel)
@@ -266,7 +329,7 @@ protected:
                 PrintLine("TCP Connection Not Established Yet!\n");
             }
         }
-        else if (RetVal == "3")
+        else if (RetVal == "2")
         {
             if (m_pSocket && m_pSocket->IsConnected() && m_pClientEngine->IsOpen())
             {
@@ -293,11 +356,11 @@ protected:
             }
             
         }
-        else if (RetVal == "4")
+        else if (RetVal == "3")
         {
             if (m_pSocket && m_pSocket->IsConnected() && m_pClientEngine->IsOpen())
             {
-                Cosem_Attribute_Descriptor Descriptor;
+                Cosem_Attribute_Descriptor Descriptor; 
                 
                 Descriptor.class_id = (ClassIDType) GetNumericInput("Class ID (Default: 1)", CLSID_IData);
                 Descriptor.attribute_id = (ObjectAttributeIdType) GetNumericInput("Attribute (Default: 2)", 2);
@@ -322,7 +385,7 @@ protected:
             }
             
         }    
-        else if (RetVal == "5")
+        else if (RetVal == "4")
         {
             if (m_pSocket && m_pSocket->IsConnected() && m_pClientEngine->IsOpen())
             {
@@ -351,14 +414,14 @@ protected:
             }
             
         }         
-        else if (RetVal == "6")
+        else if (RetVal == "5")
         {
             if (!m_pClientEngine->Release())
             {
                 PrintLine("Problem submitting COSEM Release!\n");
             }
         }
-        else if (RetVal == "9")
+        else if (toupper(RetVal[0]) == 'D')
         {
             if (m_pSocket)
             {
@@ -377,6 +440,8 @@ protected:
     
     LinuxClientEngine *             m_pClientEngine = nullptr;
     ISocket *                       m_pSocket = nullptr;
+    ISerialSocket *                 m_pSerialSocket = nullptr;
+    HDLCClientLLC *                 m_pHDLC = nullptr;
     COSEMClientEngine::RequestToken m_GetToken;
     COSEMClientEngine::RequestToken m_SetToken;
     COSEMClientEngine::RequestToken m_ActionToken;
@@ -397,7 +462,9 @@ protected:
     {
         PrintLine("\nServer Menu:\n\n");
         PrintLine("\t0 - Exit Application\n");
-        PrintLine("\t1 - TCP Server\n\n");
+        PrintLine("\t1 - TCP Server\n");
+        PrintLine("\t2 - HDLC Server\n");
+        PrintLine("\t3 - Serial Wrapper Server\n\n");
         PrintLine("Select: ");
         ReadLine(std::bind(&ServerApp::ServerMenu_Handler, this, std::placeholders::_1));
     }
@@ -420,6 +487,51 @@ protected:
                 PrintLine("Failed to initiate listen\n");
             }
         }
+        else if (RetVal == "2")
+        {
+            ISerialSocket * pSocket;
+            int             ServerAddress = GetNumericInput("Server Address (Default: 1)", 1);
+            std::string     SerialPort = GetStringInput("Serial Port (Default: /tmp/ttyS10)", "/tmp/ttyS10");
+            
+            PrintLine("Initial Baud Rate Selection\n");
+            PrintLine("\t6  - 9600\n");
+            PrintLine("\t10 - 115200\n");
+            int         BaudRate = GetNumericInput("(Default: 6 - 9600)", 6);
+            
+            PrintLine(std::string("\nHDLC Server Mode - Listening on ") + SerialPort + std::string("\n"));
+            //
+            // TODO - HDLCServerLLC ServerAddress should be able to handle multiple SAPs
+            //
+            m_pServerEngine = new LinuxCOSEMServerEngine(COSEMServerEngine::Options(),
+                new HDLCServerLLC(HDLCAddress(ServerAddress), 
+                    (pSocket = Base()->GetCore()->GetSerial()->CreateSocket(LinuxSerial::Options(ISerial::Options::BaudRate(BaudRate)))), 
+                HDLCOptions())); 
+            
+            if (pSocket->Open(SerialPort.c_str()) != SUCCESS)
+            {
+                PrintLine("Failed to initiate connect\n");
+            }
+        } 
+        else if (RetVal == "3")
+        {
+            ISerialSocket * pSocket;
+            std::string     SerialPort = GetStringInput("Serial Port (Default: /tmp/ttyS10)", "/tmp/ttyS10");
+            
+            PrintLine("Initial Baud Rate Selection\n");
+            PrintLine("\t6  - 9600\n");
+            PrintLine("\t10 - 115200\n");
+            int         BaudRate = GetNumericInput("(Default: 6 - 9600)", 6);
+            
+            PrintLine(std::string("\nSerial Wrapper Server Mode - Listening on ") + SerialPort + std::string("\n"));
+            m_pServerEngine = new LinuxCOSEMServerEngine(COSEMServerEngine::Options(),
+                new SerialWrapper((pSocket = Base()->GetCore()->GetSerial()->CreateSocket(LinuxSerial::Options(ISerial::Options::BaudRate(BaudRate))))));
+            
+            if (pSocket->Open(SerialPort.c_str()) != SUCCESS)
+            {
+                PrintLine("Failed to initiate connect\n");
+            }
+        }
+        
         m_Base.get_io_service().post(std::bind(&ServerApp::ServerMenu, this));
     }
     
@@ -458,185 +570,5 @@ int main(int argc, char *argv[])
         ClientApp App(bl);
         App.Run();
     }
-        
-#if 0
-// -s 1 -d 1 -C /dev/ttyUSB0 -W -p 33333333
-    LinuxBaseLibrary     bl;
-    ISerial *		     pSerial = bl.GetCore()->GetSerial();
-    ISocket *		     pSocket;
-    int                  opt;
-    bool                 StartWithIEC = false;
-    bool                 Server = false;
-    bool                 IsSerialWrapper = false;
-    bool                 IsTCP = false;
-    char *               pCOMPortName = nullptr;
-    char *               pSourceAddress = nullptr;
-    char *               pDestinationAddress = nullptr;
-    char *               pPassword = nullptr;
-    COSEM::SecurityLevel Security = COSEM::SECURITY_NONE;
-    
-    while ((opt =::getopt(argc, argv, "TSC:s:d:IWp:P:")) != -1)
-    {
-        switch (opt)
-        {
-        case 'T':
-            IsTCP = true;
-            break;
-        case 'I':
-            StartWithIEC = true;
-            break;
-        case 'W':
-            IsSerialWrapper = true;
-            break;
-        case 'S':
-            Server = true;
-            break;
-        case 's':
-            pSourceAddress = optarg;
-            break;
-        case 'd':
-            pDestinationAddress = optarg;
-            break;
-        case 'C':
-            pCOMPortName = optarg;
-            break;
-        case 'p':
-            pPassword = optarg;
-            Security = COSEM::SECURITY_LOW_LEVEL;
-            break;
-        case 'P':
-            pPassword = optarg;
-            Security = COSEM::SECURITY_HIGH_LEVEL;
-            break;
-        default:
-            std::cerr << "Internal error!\n";
-            return -1;
-        }
-    }
-    
-    if (Server &&
-        nullptr != pSourceAddress)
-    {
-        Transport *              pTransport = nullptr;
-        LinuxCOSEMServerEngine * pServerEngine = nullptr;
-        
-        if (IsTCP)
-        {
-            std::cout << "TCP Server Mode\n";
-            pServerEngine = new LinuxCOSEMServerEngine(COSEMServerEngine::Options(),
-                                new TCPWrapper((pSocket = Base()->GetCore()->GetIP()->CreateSocket(LinuxIP::Options()))));
-            if (SUCCESSFUL != pSocket->Open())
-            {
-                std::cout << "Failed to initiate listen\n";
-                exit(-1);
-            }
-            
-        }
-        else
-        {
-            ISerial::Options::BaudRate  BR = LinuxSerial::Options::BAUD_9600;
 
-            if (pSerial->SetOptions(LinuxSerial::Options(BR)) != SUCCESS ||
-                pSerial->Open(pCOMPortName) != SUCCESS)
-            {
-                std::cerr << "Error opening port " << pCOMPortName << "\n";
-                exit(-1);
-            }
-
-            if (IsSerialWrapper)
-            {
-                pTransport = new SerialWrapper(pSerial);
-            }
-            else
-            {
-                //
-                // TODO - Update HDLCServerLLC to support multiple SAP
-                //
-                uint8_t SourceAddress = uint8_t(strtol(pSourceAddress, nullptr, 16));
-                pTransport = new HDLCServerLLC(HDLCAddress(SourceAddress), pSerial,
-                    HDLCOptions({ StartWithIEC, 3, 500 }));
-                
-            }            
-        }
-
-        if (pServerEngine)
-        {
-            while (Base()->Process()) 
-            {
-                if (!pServerEngine->Process())
-                    break;
-            }
-        }
-
-    }
-    else if (nullptr != pCOMPortName &&
-             nullptr != pSourceAddress &&
-             nullptr != pDestinationAddress)
-    {
-        uint8_t             SourceAddress = uint8_t(strtol(pSourceAddress, nullptr, 16));
-        uint8_t             DestinationAddress = uint8_t(strtol(pDestinationAddress, nullptr, 16));
-        Transport *         pTransport = nullptr;
-        COSEMClientEngine * pClientEngine = nullptr;
-            
-        if (IsTCP)
-        {
-            pClientEngine = new COSEMClientEngine(COSEMClientEngine::Options(SourceAddress), 
-                new TCPWrapper((pSocket = Base()->GetCore()->GetIP()->CreateSocket(LinuxIP::Options(LinuxIP::Options::MODE_CLIENT)))));
-            if (SUCCESSFUL != pSocket->Open(pCOMPortName))
-            {
-                std::cout << "Failed to initiate connect\n";
-                exit(-1);
-            }
-        }
-        else
-        {
-            ISerial::Options::BaudRate  BR = LinuxSerial::Options::BAUD_9600;
-
-            if (pSerial->SetOptions(LinuxSerial::Options(BR)) != SUCCESS ||
-                pSerial->Open(pCOMPortName) != SUCCESS)
-            {
-                std::cerr << "Error opening port " << pCOMPortName << "\n";
-                exit(-1);
-            }
-
-            if (IsSerialWrapper)
-            {
-                pTransport = new SerialWrapper(pSerial);
-            }
-            else
-            {
-                pTransport = new HDLCClientLLC(HDLCAddress(SourceAddress), pSerial,
-                                               HDLCOptions({ StartWithIEC, 3, 500 }));
-            }
-                
-        }
-
-        if (pClientEngine)
-        {
-            while (Base()->Process()) 
-            {
-                if (pSocket->IsConnected())
-                {
-                    if (pClientEngine->Open(DestinationAddress, { Security, pPassword }))
-                    {
-                        IData     SerialNumbers;
-                        DLMSValue Value;
-                        if (pClientEngine->Get({ 0, 0, 96, 1, 0, 255 },
-                                               &SerialNumbers.value) &&
-                            COSEMType::VALUE_RETRIEVED == SerialNumbers.value.GetNextValue(&Value))
-                        {
-                            std::cout << DLMSValueGet<VISIBLE_STRING_CType>(Value) << std::endl;
-                        }
-            
-                        pClientEngine->Close();
-                    }
-                }
-                
-                if (!pClientEngine->Process())
-                    break; 
-            }
-
-        }
-    }
-#endif
 }

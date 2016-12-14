@@ -9,7 +9,7 @@ namespace EPRI
     {
     public:
         SerialWrapper() = delete;
-        SerialWrapper(ISerial * pSerial);
+        SerialWrapper(ISerialSocket * pSerial);
         virtual ~SerialWrapper();
     	//
         // Transport
@@ -17,11 +17,19 @@ namespace EPRI
         virtual ProcessResultType Process();
 	
     protected:
+        //
+        // Transport
+        //
+        virtual bool OnConnect(COSEMAddressType Address)
+        {
+            return true;
+        }
+        
         bool Send(const DLMSVector& Data);
         bool Receive(DLMSVector * pData);
  
     private:
-        ISerial *	    m_pSerial = nullptr;
+        ISerialSocket * m_pSerial = nullptr;
         bool            m_bConnectionFired = false;
         
     };

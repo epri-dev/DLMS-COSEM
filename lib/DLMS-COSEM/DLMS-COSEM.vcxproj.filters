@@ -327,6 +327,9 @@
     <ClInclude Include="include\optional.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="include\IScheduler.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Makefile" />

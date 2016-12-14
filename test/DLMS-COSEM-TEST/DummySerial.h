@@ -7,53 +7,102 @@
 #include "ERROR_TYPE.h"
 #include "ISerial.h"
 
-class DummySerial : public EPRI::ISerial
+using namespace EPRI;
+
+class DummySerial : public EPRI::ISerialSocket
 {
 public:
     DummySerial()
     {
     }
     //
-    // ISerial
+    // ISerialSocket
     //
-    EPRI::ERROR_TYPE Open(const char * PortName)
+    EPRI::ERROR_TYPE Open(const char * DestinationAddress = nullptr, int Port = DEFAULT_DLMS_PORT)
     {
         return EPRI::SUCCESSFUL;
     }
-    Options GetOptions()
+    ConnectCallbackFunction RegisterConnectHandler(ConnectCallbackFunction Callback)
     {
-        return Options();
+        ConnectCallbackFunction RetVal = m_Connect;
+        m_Connect = Callback;
+        return RetVal;
     }
-    EPRI::ERROR_TYPE SetOptions(const Options& /*Opt*/)
+    EPRI::ERROR_TYPE SetOptions(const EPRI::ISerial::Options& /*Opt*/)
     {
         return EPRI::SUCCESSFUL;
     }
-    EPRI::ERROR_TYPE Write(const uint8_t * pBuffer, size_t Bytes)
+    EPRI::ERROR_TYPE Write(const DLMSVector& Data, bool Asynchronous = false)
     {
         int Who = WhoCalled();
-        while (Bytes--)
+        for (int Index = 0; Index < Data.Size(); ++Index)
         {
-            m_SerialStream[Who].push_back(*pBuffer++) ;
+            m_SerialStream[Who].push_back(Data[Index]);
         }
         return EPRI::SUCCESSFUL;
     }
-    EPRI::ERROR_TYPE Read(uint8_t * pBuffer, size_t MaxBytes, uint32_t TimeOutInMS = 0, size_t * pActualBytes = nullptr)
+    WriteCallbackFunction RegisterWriteHandler(WriteCallbackFunction Callback)
+    {
+        WriteCallbackFunction RetVal = m_Write;
+        m_Write = Callback;
+        return RetVal;
+    }
+    ERROR_TYPE Read(DLMSVector * pData,
+        size_t ReadAtLeast = 0,
+        uint32_t TimeOutInMS = 0,
+        size_t * pActualBytes = nullptr)
     {
         int Who = WhoCalled() ^ 1;
         if (m_SerialStream[Who].size())
         {
-            while (MaxBytes--)
+            if (ReadAtLeast >= m_SerialStream[Who].size() || ReadAtLeast == 0)
             {
-                *pBuffer++ = m_SerialStream[Who].front();
-                m_SerialStream[Who].pop_front();
+                ReadAtLeast = m_SerialStream[Who].size();
+            }
+            if (pData)
+            {
+                while (ReadAtLeast--)
+                {
+                    pData->Append<uint8_t>(m_SerialStream[Who].front());
+                    m_SerialStream[Who].pop_front();
+                }
+            }
+            else
+            {
+                while (ReadAtLeast--)
+                {
+                    m_AsyncBuffer[Who].Append<uint8_t>(m_SerialStream[Who].front());
+                    m_SerialStream[Who].pop_front();
+                }                    
             }
             return EPRI::SUCCESSFUL;
         }
         return ~EPRI::SUCCESSFUL;
     }
+    bool AppendAsyncReadResult(DLMSVector * pData, size_t ReadAtLeast = 0)
+    {
+        int Who = WhoCalled() ^ 1;
+        if (ReadAtLeast >= m_AsyncBuffer[Who].Size() || ReadAtLeast == 0)
+        {
+            ReadAtLeast = m_AsyncBuffer[Who].Size();
+        }
+        return pData->Append(m_AsyncBuffer[Who], 0, ReadAtLeast);
+    }
+    ReadCallbackFunction RegisterReadHandler(ReadCallbackFunction Callback)
+    {
+        ReadCallbackFunction RetVal = m_Read;
+        m_Read = Callback;
+        return RetVal;
+    }
     EPRI::ERROR_TYPE Close()
     {
         return EPRI::SUCCESSFUL;
+    }
+    virtual CloseCallbackFunction RegisterCloseHandler(CloseCallbackFunction Callback)
+    {
+        CloseCallbackFunction RetVal = m_Close;
+        m_Close = Callback;
+        return RetVal;
     }
     EPRI::ERROR_TYPE Flush(FlushDirection Direction)
     {
@@ -94,7 +143,12 @@ protected:
     }
     
 private:
-    std::deque<uint8_t>  m_SerialStream[2];
+    std::deque<uint8_t>     m_SerialStream[2];
+    ConnectCallbackFunction m_Connect;
+    WriteCallbackFunction   m_Write;
+    ReadCallbackFunction    m_Read;
+    CloseCallbackFunction   m_Close;
+    DLMSVector              m_AsyncBuffer[2];
 
 };
 

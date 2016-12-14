@@ -167,6 +167,7 @@
     <DeployWhenLaunchedWithoutDebugging>true</DeployWhenLaunchedWithoutDebugging>
   </Debug>
   <CustomBuild>
+    <PreSyncActions />
     <PreBuildActions />
     <PostBuildActions />
     <PreCleanActions />

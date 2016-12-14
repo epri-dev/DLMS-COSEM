@@ -78,7 +78,6 @@ namespace EPRI
 
         virtual ERROR_TYPE Open(const char * DestinationAddress = nullptr, int Port = DEFAULT_DLMS_PORT) = 0;
         virtual ConnectCallbackFunction RegisterConnectHandler(ConnectCallbackFunction Callback) = 0;
-        virtual IIP::Options GetOptions() = 0;
         virtual ERROR_TYPE Write(const DLMSVector& Data, bool Asynchronous = false) = 0;
         virtual WriteCallbackFunction RegisterWriteHandler(WriteCallbackFunction Callback) = 0;
         virtual ERROR_TYPE Read(DLMSVector * pData, size_t ReadAtLeast = 0,
