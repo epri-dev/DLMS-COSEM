@@ -119,11 +119,17 @@
     <ClCompile Include="BSP\STM32F2xxxx\STM32F2xx_HAL_Driver\Src\stm32f2xx_ll_fsmc.c" />
     <ClCompile Include="BSP\STM32F2xxxx\STM32F2xx_HAL_Driver\Src\stm32f2xx_ll_sdmmc.c" />
     <ClCompile Include="BSP\STM32F2xxxx\STM32F2xx_HAL_Driver\Src\stm32f2xx_ll_usb.c" />
+    <ClCompile Include="CircularBuffer.cpp" />
+    <ClCompile Include="FreeRTOSNew.cpp" />
     <ClCompile Include="STM32-Client.cpp" />
     <ClCompile Include="STM32-NUCLEO-F207ZG.c" />
+    <ClCompile Include="STM32-Server.cpp" />
     <ClCompile Include="STM32BaseLibrary.cpp" />
     <ClCompile Include="STM32Core.cpp" />
+    <ClCompile Include="STM32CosemServer.cpp" />
+    <ClCompile Include="STM32Debug.cpp" />
     <ClCompile Include="STM32Memory.cpp" />
+    <ClCompile Include="STM32Scheduler.cpp" />
     <ClCompile Include="STM32Serial.cpp" />
     <ClCompile Include="STM32SimpleTimer.cpp" />
     <ClCompile Include="system_stm32f2xx.c" />
@@ -215,12 +221,17 @@
     <ClInclude Include="FreeRTOSConfig.h" />
     <ClInclude Include="gcc_Debug.h" />
     <ClInclude Include="gcc_Release.h" />
+    <ClInclude Include="include\CircularBuffer.h" />
     <ClInclude Include="include\STM32-Client.h" />
+    <ClInclude Include="include\STM32-Server.h" />
     <ClInclude Include="include\STM32BaseLibrary.h" />
     <ClInclude Include="include\STM32Core.h" />
+    <ClInclude Include="include\STM32Debug.h" />
     <ClInclude Include="include\STM32Memory.h" />
+    <ClInclude Include="include\STM32Scheduler.h" />
     <ClInclude Include="include\STM32Serial.h" />
     <ClInclude Include="include\STM32SimpleTimer.h" />
+    <ClInclude Include="include\STM32CosemServer.h" />
     <ClInclude Include="stm32f2xx_hal_conf.h" />
   </ItemGroup>
   <ItemGroup>

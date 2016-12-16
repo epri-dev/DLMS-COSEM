@@ -76,13 +76,22 @@
   <ItemGroup>
     <ClCompile Include="..\DLMS-COSEM\APDU\AARE.cpp" />
     <ClCompile Include="..\DLMS-COSEM\APDU\AARQ.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\APDU\ACTION-Request.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\APDU\ACTION-Response.cpp" />
     <ClCompile Include="..\DLMS-COSEM\APDU\APDUConstants.cpp" />
     <ClCompile Include="..\DLMS-COSEM\APDU\APDUFactory.cpp" />
     <ClCompile Include="..\DLMS-COSEM\APDU\ASNType.cpp" />
     <ClCompile Include="..\DLMS-COSEM\APDU\GET-Request.cpp" />
     <ClCompile Include="..\DLMS-COSEM\APDU\GET-Response.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\APDU\RLRE.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\APDU\RLRQ.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\APDU\SET-Request.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\APDU\SET-Response.cpp" />
     <ClCompile Include="..\DLMS-COSEM\COSEM.cpp" />
     <ClCompile Include="..\DLMS-COSEM\COSEMClient.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\COSEMDevice.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\COSEMEngine.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\COSEMObjectInstanceID.cpp" />
     <ClCompile Include="..\DLMS-COSEM\COSEMServer.cpp" />
     <ClCompile Include="..\DLMS-COSEM\DLMS-COSEM.cpp" />
     <ClCompile Include="..\DLMS-COSEM\DLMSVector.cpp" />
@@ -95,6 +104,11 @@
     <ClCompile Include="..\DLMS-COSEM\hdlc\HDLCStatistics.cpp" />
     <ClCompile Include="..\DLMS-COSEM\hdlc\modcnt.cpp" />
     <ClCompile Include="..\DLMS-COSEM\hdlc\packet.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\interfaces\COSEMData.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\interfaces\IClock.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\interfaces\ICOSEMInterface.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\interfaces\IData.cpp" />
+    <ClCompile Include="..\DLMS-COSEM\LogicalDevice.cpp" />
     <ClCompile Include="..\DLMS-COSEM\serialwrapper\SerialWrapper.cpp" />
     <ClCompile Include="..\DLMS-COSEM\StateMachine.cpp" />
     <ClCompile Include="..\DLMS-COSEM\Wrapper.cpp" />

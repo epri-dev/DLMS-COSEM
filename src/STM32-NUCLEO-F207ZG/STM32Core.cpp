@@ -15,6 +15,11 @@ namespace EPRI
     {
         return &m_Serial;
     }
+    
+    IIP * STM32Core::GetIP()
+    {
+        return nullptr;
+    }
 	
     std::shared_ptr<ISimpleTimer> STM32Core::CreateSimpleTimer(bool bUseHeap /* = true*/)
     {

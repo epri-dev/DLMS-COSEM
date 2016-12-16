@@ -42,7 +42,7 @@
     <ClCompile Include="LinuxDebug.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="include\LinuxScheduler.cpp">
+    <ClCompile Include="LinuxScheduler.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>

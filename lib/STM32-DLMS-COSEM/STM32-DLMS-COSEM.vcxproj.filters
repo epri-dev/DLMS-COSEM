@@ -124,6 +124,48 @@
     <ClCompile Include="..\DLMS-COSEM\APDU\GET-Response.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="..\DLMS-COSEM\APDU\ACTION-Request.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DLMS-COSEM\APDU\ACTION-Response.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DLMS-COSEM\APDU\SET-Request.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DLMS-COSEM\APDU\SET-Response.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DLMS-COSEM\interfaces\COSEMData.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DLMS-COSEM\interfaces\IClock.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DLMS-COSEM\interfaces\ICOSEMInterface.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DLMS-COSEM\interfaces\IData.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DLMS-COSEM\COSEMDevice.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DLMS-COSEM\COSEMObjectInstanceID.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DLMS-COSEM\LogicalDevice.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DLMS-COSEM\COSEMEngine.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DLMS-COSEM\APDU\RLRE.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DLMS-COSEM\APDU\RLRQ.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\DLMS-COSEM\include\StateMachine.h">

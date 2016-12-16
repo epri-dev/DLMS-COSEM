@@ -63,7 +63,7 @@
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="include\LinuxScheduler.cpp" />
+    <ClCompile Include="LinuxScheduler.cpp" />
     <ClCompile Include="Linux.cpp" />
     <ClCompile Include="LinuxBaseLibrary.cpp" />
     <ClCompile Include="LinuxCore.cpp" />

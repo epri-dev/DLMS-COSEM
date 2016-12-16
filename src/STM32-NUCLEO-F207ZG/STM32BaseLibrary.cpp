@@ -11,7 +11,6 @@ namespace EPRI
     STM32BaseLibrary::~STM32BaseLibrary()
     {
     }
-	
     //
     // IBaseLibrary
     //
@@ -27,7 +26,7 @@ namespace EPRI
 
     IScheduler * STM32BaseLibrary::GetScheduler()
     {
-        return nullptr;
+        return &m_Scheduler;
     }
 
     ISynchronization * STM32BaseLibrary::GetSynchronization()
@@ -37,7 +36,12 @@ namespace EPRI
 
     IDebug * STM32BaseLibrary::GetDebug()
     {
-        return nullptr;
+        return &m_Debug;
+    }
+    
+    bool STM32BaseLibrary::Process()
+    {
+        return true;
     }
 	
 }

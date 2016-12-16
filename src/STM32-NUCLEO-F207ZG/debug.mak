@@ -16,8 +16,8 @@ LINUX_PACKAGES :=
 CFLAGS := -ggdb -ffunction-sections -O0
 CXXFLAGS := -ggdb -ffunction-sections -O0 -std=c++11
 ASFLAGS := 
-LDFLAGS := -Wl,-gc-sections
-COMMONFLAGS := 
+LDFLAGS := -Wl,-gc-sections -Wl,-q
+COMMONFLAGS := -fstack-usage
 LINKER_SCRIPT := 
 
 START_GROUP := -Wl,--start-group

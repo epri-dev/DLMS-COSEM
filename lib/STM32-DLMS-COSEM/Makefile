@@ -35,7 +35,7 @@ error:
 	$(error Invalid configuration, please check your inputs)
 endif
 
-SOURCEFILES := ../DLMS-COSEM/APDU/AARE.cpp ../DLMS-COSEM/APDU/AARQ.cpp ../DLMS-COSEM/APDU/APDUConstants.cpp ../DLMS-COSEM/APDU/APDUFactory.cpp ../DLMS-COSEM/APDU/ASNType.cpp ../DLMS-COSEM/APDU/GET-Request.cpp ../DLMS-COSEM/APDU/GET-Response.cpp ../DLMS-COSEM/COSEM.cpp ../DLMS-COSEM/COSEMClient.cpp ../DLMS-COSEM/COSEMServer.cpp ../DLMS-COSEM/DLMS-COSEM.cpp ../DLMS-COSEM/DLMSVector.cpp ../DLMS-COSEM/hdlc/HDLCAddress.cpp ../DLMS-COSEM/hdlc/HDLCClient.cpp ../DLMS-COSEM/hdlc/HDLCHelpers.cpp ../DLMS-COSEM/hdlc/HDLCLLC.cpp ../DLMS-COSEM/hdlc/HDLCMAC.cpp ../DLMS-COSEM/hdlc/HDLCServer.cpp ../DLMS-COSEM/hdlc/HDLCStatistics.cpp ../DLMS-COSEM/hdlc/modcnt.cpp ../DLMS-COSEM/hdlc/packet.cpp ../DLMS-COSEM/serialwrapper/SerialWrapper.cpp ../DLMS-COSEM/StateMachine.cpp ../DLMS-COSEM/Wrapper.cpp
+SOURCEFILES := ../DLMS-COSEM/APDU/AARE.cpp ../DLMS-COSEM/APDU/AARQ.cpp ../DLMS-COSEM/APDU/ACTION-Request.cpp ../DLMS-COSEM/APDU/ACTION-Response.cpp ../DLMS-COSEM/APDU/APDUConstants.cpp ../DLMS-COSEM/APDU/APDUFactory.cpp ../DLMS-COSEM/APDU/ASNType.cpp ../DLMS-COSEM/APDU/GET-Request.cpp ../DLMS-COSEM/APDU/GET-Response.cpp ../DLMS-COSEM/APDU/RLRE.cpp ../DLMS-COSEM/APDU/RLRQ.cpp ../DLMS-COSEM/APDU/SET-Request.cpp ../DLMS-COSEM/APDU/SET-Response.cpp ../DLMS-COSEM/COSEM.cpp ../DLMS-COSEM/COSEMClient.cpp ../DLMS-COSEM/COSEMDevice.cpp ../DLMS-COSEM/COSEMEngine.cpp ../DLMS-COSEM/COSEMObjectInstanceID.cpp ../DLMS-COSEM/COSEMServer.cpp ../DLMS-COSEM/DLMS-COSEM.cpp ../DLMS-COSEM/DLMSVector.cpp ../DLMS-COSEM/hdlc/HDLCAddress.cpp ../DLMS-COSEM/hdlc/HDLCClient.cpp ../DLMS-COSEM/hdlc/HDLCHelpers.cpp ../DLMS-COSEM/hdlc/HDLCLLC.cpp ../DLMS-COSEM/hdlc/HDLCMAC.cpp ../DLMS-COSEM/hdlc/HDLCServer.cpp ../DLMS-COSEM/hdlc/HDLCStatistics.cpp ../DLMS-COSEM/hdlc/modcnt.cpp ../DLMS-COSEM/hdlc/packet.cpp ../DLMS-COSEM/interfaces/COSEMData.cpp ../DLMS-COSEM/interfaces/IClock.cpp ../DLMS-COSEM/interfaces/ICOSEMInterface.cpp ../DLMS-COSEM/interfaces/IData.cpp ../DLMS-COSEM/LogicalDevice.cpp ../DLMS-COSEM/serialwrapper/SerialWrapper.cpp ../DLMS-COSEM/StateMachine.cpp ../DLMS-COSEM/Wrapper.cpp
 EXTERNAL_LIBS := 
 EXTERNAL_LIBS_COPIED := $(foreach lib, $(EXTERNAL_LIBS),$(BINARYDIR)/$(notdir $(lib)))
 
@@ -189,6 +189,14 @@ $(BINARYDIR)/AARQ.o : ../DLMS-COSEM/APDU/AARQ.cpp $(all_make_files) |$(BINARYDIR
 	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
 
 
+$(BINARYDIR)/ACTION-Request.o : ../DLMS-COSEM/APDU/ACTION-Request.cpp $(all_make_files) |$(BINARYDIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
+
+
+$(BINARYDIR)/ACTION-Response.o : ../DLMS-COSEM/APDU/ACTION-Response.cpp $(all_make_files) |$(BINARYDIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
+
+
 $(BINARYDIR)/APDUConstants.o : ../DLMS-COSEM/APDU/APDUConstants.cpp $(all_make_files) |$(BINARYDIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
 
@@ -209,11 +217,39 @@ $(BINARYDIR)/GET-Response.o : ../DLMS-COSEM/APDU/GET-Response.cpp $(all_make_fil
 	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
 
 
+$(BINARYDIR)/RLRE.o : ../DLMS-COSEM/APDU/RLRE.cpp $(all_make_files) |$(BINARYDIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
+
+
+$(BINARYDIR)/RLRQ.o : ../DLMS-COSEM/APDU/RLRQ.cpp $(all_make_files) |$(BINARYDIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
+
+
+$(BINARYDIR)/SET-Request.o : ../DLMS-COSEM/APDU/SET-Request.cpp $(all_make_files) |$(BINARYDIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
+
+
+$(BINARYDIR)/SET-Response.o : ../DLMS-COSEM/APDU/SET-Response.cpp $(all_make_files) |$(BINARYDIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
+
+
 $(BINARYDIR)/COSEM.o : ../DLMS-COSEM/COSEM.cpp $(all_make_files) |$(BINARYDIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
 
 
 $(BINARYDIR)/COSEMClient.o : ../DLMS-COSEM/COSEMClient.cpp $(all_make_files) |$(BINARYDIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
+
+
+$(BINARYDIR)/COSEMDevice.o : ../DLMS-COSEM/COSEMDevice.cpp $(all_make_files) |$(BINARYDIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
+
+
+$(BINARYDIR)/COSEMEngine.o : ../DLMS-COSEM/COSEMEngine.cpp $(all_make_files) |$(BINARYDIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
+
+
+$(BINARYDIR)/COSEMObjectInstanceID.o : ../DLMS-COSEM/COSEMObjectInstanceID.cpp $(all_make_files) |$(BINARYDIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
 
 
@@ -262,6 +298,26 @@ $(BINARYDIR)/modcnt.o : ../DLMS-COSEM/hdlc/modcnt.cpp $(all_make_files) |$(BINAR
 
 
 $(BINARYDIR)/packet.o : ../DLMS-COSEM/hdlc/packet.cpp $(all_make_files) |$(BINARYDIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
+
+
+$(BINARYDIR)/COSEMData.o : ../DLMS-COSEM/interfaces/COSEMData.cpp $(all_make_files) |$(BINARYDIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
+
+
+$(BINARYDIR)/IClock.o : ../DLMS-COSEM/interfaces/IClock.cpp $(all_make_files) |$(BINARYDIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
+
+
+$(BINARYDIR)/ICOSEMInterface.o : ../DLMS-COSEM/interfaces/ICOSEMInterface.cpp $(all_make_files) |$(BINARYDIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
+
+
+$(BINARYDIR)/IData.o : ../DLMS-COSEM/interfaces/IData.cpp $(all_make_files) |$(BINARYDIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
+
+
+$(BINARYDIR)/LogicalDevice.o : ../DLMS-COSEM/LogicalDevice.cpp $(all_make_files) |$(BINARYDIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
 
 

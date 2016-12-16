@@ -3,6 +3,8 @@
 #include "IBaseLibrary.h"
 #include "STM32Memory.h"
 #include "STM32Core.h"
+#include "STM32Scheduler.h"
+#include "STM32Debug.h"
 
 namespace EPRI
 {
@@ -19,11 +21,14 @@ namespace EPRI
         IScheduler * GetScheduler();
         ISynchronization * GetSynchronization();		
         IDebug * GetDebug();
+        bool Process();
 		
     private:
-        STM32Memory	 m_Memory;
-        STM32Core    m_Core;
-		
+        STM32Memory	   m_Memory;
+        STM32Core      m_Core;
+        STM32Scheduler m_Scheduler;		
+        STM32Debug     m_Debug;		
+
     };
 	
 }

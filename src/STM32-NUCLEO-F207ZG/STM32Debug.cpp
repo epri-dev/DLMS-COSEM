@@ -1,30 +1,29 @@
 #include <cstdio>
 #include <cstdarg>
 
-#include "LinuxDebug.h"
+#include "STM32Debug.h"
 
 namespace EPRI
 {
-    LinuxDebug::LinuxDebug(asio::io_service& IO) :
-        m_Output(IO, ::dup(STDOUT_FILENO)), m_IO(IO)
+    STM32Debug::STM32Debug()
     {
     }
     
-    LinuxDebug::~LinuxDebug() 
+    STM32Debug::~STM32Debug()
     {
     }
     
-    void LinuxDebug::TRACE(const char * Format, ...)
+    void STM32Debug::TRACE(const char * Format, ...)
     {
-        char Buffer[256];
         va_list Args;
         va_start(Args, Format);
-        vsnprintf(Buffer, sizeof(Buffer), Format, Args);
-        asio::write(m_Output, asio::buffer(Buffer, std::strlen(Buffer)));
+#ifdef DEBUG
+        //vprintf(Format, Args);
+#endif
         va_end(Args);
     }
     
-    void LinuxDebug::TRACE_BUFFER(const char * Marker, const uint8_t * Buffer, size_t BufferSize, uint8_t BytesPerLine /*= 16*/)
+    void STM32Debug::TRACE_BUFFER(const char * Marker, const uint8_t * Buffer, size_t BufferSize, uint8_t BytesPerLine /*= 16*/)
     {
         TRACE("\n%s: ", Marker);
         const uint8_t * p = Buffer;
@@ -39,7 +38,7 @@ namespace EPRI
         TRACE("\n");
     }
     
-    void LinuxDebug::TRACE_VECTOR(const char * Marker, const DLMSVector& Data, uint8_t BytesPerLine /*= 16*/)
+    void STM32Debug::TRACE_VECTOR(const char * Marker, const DLMSVector& Data, uint8_t BytesPerLine /*= 16*/)
     {
         TRACE_BUFFER(Marker, Data.GetData(), Data.Size(), BytesPerLine);
     }

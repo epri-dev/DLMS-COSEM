@@ -5,7 +5,7 @@
   <BspVersion>1.0</BspVersion>
   <McuID>STM32F207ZG</McuID>
   <BSPSubdirectory>BSP</BSPSubdirectory>
-  <MCUDefinitionFile>.\BSP\STM32F2xxxx/DeviceDefinitions/stm32f207xx.xml</MCUDefinitionFile>
+  <MCUDefinitionFile>BSP\STM32F2xxxx\DeviceDefinitions\stm32f207xx.xml</MCUDefinitionFile>
   <MCUProperties>
     <Entries />
   </MCUProperties>
@@ -20,6 +20,7 @@
         <string>USE_FREERTOS</string>
         <string>stm32_flash_layout</string>
         <string>STM32F207xx</string>
+        <string>DEBUG_DEFAULT_INTERRUPT_HANDLERS</string>
       </PreprocessorMacros>
       <IncludeDirectories>
         <string>.</string>
@@ -281,11 +282,14 @@
     <RAMSize>131072</RAMSize>
     <FLASHBase>134217728</FLASHBase>
     <RAMBase>536870912</RAMBase>
-    <MCUDefinitionFile>.\BSP\STM32F2xxxx/DeviceDefinitions/stm32f207xx.xml</MCUDefinitionFile>
+    <MCUDefinitionFile>BSP\STM32F2xxxx\DeviceDefinitions\stm32f207xx.xml</MCUDefinitionFile>
     <AdditionalSourcesRequiredForTesting>false</AdditionalSourcesRequiredForTesting>
   </InPlaceMCU>
   <MCUMakFile>stm32.mak</MCUMakFile>
   <ReferencedFrameworks />
+  <FrameworkProperties>
+    <Entries />
+  </FrameworkProperties>
   <TestFrameworkProperties>
     <Entries />
   </TestFrameworkProperties>

@@ -15,6 +15,7 @@ namespace EPRI
         //
         ISerial * GetSerial();
         std::shared_ptr<ISimpleTimer> CreateSimpleTimer(bool bUseHeap = true);
+        IIP * GetIP();
 
     private:
         STM32Serial			m_Serial;

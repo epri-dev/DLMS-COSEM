@@ -116,7 +116,10 @@ namespace EPRI
     
     void LinuxSerialSocket::ASIO_Read_Timeout(const asio::error_code& Error)
     {
-        m_Port.cancel();
+        if (asio::error::operation_aborted != Error)
+        {
+            m_Port.cancel();
+        }
     }
 
     ERROR_TYPE LinuxSerialSocket::Open(const char * DestinationAddress /*= nullptr*/, int Port /*= DEFAULT_DLMS_PORT*/)
