@@ -55,6 +55,6 @@ For the STM32 Nucleo F207ZG development board:
 	through the ST-Link interface is used for debugging purposes.  The server USART is USART6.  Connect your
 	TX and RX lines to the following:
 	
-	![USART6 Connections](https://cloud.githubusercontent.com/assets/20430436/21267710/5828c7d8-c360-11e6-94ea-61a6eb41e582.PNG)
+![USART6 Connections](https://cloud.githubusercontent.com/assets/20430436/21267710/5828c7d8-c360-11e6-94ea-61a6eb41e582.PNG)
 	
 
