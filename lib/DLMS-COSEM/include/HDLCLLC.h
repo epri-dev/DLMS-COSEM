@@ -13,6 +13,9 @@ namespace EPRI
 	{
 	public:
     	HDLCLLC() = delete;
+    	//
+    	// DL-INITIALIZE
+    	//
     	HDLCLLC(HDLCMAC * pMAC);
     	virtual ~HDLCLLC();
     	
@@ -54,6 +57,9 @@ namespace EPRI
     class HDLCClientLLC : public HDLCLLC
     {
     public:
+    	//
+    	// DL-INITIALIZE
+    	//
         HDLCClientLLC(const HDLCAddress& MyAddress, 
             ISerialSocket * pSerial, 
             const HDLCOptions& Options,
@@ -96,6 +102,9 @@ namespace EPRI
     class HDLCServerLLC : public HDLCLLC
     {
     public:
+    	//
+    	// DL-INITIALIZE
+    	//
         HDLCServerLLC(const HDLCAddress& MyAddress, 
             ISerialSocket * pSerial, 
             const HDLCOptions& Options,

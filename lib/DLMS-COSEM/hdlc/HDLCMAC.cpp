@@ -69,6 +69,20 @@ namespace EPRI
         return m_CurrentState == ST_CONNECTED;
     }   
     //
+    // DL-SET_VALUE
+    //
+    void HDLCMAC::SetOptions(const HDLCOptions& Options)
+    {
+        m_CurrentOptions = Options;
+    }
+    //
+    // DL-GET_VALUE
+    //
+    HDLCOptions HDLCMAC::GetOptions() const
+    {
+        return m_CurrentOptions;
+    }
+    //
     // DA-DATA Service Implementation
     //
     bool HDLCMAC::DataRequest(const DLDataRequestParameter& Parameters)

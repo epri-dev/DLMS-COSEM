@@ -31,6 +31,9 @@ namespace EPRI
     	
 	public:
     	HDLCMAC() = delete;
+    	//
+    	// DL-INITIALIZE
+    	//
     	HDLCMAC(const HDLCAddress& MyAddress, 
         	ISerialSocket * pSerial, 
         	const HDLCOptions& Options,
@@ -41,14 +44,22 @@ namespace EPRI
     	const HDLCStatistics& Statistics() const;
     	void ClearStatistics();
     	bool IsConnected() const;
+    	//
+    	// DL-SET_VALUE
+    	//
+    	virtual void SetOptions(const HDLCOptions& Options);
+    	//
+    	// DL-GET_VALUE
+    	//
+    	virtual HDLCOptions GetOptions() const;
         //
-        // DL-DATA Service
+        // MA-DATA Service
         //
     	virtual bool DataRequest(const DLDataRequestParameter& Parameters);
     	
 	protected:
         //
-        // State Machine
+        // State Machine/DL-LM_EVENT
         //
     	enum States : uint8_t
     	{
@@ -230,6 +241,9 @@ namespace EPRI
     {
     public:
         HDLCClient() = delete;
+    	//
+    	// DL-INITIALIZE, DL-SETVALUE(HDLCOptions)
+    	//
         HDLCClient(const HDLCAddress& MyAddress, 
             ISerialSocket * pSerial, 
             const HDLCOptions& Opt,
@@ -268,6 +282,9 @@ namespace EPRI
     {
     public:
         HDLCServer() = delete;
+    	//
+    	// DL-INITIALIZE, DL-SETVALUE(HDLCOptions)
+    	//
         HDLCServer(const HDLCAddress& MyAddress, 
             ISerialSocket * pSerial, 
             const HDLCOptions& Opt,
