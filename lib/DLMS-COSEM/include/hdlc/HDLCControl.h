@@ -19,6 +19,8 @@ namespace EPRI
 			DM      = 0x0F,
 			FRMR    = 0x87,
 			UI      = 0x03,
+			IDENT   = 0x20,
+			IDENTR  = 0xFE,
 			UNKNOWN = 0xFF
 		};
     	
@@ -59,6 +61,10 @@ namespace EPRI
 			case UI:
             	m_Value = Ctrl | (PF);
             	break;
+        	case IDENT:
+        	case IDENTR:
+            	m_Value = Ctrl;
+            	break;
         	default:
             	m_Value = UNKNOWN;
             	break;
@@ -91,7 +97,8 @@ namespace EPRI
 			case DM:
 			case FRMR:
 			case UI:
-				return (true); 
+			case IDENTR:
+                return (true); 
 			default:
 				return (false); 
 			}
@@ -99,6 +106,10 @@ namespace EPRI
 
 		inline Control PacketType() const
 		{
+    		if (IDENT == m_Value || IDENTR == m_Value)
+    		{
+        		return (Control) m_Value;
+    		}
 			if (0x00 == (m_Value & 0x01))
 			{
 				return INFO;
@@ -156,6 +167,10 @@ namespace EPRI
             	return "FRMR";
         	case UI:
             	return "UI";
+        	case IDENT:
+            	return "IDENT";
+        	case IDENTR:
+            	return "IDENTR";
         	default:
             	return "UNKNOWN";
         	}

@@ -221,8 +221,10 @@ protected:
         PrintLine("\nClient Menu:\n\n");
         PrintLine("\t0 - Exit Application\n");
         PrintLine("\tA - TCP Connect\n");
-        PrintLine("\tB - HDLC Connect\n");
-        PrintLine("\tC - Serial Wrapper Connect\n");
+        PrintLine("\tB - HDLC Physical Connect\n");
+        PrintLine("\tC - HDLC Identify\n");
+        PrintLine("\tD - HDLC Datalink Connect\n");
+        PrintLine("\tE - Serial Wrapper Connect\n");
         PrintLine("\n");
         PrintLine("\t1 - COSEM Open\n");
         PrintLine("\t2 - COSEM Get\n");
@@ -230,11 +232,21 @@ protected:
         PrintLine("\t4 - COSEM Action\n");
         PrintLine("\t5 - COSEM Release\n");
         PrintLine("\n");
-        PrintLine("\tD - TCP Disconnect\n"); 
-        PrintLine("\tE - HDLC Disconnect\n");
-        PrintLine("\tF - Serial Wrapper Disconnect\n");
+        PrintLine("\tT - TCP Disconnect\n"); 
+        PrintLine("\tU - HDLC Disconnect\n");
+        PrintLine("\tV - Serial Wrapper Disconnect\n");
         PrintLine("\nSelect: ");
         ReadLine(std::bind(&ClientApp::ClientMenu_Handler, this, std::placeholders::_1));
+    }
+    
+    bool IdentifyResponse(const BaseCallbackParameter& Parameters)
+    {
+        const DLIdentifyResponseParameter& Response = 
+            dynamic_cast<const DLIdentifyResponseParameter&>(Parameters);
+        Base()->GetDebug()->TRACE("\n\nIdentify Response (%d, %d, %d, %d)...\n\n",
+            Response.SuccessCode, Response.ProtocolID, Response.ProtocolVersion, 
+            Response.ProtocolRevision);
+        return true;
     }
     
     void ClientMenu_Handler(const std::string& RetVal) 
@@ -258,7 +270,6 @@ protected:
         else if (toupper(RetVal[0]) == 'B')
         {
             int         SourceAddress = GetNumericInput("Client Address (Default: 1)", 1);
-            int         DestinationAddress = GetNumericInput("Destination Address (Default: 1)", 1);
             std::string SerialPort = GetStringInput("Serial Port (Default: /tmp/ttyS11)", "/tmp/ttyS11");
             
             PrintLine("Initial Baud Rate Selection\n");
@@ -269,10 +280,10 @@ protected:
             // Engine
             //
             m_pClientEngine = new LinuxClientEngine(COSEMClientEngine::Options(SourceAddress), 
-                                (m_pHDLC = new HDLCClientLLC(HDLCAddress(SourceAddress), 
-                                    (m_pSerialSocket = 
-                                        Base()->GetCore()->GetSerial()->CreateSocket(LinuxSerial::Options(ISerial::Options::BaudRate(BaudRate)))),
-                                           HDLCOptions())));
+                (m_pHDLC = new HDLCClientLLC(HDLCAddress(SourceAddress), 
+                    (m_pSerialSocket = 
+                        Base()->GetCore()->GetSerial()->CreateSocket(LinuxSerial::Options(ISerial::Options::BaudRate(BaudRate)))),
+                    HDLCOptions())));
             //
             // Physical
             //
@@ -282,14 +293,43 @@ protected:
             }
             else
             {
+                m_pSocket = m_pSerialSocket;
+            }
+        }  
+        else if (toupper(RetVal[0]) == 'C')
+        {
+            if (m_pHDLC)
+            {
+                //
+                // IDENTIFY
+                //
+                m_pHDLC->RegisterIdentifyConfirm(std::bind(&ClientApp::IdentifyResponse, 
+                    this, std::placeholders::_1));
+                m_pHDLC->IdentifyRequest(DLIdentifyRequestParameter(HDLCAddress()));
+            }
+            else
+            {
+                PrintLine("Physical Connection Not Established Yet!\n"); 
+            }
+            
+        }
+        else if (toupper(RetVal[0]) == 'D')
+        {
+            if (m_pSerialSocket && m_pHDLC && m_pSerialSocket->IsConnected())
+            {
+                int DestinationAddress = GetNumericInput("Destination Address (Default: 1)", 1);
                 //
                 // Datalink
                 //
                 m_pHDLC->ConnectRequest(DLConnectRequestOrIndication(HDLCAddress(DestinationAddress)));
-                m_pSocket = m_pSerialSocket;
             }
-        }        
-        else if (toupper(RetVal[0]) == 'C')
+            else
+            {
+                PrintLine("Physical Connection Not Established Yet!\n");
+            }
+        }
+        
+        else if (toupper(RetVal[0]) == 'E')
         {
             int         SourceAddress = GetNumericInput("Client Address (Default: 1)", 1);
             std::string SerialPort = GetStringInput("Serial Port (Default: /tmp/ttyS11)", "/tmp/ttyS11");
@@ -421,7 +461,7 @@ protected:
                 PrintLine("Problem submitting COSEM Release!\n");
             }
         }
-        else if (toupper(RetVal[0]) == 'D')
+        else if (toupper(RetVal[0]) == 'T')
         {
             if (m_pSocket)
             {

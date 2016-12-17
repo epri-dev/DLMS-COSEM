@@ -87,7 +87,6 @@ namespace EPRI
         virtual ERROR_TYPE Close() = 0;
         virtual CloseCallbackFunction RegisterCloseHandler(CloseCallbackFunction Callback) = 0;
         virtual bool IsConnected() = 0;
-        
     };
     
 }

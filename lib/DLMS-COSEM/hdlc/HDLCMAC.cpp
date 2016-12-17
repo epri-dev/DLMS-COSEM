@@ -44,7 +44,6 @@ namespace EPRI
         //
         m_PacketCallback.RegisterCallback(HDLCControl::INFO, 
             std::bind(&HDLCMAC::I_Handler, this, std::placeholders::_1));
-        
     }
     
     HDLCMAC::~HDLCMAC()
@@ -341,7 +340,8 @@ namespace EPRI
         if (pRXPacket)
         {
             HDLCControl::Control PacketType = pRXPacket->GetControl().PacketType();
-            if (pRXPacket->GetDestinationAddress() == m_MyAddress)
+            if (pRXPacket->IsIdentify() ||
+                pRXPacket->GetDestinationAddress() == m_MyAddress)
             {
                 bool CallbackRetVal = false;
                 if (m_PacketCallback.FireCallback(PacketType, *pRXPacket, &CallbackRetVal) && !CallbackRetVal)

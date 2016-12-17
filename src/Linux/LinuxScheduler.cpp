@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include "LinuxScheduler.h"
 
 namespace EPRI
@@ -14,6 +16,11 @@ namespace EPRI
     void LinuxScheduler::Post(PostFunction Handler)
     {
         m_IO.post(Handler);
+    }
+    
+    void LinuxScheduler::Sleep(uint32_t MSToSleep)
+    {
+        ::usleep(MSToSleep * 1000L);
     }
 
 }

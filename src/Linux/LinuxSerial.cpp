@@ -72,10 +72,7 @@ namespace EPRI
             (asio::error::connection_reset == Error) ||
             (asio::error::operation_aborted == Error))
         {
-            if (m_Close)
-            {
-                m_Close(SUCCESSFUL);
-            }
+            OnClose(SUCCESSFUL);
         }
         else if (m_Write)
         {
@@ -94,10 +91,7 @@ namespace EPRI
         if ((asio::error::connection_reset == Error) ||
             (asio::error::eof == Error))
         {
-            if (m_Close)
-            {
-                m_Close(SUCCESSFUL);
-            }
+            OnClose(SUCCESSFUL);
         }
         else if (m_Read)
         {
@@ -268,6 +262,7 @@ namespace EPRI
     ERROR_TYPE LinuxSerialSocket::Close()
     {
         m_Port.close();
+        OnClose(SUCCESSFUL);
         return SUCCESSFUL;
     }
     
@@ -342,6 +337,14 @@ namespace EPRI
         m_Port.set_option(asio::serial_port_base::parity(PARITIES[m_Options.m_Parity]));
         m_Port.set_option(asio::serial_port_base::stop_bits(STOPBITS[m_Options.m_StopBits]));
         m_Port.set_option(asio::serial_port_base::flow_control(asio::serial_port_base::flow_control::none));
-    }    
+    }   
+
+    void LinuxSerialSocket::OnClose(ERROR_TYPE Error)
+    {
+        if (m_Close)
+        {
+            m_Close(Error);
+        }
+    }
 
 }

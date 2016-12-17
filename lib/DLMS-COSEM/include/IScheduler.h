@@ -21,7 +21,7 @@ namespace EPRI
         
         typedef std::function<void(void)> PostFunction;
         virtual void Post(PostFunction Handler) = 0;
-
+        virtual void Sleep(uint32_t MSToSleep) = 0;
     };
 	
 }

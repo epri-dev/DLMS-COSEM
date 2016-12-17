@@ -59,6 +59,11 @@ namespace EPRI
             const HDLCOptions& Options,
             uint8_t MaxPreallocatedPacketBuffers = 10);
         virtual ~HDLCClientLLC();
+    	//
+    	// IDENTIFY Service
+    	//
+        virtual bool IdentifyRequest(const DLIdentifyRequestParameter& Parameters);
+        void RegisterIdentifyConfirm(CallbackFunction Callback);
         //
         // DL-CONNECT Service
         //
@@ -70,6 +75,10 @@ namespace EPRI
         void RegisterDataIndication(CallbackFunction Callback);
 
     protected:
+        //
+        // IDENTIFY Service
+        //
+        virtual bool MACIdentifyConfirm(const BaseCallbackParameter& Parameters);
         //
         // DL-CONNECT Service
         //
@@ -98,6 +107,11 @@ namespace EPRI
         bool ConnectResponse(const DLConnectConfirmOrResponse& Parameters);
         
     protected:
+        //
+        // IDENTIFY Service (Handled Completely in the Server)
+        //
+        virtual bool IdentifyResponse(const DLIdentifyResponseParameter& Parameters);
+        virtual bool MACIdentifyIndication(const BaseCallbackParameter& Parameters);
         //
         // DL-CONNECT Service
         //

@@ -24,10 +24,31 @@ namespace EPRI
             std::bind(&HDLCClientLLC::MACConnectConfirm, this, std::placeholders::_1));
         m_MAC.RegisterCallback(DLDataRequestParameter::ID,
             std::bind(&HDLCClientLLC::MACDataIndication, this, std::placeholders::_1));
+        m_MAC.RegisterCallback(DLIdentifyResponseParameter::ID,
+            std::bind(&HDLCClientLLC::MACIdentifyConfirm, this, std::placeholders::_1));
     }
     
     HDLCClientLLC::~HDLCClientLLC()
     {
+    }
+    //
+    // IDENTIFY Service Implementation
+    //
+    bool HDLCClientLLC::IdentifyRequest(const DLIdentifyRequestParameter& Parameters)
+    {
+        return m_MAC.IdentifyRequest(Parameters);
+    }
+    
+    void HDLCClientLLC::RegisterIdentifyConfirm(CallbackFunction Callback)
+    {
+        RegisterCallback(DLIdentifyResponseParameter::ID, Callback);
+    }    
+
+    bool HDLCClientLLC::MACIdentifyConfirm(const BaseCallbackParameter& Parameters)
+    {
+        bool    RetVal = false;
+        FireCallback(DLIdentifyResponseParameter::ID, Parameters, &RetVal);
+        return true;
     }
     //
     // DA-CONNECT Service Implementation
@@ -84,10 +105,26 @@ namespace EPRI
             std::bind(&HDLCClient::UA_Handler, this, std::placeholders::_1));
         m_PacketCallback.RegisterCallback(HDLCControl::INFO, 
             std::bind(&HDLCClient::I_Handler, this, std::placeholders::_1));
+        m_PacketCallback.RegisterCallback(HDLCControl::IDENTR, 
+            std::bind(&HDLCClient::IDENTR_Handler, this, std::placeholders::_1));
     }
     
     HDLCClient::~HDLCClient()
     {
+    }
+    //
+    // IDENTIFY Service
+    //
+    bool HDLCClient::IdentifyRequest(const DLIdentifyRequestParameter& Parameters)
+    {
+        bool ReturnValue = false;
+        BEGIN_TRANSITION_MAP
+            TRANSITION_MAP_ENTRY(ST_DISCONNECTED, ST_DISCONNECTED)
+            TRANSITION_MAP_ENTRY(ST_IEC_CONNECT, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_CONNECTING_WAIT, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_CONNECTED, EVENT_IGNORED)
+        END_TRANSITION_MAP(ReturnValue, new IdentifyEventData(Parameters));
+        return ReturnValue;
     }
     //
     // DA-CONNECT Service Implementation
@@ -117,7 +154,47 @@ namespace EPRI
 
     void HDLCClient::ST_Disconnected_Handler(EventData * pData)
     {
-        Process();
+        //
+        // IDENTIFY Request
+        //
+        IdentifyEventData * pIdentifyEvent = dynamic_cast<IdentifyEventData *>(pData);
+        if (pIdentifyEvent)
+        {
+            Packet *      pIDENT = GetWorkingTXPacket();
+            if (pIDENT)
+            {
+                HDLCErrorCode ReturnCode = 
+                    pIDENT->MakeIdentifyPacket(HDLCControl(HDLCControl::IDENT));
+                if (SUCCESS == ReturnCode)
+                {
+                    EnqueueWorkingTXPacket();
+                }
+                else
+                {
+                    ReleaseWorkingTXPacket();
+                }
+            }
+            Process();
+            return;
+        }
+        //
+        // IDENTR 
+        //
+        PacketEventData * pPacketData = dynamic_cast<PacketEventData *>(pData);
+        if (pPacketData && pPacketData->Data.GetControl().PacketType() == HDLCControl::IDENTR)
+        {
+            bool    RetVal = false;
+            size_t  InformationLength = 0;
+            //
+            // Packet Parsing Garauntees Correct Information Sizing
+            //
+            FireCallback(DLIdentifyResponseParameter::ID, 
+                DLIdentifyResponseParameter(m_MyAddress, pPacketData->Data.GetInformation(InformationLength)),
+                &RetVal);
+            
+            Process();
+            return;
+        }        
     }
 
     void HDLCClient::ST_IEC_Connect_Handler(EventData * pData)
@@ -162,11 +239,7 @@ namespace EPRI
                     break;
                 case STATE_BAUD:
                     m_pSerial->Write(DLMSVector(MODE_E_9600, sizeof(MODE_E_9600)));
-#ifdef __linux__
-                    ::sleep(1);
-#else
-#warning "Need to implement sleep for embedded!"
-#endif
+                    Base()->GetScheduler()->Sleep(1000);
                     m_pSerial->SetOptions(
                         ISerial::Options(ISerial::Options::BAUD_9600,
                         8, 
@@ -192,25 +265,29 @@ namespace EPRI
         // Connect Request
         //
         ConnectEventData * pConnectData = dynamic_cast <ConnectEventData *>(pData);
-        Packet *           pSNRM = GetWorkingTXPacket();
-        if (pSNRM)
+        if (pConnectData)
         {
-            HDLCErrorCode ReturnCode = pSNRM->MakePacket(Packet::NO_SEGMENT,
-                pConnectData->Data.DestinationAddress,
-                m_MyAddress,
-                HDLCControl(HDLCControl::SNRM));
-            if (SUCCESS == ReturnCode)
+            Packet *      pSNRM = GetWorkingTXPacket();
+            if (pSNRM)
             {
-                EnqueueWorkingTXPacket();
+                HDLCErrorCode ReturnCode = pSNRM->MakePacket(Packet::NO_SEGMENT,
+                    pConnectData->Data.DestinationAddress,
+                    m_MyAddress,
+                    HDLCControl(HDLCControl::SNRM));
+                if (SUCCESS == ReturnCode)
+                {
+                    EnqueueWorkingTXPacket();
+                }
+                else
+                {
+                    ReleaseWorkingTXPacket();
+                    InternalEvent(ST_DISCONNECTED);
+                }
             }
-            else
-            {
-                ReleaseWorkingTXPacket();
-                InternalEvent(ST_DISCONNECTED);
-            }
+            Process();
+            return;
         }
 
-        Process();
     }
     
     void HDLCClient::ST_Connected_Handler(EventData * pData)
@@ -251,6 +328,18 @@ namespace EPRI
             TRANSITION_MAP_ENTRY(ST_DISCONNECTED, EVENT_IGNORED)
             TRANSITION_MAP_ENTRY(ST_IEC_CONNECT, EVENT_IGNORED)
             TRANSITION_MAP_ENTRY(ST_CONNECTING_WAIT, ST_CONNECTED)
+            TRANSITION_MAP_ENTRY(ST_CONNECTED, EVENT_IGNORED)
+        END_TRANSITION_MAP(bAllowed, new PacketEventData(RXPacket));
+        return bAllowed;
+    }
+
+    bool HDLCClient::IDENTR_Handler(const Packet& RXPacket)
+    {
+        bool bAllowed = false;
+        BEGIN_TRANSITION_MAP
+            TRANSITION_MAP_ENTRY(ST_DISCONNECTED, ST_DISCONNECTED)
+            TRANSITION_MAP_ENTRY(ST_IEC_CONNECT, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_CONNECTING_WAIT, EVENT_IGNORED)
             TRANSITION_MAP_ENTRY(ST_CONNECTED, EVENT_IGNORED)
         END_TRANSITION_MAP(bAllowed, new PacketEventData(RXPacket));
         return bAllowed;

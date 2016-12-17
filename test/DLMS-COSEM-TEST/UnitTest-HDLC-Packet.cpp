@@ -120,3 +120,75 @@ TEST(HDLCPacket, MakeByByte)
     EXPECT_EQ(0, Receiver.GetInformationLength());   
 
 }
+
+static const uint8_t IDENTIFY_TEST_PACKET[] = { 0x20 };
+static const uint8_t IDENTIFY_TEST1_PACKET[] = { 'I' };
+static const uint8_t IDENTIFY_RESPONSE_PACKET[] = { 0x00, 0x04, 0x01, 0x00 };
+
+TEST(HDLCPacket, Identify) 
+{
+    Packet Identify;
+    
+    size_t InformationLength = 0;
+    size_t PacketIndex = sizeof(IDENTIFY_TEST_PACKET);
+    const uint8_t * pBytes = IDENTIFY_TEST_PACKET;
+    HDLCErrorCode Error = NEED_MORE;
+    while (PacketIndex--)
+    {
+        Error = Identify.MakeByByte(*pBytes++);
+        if (Error != NEED_MORE)
+        {
+            break;
+        }
+    }
+    ASSERT_EQ(SUCCESS, Error);
+    EXPECT_EQ(Packet::NO_SEGMENT, Identify.GetSegmentation());
+    EXPECT_TRUE(HDLCAddress() == Identify.GetDestinationAddress());
+    EXPECT_TRUE(HDLCAddress() == Identify.GetSourceAddress());
+    EXPECT_EQ(HDLCControl(HDLCControl::IDENT), Identify.GetControl());
+    EXPECT_EQ(0, Identify.GetInformationLength());   
+    EXPECT_EQ(nullptr, Identify.GetInformation(InformationLength));   
+
+    Identify.Clear();
+    InformationLength = 0;
+    PacketIndex = sizeof(IDENTIFY_TEST1_PACKET);
+    pBytes = IDENTIFY_TEST1_PACKET;
+    while (PacketIndex--)
+    {
+        Error = Identify.MakeByByte(*pBytes++);
+        if (Error != NEED_MORE)
+        {
+            break;
+        }
+    }
+    ASSERT_EQ(SUCCESS, Error);
+    EXPECT_EQ(Packet::NO_SEGMENT, Identify.GetSegmentation());
+    EXPECT_TRUE(HDLCAddress() == Identify.GetDestinationAddress());
+    EXPECT_TRUE(HDLCAddress() == Identify.GetSourceAddress());
+    EXPECT_EQ(HDLCControl(HDLCControl::IDENT), Identify.GetControl());
+    EXPECT_EQ(0, Identify.GetInformationLength());   
+    EXPECT_EQ(nullptr, Identify.GetInformation(InformationLength));  
+    
+    Identify.Clear();
+    InformationLength = 0;
+    PacketIndex = sizeof(IDENTIFY_RESPONSE_PACKET);
+    pBytes = IDENTIFY_RESPONSE_PACKET;
+    while (PacketIndex--)
+    {
+        Error = Identify.MakeByByte(*pBytes++);
+        if (Error != NEED_MORE)
+        {
+            break;
+        }
+    }
+    ASSERT_EQ(SUCCESS, Error);
+    EXPECT_EQ(Packet::NO_SEGMENT, Identify.GetSegmentation());
+    EXPECT_TRUE(HDLCAddress() == Identify.GetDestinationAddress());
+    EXPECT_TRUE(HDLCAddress() == Identify.GetSourceAddress());
+    EXPECT_EQ(HDLCControl(HDLCControl::IDENTR), Identify.GetControl());
+    EXPECT_EQ(sizeof(IDENTIFY_RESPONSE_PACKET), Identify.GetInformationLength()) ;   
+    EXPECT_EQ(0, std::memcmp(Identify.GetInformation(InformationLength), IDENTIFY_RESPONSE_PACKET, 
+        sizeof(IDENTIFY_RESPONSE_PACKET)));
+      
+}
+

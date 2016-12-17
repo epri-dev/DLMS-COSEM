@@ -21,6 +21,8 @@ namespace EPRI
         HDLCLLC(&m_MAC), 
         m_MAC(MyAddress, pSerial, Options, MaxPreallocatedPacketBuffers)
     {
+        m_MAC.RegisterCallback(DLIdentifyRequestParameter::ID,
+            std::bind(&HDLCServerLLC::MACIdentifyIndication, this, std::placeholders::_1));
         m_MAC.RegisterCallback(DLConnectRequestOrIndication::ID,
             std::bind(&HDLCServerLLC::MACConnectIndication, this, std::placeholders::_1));
         m_MAC.RegisterCallback(DLDataRequestParameter::ID,
@@ -29,6 +31,21 @@ namespace EPRI
     
     HDLCServerLLC::~HDLCServerLLC()
     {
+    }
+    //
+    // IDENTIFY Service
+    //
+    bool HDLCServerLLC::IdentifyResponse(const DLIdentifyResponseParameter& Parameters)
+    {
+        return m_MAC.IdentifyResponse(Parameters);
+    }
+
+    bool HDLCServerLLC::MACIdentifyIndication(const BaseCallbackParameter& Parameters)
+    {
+        const DLIdentifyRequestParameter& IdentifyParams = 
+            dynamic_cast<const DLIdentifyRequestParameter&>(Parameters);
+        
+        return IdentifyResponse(DLIdentifyResponseParameter(IdentifyParams.DestinationAddress));
     }
     //
     // DA-CONNECT Service
@@ -71,10 +88,26 @@ namespace EPRI
     {
         m_PacketCallback.RegisterCallback(HDLCControl::SNRM, 
             std::bind(&HDLCServer::SNRM_Handler, this, std::placeholders::_1));
+        m_PacketCallback.RegisterCallback(HDLCControl::IDENT, 
+            std::bind(&HDLCServer::IDENT_Handler, this, std::placeholders::_1));
     }
     
     HDLCServer::~HDLCServer()
     {
+    }
+    //
+    // IDENTIFY Service
+    //
+    bool HDLCServer::IdentifyResponse(const DLIdentifyResponseParameter& Parameters)
+    {
+        bool bAllowed = false;
+        BEGIN_TRANSITION_MAP
+            TRANSITION_MAP_ENTRY(ST_DISCONNECTED, ST_DISCONNECTED)
+            TRANSITION_MAP_ENTRY(ST_IEC_CONNECT, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_CONNECTING_WAIT, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_CONNECTED, EVENT_IGNORED)
+        END_TRANSITION_MAP(bAllowed, new IdentifyResponseData(Parameters));
+        return bAllowed;
     }
     //
     // DA-CONNECT Service
@@ -98,7 +131,46 @@ namespace EPRI
     
     void HDLCServer::ST_Disconnected_Handler(EventData * pData)
     {
-        Process();
+        //
+        // IDENT
+        //
+        PacketEventData * pPacketData = dynamic_cast<PacketEventData *>(pData);
+        if (pPacketData && pPacketData->Data.GetControl().PacketType() == HDLCControl::IDENT)
+        {
+            bool RetVal = false;
+            RetVal = FireCallback(DLIdentifyRequestParameter::ID, 
+                DLIdentifyRequestParameter(m_MyAddress),
+                &RetVal) && RetVal;
+
+            Process();
+            return;
+        }    
+        //
+        // IDENTIFY Response
+        //
+        IdentifyResponseData * pIdentifyData = dynamic_cast<IdentifyResponseData *>(pData);
+        if (pIdentifyData)
+        {
+            Packet *      pIDENTR = GetWorkingTXPacket();
+            if (pIDENTR)
+            {
+                DLIdentifyResponseParameter& Data = pIdentifyData->Data;
+                HDLCErrorCode                ReturnCode = 
+                    pIDENTR->MakeIdentifyPacket(HDLCControl(HDLCControl::IDENTR),
+                                                Data.SuccessCode, Data.ProtocolID,
+                                                Data.ProtocolVersion, Data.ProtocolRevision);
+                if (SUCCESS == ReturnCode)
+                {
+                    EnqueueWorkingTXPacket();
+                }
+                else
+                {
+                    ReleaseWorkingTXPacket();
+                }
+            }
+            Process();
+            return;
+        }             
     }
     
     void HDLCServer::ST_IEC_Connect_Handler(EventData * pData)
@@ -194,5 +266,16 @@ namespace EPRI
         END_TRANSITION_MAP(bAllowed, new PacketEventData(RXPacket));
         return bAllowed;
     }
-
+    
+    bool HDLCServer::IDENT_Handler(const Packet& RXPacket)
+    {
+        bool bAllowed = false;
+        BEGIN_TRANSITION_MAP
+            TRANSITION_MAP_ENTRY(ST_DISCONNECTED, ST_DISCONNECTED)
+            TRANSITION_MAP_ENTRY(ST_IEC_CONNECT, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_CONNECTING_WAIT, EVENT_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_CONNECTED, EVENT_IGNORED)
+        END_TRANSITION_MAP(bAllowed, new PacketEventData(RXPacket));
+        return bAllowed;
+    }
 }

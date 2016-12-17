@@ -47,6 +47,8 @@ namespace EPRI
         void ASIO_Read_Handler(const asio::error_code& Error, size_t BytesTransferred);
         void ASIO_Read_Timeout(const asio::error_code& Error);
         void SetPortOptions();
+        
+        void OnClose(ERROR_TYPE Error);
 
         asio::serial_port               m_Port;
         asio::steady_timer              m_ReadTimer;
@@ -56,7 +58,6 @@ namespace EPRI
         WriteCallbackFunction           m_Write;
         ReadCallbackFunction            m_Read;
         CloseCallbackFunction           m_Close;
-        
     };
 
     class LinuxSerial : public ISerial

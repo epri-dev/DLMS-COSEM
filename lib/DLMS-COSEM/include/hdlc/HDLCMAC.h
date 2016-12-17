@@ -125,6 +125,41 @@ namespace EPRI
         HDLCAddress DestinationAddress;
     };
     //
+    // IDENTIFY
+    //
+    struct DLIdentifyRequestParameter : public HDLCCallbackParameter
+    {
+        static const uint16_t ID = 0x100A;
+        DLIdentifyRequestParameter(const HDLCAddress& DA)
+            : HDLCCallbackParameter(DA)
+        {
+        }
+    };
+    struct DLIdentifyResponseParameter : public HDLCCallbackParameter
+    {
+        static const uint16_t ID = 0x100B;
+        DLIdentifyResponseParameter(const HDLCAddress& DA, const uint8_t * pData)
+            : HDLCCallbackParameter(DA)
+        {
+            SuccessCode = pData[0];
+            ProtocolID = pData[1];
+            ProtocolVersion = pData[2];
+            ProtocolRevision = pData[3];
+        }
+        DLIdentifyResponseParameter(const HDLCAddress& DA)
+            : HDLCCallbackParameter(DA)
+        {
+            SuccessCode = Packet::IDENTIFY_RESPONSE[0];
+            ProtocolID = Packet::IDENTIFY_RESPONSE[1];
+            ProtocolVersion = Packet::IDENTIFY_RESPONSE[2];
+            ProtocolRevision = Packet::IDENTIFY_RESPONSE[3];
+        }
+        uint8_t SuccessCode;
+        uint8_t ProtocolID;
+        uint8_t ProtocolVersion;
+        uint8_t ProtocolRevision;
+    };
+    //
     // CONNECT
     //
     struct DLConnectConfirmOrResponse : public HDLCCallbackParameter
@@ -184,6 +219,8 @@ namespace EPRI
         
     };
     
+    using IdentifyEventData = MACEventData<DLIdentifyRequestParameter>;
+    using IdentifyResponseData = MACEventData<DLIdentifyResponseParameter>;
     using ConnectEventData = MACEventData<DLConnectRequestOrIndication>;
     using ConnectResponseData = MACEventData<DLConnectConfirmOrResponse>;
     using PacketEventData = MACEventData<Packet>;
@@ -198,10 +235,14 @@ namespace EPRI
             const HDLCOptions& Opt,
             uint8_t MaxPreallocatedPacketBuffers);
         virtual ~HDLCClient();
+    	//
+    	// IDENTIFY Service
+    	//
+        virtual bool IdentifyRequest(const DLIdentifyRequestParameter& Parameters);
         //
         // MA-CONNECT Service
         //
-        bool ConnectRequest(const DLConnectRequestOrIndication& Parameters);
+        virtual bool ConnectRequest(const DLConnectRequestOrIndication& Parameters);
         
     protected:
         //
@@ -219,6 +260,7 @@ namespace EPRI
         //
         bool UI_Handler(const Packet& RXPacket);
         bool UA_Handler(const Packet& RXPacket);
+        bool IDENTR_Handler(const Packet& RXPacket);
       
     };
     
@@ -231,6 +273,10 @@ namespace EPRI
             const HDLCOptions& Opt,
             uint8_t MaxPreallocatedPacketBuffers);
         virtual ~HDLCServer();
+        //
+        // IDENTIFY Service
+        //
+        bool IdentifyResponse(const DLIdentifyResponseParameter& Parameters);
         //
         // MA-CONNECT Service
         //
@@ -251,6 +297,7 @@ namespace EPRI
         // Packet Handlers
         //
         bool SNRM_Handler(const Packet& Packet);
+        bool IDENT_Handler(const Packet& RXPacket);
         
     };
 

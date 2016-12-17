@@ -16,7 +16,10 @@ namespace EPRI
 	class Packet
 	{
 	public:
-		static const uint8_t HDLC_START_FLAG = 0x7E;
+    	static const uint8_t IDENTIFY_FLAG1 = ' ';
+    	static const uint8_t IDENTIFY_FLAG2 = 'I';
+    	static const uint8_t IDENTIFY_RESPONSE[];
+    	static const uint8_t HDLC_START_FLAG = 0x7E;
 		static const uint8_t HDLC_STOP_FLAG = 0x7E;
 		static const uint8_t FRAME_FORMAT = sizeof(uint16_t);
     	static const uint8_t MAX_ADDRESS_FIELD = sizeof(uint16_t);
@@ -50,6 +53,7 @@ namespace EPRI
     	virtual HDLCControl GetControl() const;
     	virtual uint16_t GetInformationLength() const;
     	virtual const uint8_t * GetInformation(size_t& InformationLength) const;
+    	virtual bool IsIdentify() const;
     	
     	virtual HDLCErrorCode MakePacket(Segmentation Segmented,
         	const HDLCAddress& DestinationAddr,
@@ -57,6 +61,12 @@ namespace EPRI
         	const HDLCControl& Control,
         	const uint8_t * Information = nullptr,
         	size_t InformationSize = 0);
+    	virtual HDLCErrorCode MakeIdentifyPacket(const HDLCControl& Control,
+        	uint8_t SuccessCode = 0x00,
+        	uint8_t ProtocolID = 0x00,
+        	uint8_t ProtocolVersion = 0x00,
+        	uint8_t ProtocolRevision = 0x00);
+
     	virtual HDLCErrorCode MakeByByte(uint8_t Byte);
     	virtual HDLCErrorCode MakeByVector(DLMSVector * pVector);
     	
@@ -76,7 +86,8 @@ namespace EPRI
         	STATE_RX_CONTROL,
         	STATE_RX_HCS,
         	STATE_RX_INFORMATION,
-        	STATE_RX_CRC
+        	STATE_RX_CRC,
+        	STATE_RX_IDENTIFY
     	};
 
     	struct PacketMappingIndexes
