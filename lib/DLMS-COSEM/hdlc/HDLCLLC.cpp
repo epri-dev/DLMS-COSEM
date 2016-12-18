@@ -33,25 +33,21 @@ namespace EPRI
         return 0;
     }
     
+    HDLCAddress HDLCLLC::ConnectedAddress() const
+    {
+        return m_pMAC->ConnectedAddress();
+    }
+
     bool HDLCLLC::IsConnected() const
     {
         return m_pMAC->IsConnected();
-    }
-
-    HDLCAddress HDLCLLC::ConnectedAddress() const
-    {
-        return m_ConnectedAddress;
     }
     //
     // MA-CONNECT Service
     //
     bool HDLCLLC::MACConnectConfirmOrIndication(const BaseCallbackParameter& Parameters)
     {
-        const HDLCCallbackParameter& DLParam = dynamic_cast<const HDLCCallbackParameter&>(Parameters);
-        m_ConnectedAddress = DLParam.DestinationAddress;
-
         FireTransportEvent(Transport::TRANSPORT_CONNECTED);
-        
         return true;
     }
     //
@@ -93,6 +89,14 @@ namespace EPRI
         return Transport::ProcessReception(ConnectedAddress().LogicalAddress(), 
                                            DLParam.DestinationAddress.LogicalAddress(), 
                                            &Data);
+    }
+    //
+    // MA-DISCONNECT Service
+    //
+    bool HDLCLLC::MACDisconnectConfirmOrIndication(const BaseCallbackParameter& Parameters)
+    {
+        FireTransportEvent(Transport::TRANSPORT_DISCONNECTED);
+        return true;
     }
     
     DLDataRequestParameter& HDLCLLC::AddLLCHeader(DLDataRequestParameter * pParameters)

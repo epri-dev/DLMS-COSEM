@@ -440,6 +440,13 @@ namespace EPRI
         const uint8_t * Information /* = nullptr */,
         size_t InformationSize /* = 0 */)
     {
+        //
+        // PRECONDITIONS
+        //
+        if (DestinationAddress.IsEmpty() || SourceAddress.IsEmpty())
+        {
+            return INVALID_PARAMETER;
+        }
         int		 PacketIndex = 0;
         size_t   HeaderSize = STATIC_HEADER_SIZE + SourceAddress.Size() + DestinationAddress.Size();
 

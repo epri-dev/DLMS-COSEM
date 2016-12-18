@@ -27,6 +27,8 @@ namespace EPRI
             std::bind(&HDLCServerLLC::MACConnectIndication, this, std::placeholders::_1));
         m_MAC.RegisterCallback(DLDataRequestParameter::ID,
             std::bind(&HDLCServerLLC::MACDataIndication, this, std::placeholders::_1));
+        m_MAC.RegisterCallback(DLDisconnectRequestOrIndication::ID,
+            std::bind(&HDLCServerLLC::MACDisconnectIndication, this, std::placeholders::_1));
     }
     
     HDLCServerLLC::~HDLCServerLLC()
@@ -74,6 +76,32 @@ namespace EPRI
         return true;
     }
     //
+    // DA-DISCONNECT Service
+    //
+    bool HDLCServerLLC::DisconnectResponse(const DLDisconnectConfirmOrResponse& Parameters)
+    {
+        return m_MAC.DisconnectResponse(Parameters);
+    }
+
+    bool HDLCServerLLC::MACDisconnectIndication(const BaseCallbackParameter& Parameters)
+    {
+        const DLDisconnectRequestOrIndication& DisconnectParams = 
+            dynamic_cast<const DLDisconnectRequestOrIndication&>(Parameters);
+        bool RetVal = OnDisconnectIndication(DisconnectParams.DestinationAddress.LogicalAddress());
+        if (RetVal)
+        {
+            RetVal = MACDisconnectConfirmOrIndication(Parameters);
+        }
+        return RetVal;
+    }
+    
+    bool HDLCServerLLC::OnDisconnectIndication(COSEMAddressType Address)
+    {
+        DLDisconnectConfirmOrResponse Response(Address);
+        DisconnectResponse(Response);
+        return true;
+    }    
+    //
     ///////////////////////////////////////////////////////////////////////////
     // 
     // Server MAC
@@ -90,6 +118,8 @@ namespace EPRI
             std::bind(&HDLCServer::SNRM_Handler, this, std::placeholders::_1));
         m_PacketCallback.RegisterCallback(HDLCControl::IDENT, 
             std::bind(&HDLCServer::IDENT_Handler, this, std::placeholders::_1));
+        m_PacketCallback.RegisterCallback(HDLCControl::DISC, 
+            std::bind(&HDLCServer::DISC_Handler, this, std::placeholders::_1));
     }
     
     HDLCServer::~HDLCServer()
@@ -123,6 +153,20 @@ namespace EPRI
         END_TRANSITION_MAP(bAllowed, new ConnectResponseData(Parameters));
         return bAllowed;
     }
+    //
+    // DA-DISCONNECT Service
+    //
+    bool HDLCServer::DisconnectResponse(const DLDisconnectConfirmOrResponse& Parameters)
+    {
+        bool bAllowed = false;
+        BEGIN_TRANSITION_MAP
+            TRANSITION_MAP_ENTRY(ST_DISCONNECTED, ST_DISCONNECTED)
+            TRANSITION_MAP_ENTRY(ST_IEC_CONNECT, ST_DISCONNECTED)
+            TRANSITION_MAP_ENTRY(ST_CONNECTING_WAIT, ST_DISCONNECTED)
+            TRANSITION_MAP_ENTRY(ST_CONNECTED, ST_DISCONNECTED)
+        END_TRANSITION_MAP(bAllowed, new DisconnectResponseData(Parameters));
+        return bAllowed;
+    }
        
     void HDLCServer::Process()
     {
@@ -132,9 +176,53 @@ namespace EPRI
     void HDLCServer::ST_Disconnected_Handler(EventData * pData)
     {
         //
-        // IDENT
+        // Disconnected State Entry
+        //
+        m_ConnectedAddress.Clear();
+        //
+        // DISC - Disconnect Request
         //
         PacketEventData * pPacketData = dynamic_cast<PacketEventData *>(pData);
+        if (pPacketData && pPacketData->Data.GetControl().PacketType() == HDLCControl::DISC)
+        {
+            bool RetVal = false;
+            RetVal = FireCallback(DLDisconnectRequestOrIndication::ID, 
+                DLDisconnectRequestOrIndication(pPacketData->Data.GetSourceAddress()),
+                &RetVal) && RetVal;
+
+            Process();
+            return;
+        }            
+        //
+        // DISCONNECT Response
+        //
+        DisconnectResponseData * pDisconnectData = dynamic_cast<DisconnectResponseData *>(pData);
+        if (pDisconnectData)
+        {
+            Packet *      pDM = GetWorkingTXPacket();
+            if (pDM)
+            {
+                DLDisconnectConfirmOrResponse& Data = pDisconnectData->Data;
+                HDLCErrorCode ReturnCode = pDM->MakePacket(Packet::NO_SEGMENT,
+                    pDisconnectData->Data.DestinationAddress,
+                    m_MyAddress,
+                    HDLCControl(HDLCControl::DM));
+                if (SUCCESS == ReturnCode)
+                {
+                    EnqueueWorkingTXPacket();
+                }
+                else
+                {
+                    ReleaseWorkingTXPacket();
+                }
+            }
+            Process();
+            return;
+        }           
+        //
+        // IDENT
+        //
+        pPacketData = dynamic_cast<PacketEventData *>(pData);
         if (pPacketData && pPacketData->Data.GetControl().PacketType() == HDLCControl::IDENT)
         {
             bool RetVal = false;
@@ -192,23 +280,8 @@ namespace EPRI
                 &RetVal) && RetVal;
             if (!RetVal)
             {
-                Packet *      pDM = GetWorkingTXPacket();
-                if (pDM)
-                {
-                    HDLCErrorCode ReturnCode = pDM->MakePacket(Packet::NO_SEGMENT,
-                        pPacketData->Data.GetSourceAddress(),
-                        m_MyAddress,
-                        HDLCControl(HDLCControl::DM));
-                    if (SUCCESS == ReturnCode)
-                    {
-                        EnqueueWorkingTXPacket();
-                    }
-                    else
-                    {
-                        ReleaseWorkingTXPacket();
-                    }
-                    InternalEvent(ST_DISCONNECTED);
-                }
+                InternalEvent(ST_DISCONNECTED,
+                    new DisconnectResponseData(DLDisconnectConfirmOrResponse(pPacketData->Data.GetSourceAddress())));
             }
             Process();
             return;
@@ -233,6 +306,7 @@ namespace EPRI
                     HDLCControl(HDLCControl::UA));
                 if (SUCCESS == ReturnCode)
                 {
+                    m_ConnectedAddress = pResponseData->Data.DestinationAddress;
                     EnqueueWorkingTXPacket();
                 }
                 else
@@ -275,6 +349,18 @@ namespace EPRI
             TRANSITION_MAP_ENTRY(ST_IEC_CONNECT, EVENT_IGNORED)
             TRANSITION_MAP_ENTRY(ST_CONNECTING_WAIT, EVENT_IGNORED)
             TRANSITION_MAP_ENTRY(ST_CONNECTED, EVENT_IGNORED)
+        END_TRANSITION_MAP(bAllowed, new PacketEventData(RXPacket));
+        return bAllowed;
+    }
+    
+    bool HDLCServer::DISC_Handler(const Packet& RXPacket)
+    {
+        bool bAllowed = false;
+        BEGIN_TRANSITION_MAP
+            TRANSITION_MAP_ENTRY(ST_DISCONNECTED, ST_DISCONNECTED)
+            TRANSITION_MAP_ENTRY(ST_IEC_CONNECT, ST_DISCONNECTED)
+            TRANSITION_MAP_ENTRY(ST_CONNECTING_WAIT, ST_DISCONNECTED)
+            TRANSITION_MAP_ENTRY(ST_CONNECTED, ST_DISCONNECTED)
         END_TRANSITION_MAP(bAllowed, new PacketEventData(RXPacket));
         return bAllowed;
     }

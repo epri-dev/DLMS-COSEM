@@ -54,6 +54,11 @@ namespace EPRI
     {
         return m_MyAddress;
     }
+    
+    HDLCAddress HDLCMAC::ConnectedAddress() const
+    {
+        return m_ConnectedAddress;
+    }
 
     const HDLCStatistics& HDLCMAC::Statistics() const
     {

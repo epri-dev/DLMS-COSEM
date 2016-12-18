@@ -43,7 +43,9 @@ namespace EPRI
     	HDLCAddress MyAddress() const;
     	const HDLCStatistics& Statistics() const;
     	void ClearStatistics();
-    	bool IsConnected() const;
+    	
+    	virtual HDLCAddress ConnectedAddress() const;
+    	virtual bool IsConnected() const;
     	//
     	// DL-SET_VALUE
     	//
@@ -106,6 +108,7 @@ namespace EPRI
     	bool ArmAsyncRead(uint32_t TimeOutInMs = 0, size_t MinimumSize = sizeof(uint8_t));
       	
         HDLCAddress							m_MyAddress;
+    	HDLCAddress                         m_ConnectedAddress;
     	ISerialSocket *                     m_pSerial;
     	HDLCOptions                         m_CurrentOptions;
 		std::shared_ptr<EPRI::ISimpleTimer>	m_pTimer;
@@ -211,7 +214,34 @@ namespace EPRI
         HDLCControl::Control FrameType;
         DLMSVector           Data;
     };
+    //
+    // DISCONNECT
+    //
+    struct DLDisconnectConfirmOrResponse : public HDLCCallbackParameter
+    {
+        static const uint16_t ID = 0x100A;
+        DLDisconnectConfirmOrResponse(const HDLCAddress& DA)
+            : HDLCCallbackParameter(DA)
+        {
+        }
+        // Result
+        // User_Information
+    };
+    
+    struct DLDisconnectRequestOrIndication : public HDLCCallbackParameter
+    {
+        static const uint16_t ID = 0x100B;
+        DLDisconnectRequestOrIndication(const HDLCAddress& DA)
+            : HDLCCallbackParameter(DA)
+        {
+        }
+        DLDisconnectRequestOrIndication()
+            : HDLCCallbackParameter(HDLCAddress())
+        {
+        }
 
+        // User_Information
+    };
     template<typename TInternal>
     class MACEventData : public EventData
     {
@@ -236,6 +266,8 @@ namespace EPRI
     using ConnectResponseData = MACEventData<DLConnectConfirmOrResponse>;
     using PacketEventData = MACEventData<Packet>;
     using DataEventData = MACEventData<DLDataRequestParameter>;
+    using DisconnectEventData = MACEventData<DLDisconnectRequestOrIndication>;
+    using DisconnectResponseData = MACEventData<DLDisconnectConfirmOrResponse>;
     
     class HDLCClient : public HDLCMAC
     {
@@ -257,6 +289,10 @@ namespace EPRI
         // MA-CONNECT Service
         //
         virtual bool ConnectRequest(const DLConnectRequestOrIndication& Parameters);
+        //
+        // MA-DISCONNECT Service
+        //
+        virtual bool DisconnectRequest(const DLDisconnectRequestOrIndication& Parameters);
         
     protected:
         //
@@ -274,6 +310,7 @@ namespace EPRI
         //
         bool UI_Handler(const Packet& RXPacket);
         bool UA_Handler(const Packet& RXPacket);
+        bool DM_Handler(const Packet& RXPacket);
         bool IDENTR_Handler(const Packet& RXPacket);
       
     };
@@ -298,6 +335,10 @@ namespace EPRI
         // MA-CONNECT Service
         //
         bool ConnectResponse(const DLConnectConfirmOrResponse& Parameters);
+        //
+        // MA-DISCONNECT Service
+        //
+        bool DisconnectResponse(const DLDisconnectConfirmOrResponse& Parameters);
         
     protected:
         //
@@ -315,7 +356,8 @@ namespace EPRI
         //
         bool SNRM_Handler(const Packet& Packet);
         bool IDENT_Handler(const Packet& RXPacket);
-        
+        bool DISC_Handler(const Packet& RXPacket);
+       
     };
 
 

@@ -46,10 +46,12 @@ namespace EPRI
         //
     	virtual bool MACDataIndication(const BaseCallbackParameter& Parameters);
         //
+        // DL-DISCONNECT Service
+        //
+    	virtual bool MACDisconnectConfirmOrIndication(const BaseCallbackParameter& Paramters);
+        //
     	DLDataRequestParameter& AddLLCHeader(DLDataRequestParameter * pParameters);
     	
-    	HDLCAddress             m_ConnectedAddress;
-
 	private:
       	HDLCMAC *				 m_pMAC;
 	};
@@ -79,6 +81,11 @@ namespace EPRI
         // DL-DATA Service
         //
         void RegisterDataIndication(CallbackFunction Callback);
+        //
+        // DL-DISCONNECT Service
+        //
+        bool DisconnectRequest(const DLDisconnectRequestOrIndication& Parameters);
+        void RegisterDisconnectConfirm(CallbackFunction Callback);
 
     protected:
         //
@@ -93,6 +100,10 @@ namespace EPRI
         // DL-DATA Service
         //
         virtual bool MACDataIndication(const BaseCallbackParameter& Parameters) final;
+        //
+        // DL-DISCONNECT Service
+        //
+        virtual bool MACDisconnectConfirm(const BaseCallbackParameter& Paramters);
         
     private:
         HDLCClient              m_MAC;
@@ -114,6 +125,10 @@ namespace EPRI
         // DL-CONNECT Service
         //
         bool ConnectResponse(const DLConnectConfirmOrResponse& Parameters);
+        //
+        // DL-DISCONNECT Service
+        //
+        bool DisconnectResponse(const DLDisconnectConfirmOrResponse& Parameters);
         
     protected:
         //
@@ -126,6 +141,11 @@ namespace EPRI
         //
         virtual bool OnConnectIndication(COSEMAddressType Address);
         virtual bool MACConnectIndication(const BaseCallbackParameter& Parameters);
+        //
+        // DL-DISCONNECT Service
+        //
+        virtual bool OnDisconnectIndication(COSEMAddressType Address);
+        virtual bool MACDisconnectIndication(const BaseCallbackParameter& Parameters);
         
     private:
         HDLCServer              m_MAC;

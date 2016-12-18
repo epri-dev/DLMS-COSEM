@@ -82,6 +82,12 @@ namespace EPRI
     
     void LinuxSerialSocket::ASIO_Read_Handler(const asio::error_code& Error, size_t BytesTransferred)
     {
+        // Port has been closed
+        //
+        if (asio::error::bad_descriptor == Error)
+        {
+            return;
+        }
         // Got Data, cancel any timeouts
         //
         m_ReadTimer.cancel();
@@ -102,6 +108,7 @@ namespace EPRI
             }
             else if (Error)
             {
+                printf("ERROR! %s\n", Error.message().c_str());
                 ErrorCode = !SUCCESSFUL;
             }
             m_Read(ErrorCode, BytesTransferred);
@@ -261,6 +268,7 @@ namespace EPRI
     
     ERROR_TYPE LinuxSerialSocket::Close()
     {
+        m_Port.cancel();
         m_Port.close();
         OnClose(SUCCESSFUL);
         return SUCCESSFUL;

@@ -249,6 +249,21 @@ protected:
         return true;
     }
     
+    bool DisconnectConfirm(const BaseCallbackParameter& Parameters)
+    {
+        const DLDisconnectConfirmOrResponse& Response = 
+            dynamic_cast<const DLDisconnectConfirmOrResponse&>(Parameters);
+        Base()->GetDebug()->TRACE("\n\nDisconnect Response from Server %d...\n\n",
+            Response.DestinationAddress.LogicalAddress());
+
+        Base()->GetCore()->GetSerial()->ReleaseSocket(m_pSerialSocket);
+        m_pSerialSocket = nullptr;
+        m_pSocket = nullptr;
+        PrintLine("Serial released.");
+        
+        return true;
+    }
+    
     void ClientMenu_Handler(const std::string& RetVal) 
     {
         if (RetVal == "0")
@@ -472,6 +487,20 @@ protected:
             else
             {
                 PrintLine("TCP Not Opened!\n");
+            }
+        }
+        else if (toupper(RetVal[0]) == 'U')
+        {
+            if (m_pHDLC && m_pHDLC->IsConnected())
+            {
+                m_pHDLC->RegisterDisconnectConfirm(std::bind(&ClientApp::DisconnectConfirm, 
+                    this,
+                    std::placeholders::_1));
+                m_pHDLC->DisconnectRequest(DLDisconnectRequestOrIndication());
+            }
+            else
+            {
+                PrintLine("HDLC Not Connected!\n");
             }
         }
        
