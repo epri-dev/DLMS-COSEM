@@ -166,6 +166,15 @@
     <ClCompile Include="..\DLMS-COSEM\APDU\RLRQ.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="..\DLMS-COSEM\APDU\xDLMS.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DLMS-COSEM\interfaces\IAssociationLN.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DLMS-COSEM\COSEMSecurity.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\DLMS-COSEM\include\StateMachine.h">

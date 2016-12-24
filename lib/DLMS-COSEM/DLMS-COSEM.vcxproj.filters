@@ -133,6 +133,15 @@
     <ClCompile Include="APDU\ACTION-Response.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="interfaces\IAssociationLN.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="APDU\xDLMS.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="COSEMSecurity.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ERROR_TYPE.h">
@@ -328,6 +337,12 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="include\IScheduler.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\interfaces\IAssociationLN.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\APDU\xDLMS.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

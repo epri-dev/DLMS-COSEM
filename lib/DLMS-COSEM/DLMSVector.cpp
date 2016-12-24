@@ -488,12 +488,14 @@ namespace EPRI
     DLMSVector& DLMSVector::operator=(DLMSVector& lval)
     {
         m_Data = lval.m_Data;
+        m_ReadPosition = 0;
         return *this;
     }
 
     DLMSVector& DLMSVector::operator=(const DLMSVector& lval)
     {
         m_Data = lval.m_Data;
+        m_ReadPosition = 0;
         return *this;
     }
    
@@ -511,5 +513,10 @@ namespace EPRI
     {
         return rhs.m_Data == m_Data;
     }
-    
+
+    bool DLMSVector::operator!=(const DLMSVector& rhs) const
+    {
+        return rhs.m_Data != m_Data;
+    }
+
 }

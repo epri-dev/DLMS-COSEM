@@ -177,6 +177,8 @@ namespace EPRI
             { (EPRI::ASN::DataTypes::GraphicString | (OPTIONS)) },
 #define ASN_BASE_TYPE(DT)\
             { DT },
+#define ASN_BASE_TYPE_WITH_OPTIONS(DT, OPTIONS)\
+            { (DT | (OPTIONS)) },
 #define ASN_DATA_TYPE\
             { EPRI::ASN::DataTypes::DT_Data },
 #define ASN_DATA_TYPE_WITH_OPTIONS(OPTIONS)\
@@ -261,7 +263,9 @@ namespace EPRI
         // Operators
         //
         bool operator==(const std::vector<uint8_t>& rhs) const;
+        bool operator!=(const std::vector<uint8_t>& rhs) const;
         bool operator==(const ASNType& rhs) const;
+        bool operator!=(const ASNType& rhs) const;
         //
         // Helpers
         //
@@ -316,14 +320,14 @@ namespace EPRI
             ASN::SchemaEntryPtr        m_SchemaEntry;
             ParseStates                m_State;
             int8_t                     m_Choice;
+            size_t                     m_SequenceIndex = 0;
         };
-        std::stack<ParseState>         m_GetStates;
-        std::stack<ParseState>         m_AppendStates;
+        using StackType = std::stack<ParseState, std::vector<ParseState>>;
+        StackType                      m_GetStates;
+        StackType                      m_AppendStates;
 
         bool IsGettingOptional(const ParseState& State) const;
         bool IsAppendingOptional(const ParseState& State, const DLMSValue& Value) const;
-        
-        
         //
         ASN::SchemaEntry               m_SingleDataType[2] = { { ASN::VOID }, { ASN::END_SCHEMA_T } };
         ASN::SchemaEntryPtr            m_pSchema = nullptr;
@@ -343,7 +347,7 @@ namespace EPRI
             RELATIVE = 0x80
         };
         
-        ASNObjectIdentifier() = delete;
+        ASNObjectIdentifier(ASN::ComponentOptions Options = ASN::NO_OPTIONS);
         ASNObjectIdentifier(ArcList List, ASN::ComponentOptions Options = ASN::NO_OPTIONS, OIDType OT = ABSOLUTE);
         virtual ~ASNObjectIdentifier();
 
@@ -352,6 +356,7 @@ namespace EPRI
         // Operators
         //
         operator DLMSVariant() const;
+        ASNObjectIdentifier& operator=(const ASNObjectIdentifier& rhs);
         //
         // Helpers
         //

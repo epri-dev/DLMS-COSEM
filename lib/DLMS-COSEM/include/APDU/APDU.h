@@ -17,9 +17,9 @@ namespace EPRI
         }
         virtual void RegisterComponent(IAPDUComponent * pComponent) = 0;
         virtual std::vector<uint8_t> GetBytes() = 0;
-        virtual bool Parse(COSEMAddressType SourceAddress,
-            COSEMAddressType DestinationAddress,
-            DLMSVector * pData) = 0;
+        virtual bool Parse(DLMSVector * pData,
+            COSEMAddressType SourceAddress,
+            COSEMAddressType DestinationAddress) = 0;
         virtual bool IsValid() const = 0;
         virtual ASN::TagIDType GetTag() = 0;
         virtual void Clear() = 0;
@@ -105,9 +105,9 @@ namespace EPRI
             return RetVal;
         }
         
-        virtual bool Parse(COSEMAddressType SourceAddress,
-            COSEMAddressType DestinationAddress,
-            DLMSVector * pData)
+        virtual bool Parse(DLMSVector * pData,
+            COSEMAddressType SourceAddress,
+            COSEMAddressType DestinationAddress)
         {
             bool   RetVal = false;
             size_t Length = 0;
@@ -177,9 +177,9 @@ namespace EPRI
             return RetVal.GetBytes();            
         }
         
-        virtual bool Parse(COSEMAddressType SourceAddress,
-            COSEMAddressType DestinationAddress,
-            DLMSVector * pData)
+        virtual bool Parse(DLMSVector * pData,
+            COSEMAddressType SourceAddress = ReservedAddresses::NO_STATION,
+            COSEMAddressType DestinationAddress = ReservedAddresses::NO_STATION)
         {
             if (Tag == pData->Peek<uint8_t>() &&
                 pData->Skip(sizeof(uint8_t)))

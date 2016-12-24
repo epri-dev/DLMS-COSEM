@@ -8,6 +8,7 @@ set(libDLMS-COSEM-SRC-FILES
 	COSEMDevice.cpp
 	COSEMEngine.cpp
 	COSEMObjectInstanceID.cpp
+	COSEMSecurity.cpp
 	COSEMServer.cpp
 	DLMS-COSEM.cpp
 	DLMSVector.cpp
@@ -36,10 +37,12 @@ set(libDLMS-COSEM-SRC-FILES
 	${CMAKE_CURRENT_LIST_DIR}/APDU/SET-Response.cpp
 	${CMAKE_CURRENT_LIST_DIR}/APDU/RLRE.cpp
 	${CMAKE_CURRENT_LIST_DIR}/APDU/RLRQ.cpp
+	${CMAKE_CURRENT_LIST_DIR}/APDU/xDLMS.cpp
 	${CMAKE_CURRENT_LIST_DIR}/interfaces/COSEMData.cpp
 	${CMAKE_CURRENT_LIST_DIR}/interfaces/IClock.cpp
 	${CMAKE_CURRENT_LIST_DIR}/interfaces/ICOSEMInterface.cpp
 	${CMAKE_CURRENT_LIST_DIR}/interfaces/IData.cpp
+	${CMAKE_CURRENT_LIST_DIR}/interfaces/IAssociationLN.cpp
 	${CMAKE_CURRENT_LIST_DIR}/serialwrapper/SerialWrapper.cpp
 	${CMAKE_CURRENT_LIST_DIR}/tcpwrapper/TCPWrapper.cpp
 	)

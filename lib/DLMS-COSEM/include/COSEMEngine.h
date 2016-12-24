@@ -4,10 +4,12 @@
 #include <map>
 #include <type_traits>
 
+#include "COSEM.h"
 #include "COSEMAddress.h"
 #include "COSEMSecurity.h"
 #include "COSEMObjectInstanceID.h"
 #include "hdlc/modcnt.h"
+#include "APDU/xDLMS.h"
 
 namespace EPRI
 {	 
@@ -36,6 +38,7 @@ namespace EPRI
         {
         }
         
+        virtual bool IsTransportConnected() const;
         virtual bool Process() = 0;
         
     protected:
@@ -58,9 +61,12 @@ namespace EPRI
             
         typedef struct _Options : public COSEMEngine::Options
         {
-            COSEMAddressType m_Address;            
-            _Options(COSEMAddressType Address)
+            COSEMAddressType m_Address; 
+            bool             m_LogicalNameReferencing;
+            
+            _Options(COSEMAddressType Address, bool LogicalNameReferencing = true)
                 : m_Address(Address)
+                , m_LogicalNameReferencing(LogicalNameReferencing)
             {
             }
             
@@ -105,7 +111,8 @@ namespace EPRI
         //
         virtual bool Process();
         
-        virtual bool Open(COSEMAddressType ServerAddress, const COSEMSecurityOptions& Security);
+        virtual bool Open(COSEMAddressType ServerAddress, const COSEMSecurityOptions& Security,
+            const xDLMS::InitiateRequest& xDLMS);
         virtual bool OnOpenConfirmation(COSEMAddressType ServerAddress);
         virtual bool IsOpen() const;
         virtual bool Get(const Cosem_Attribute_Descriptor& Descriptor,

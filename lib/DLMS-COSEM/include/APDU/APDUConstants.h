@@ -7,6 +7,8 @@ namespace EPRI
     struct APDUConstants
     {
         static const ASNType protocol_version_default;
+        static const uint8_t CURRENT_DLMS_VERSION;
+        static const int8_t  DLMS_DEFAULT_QOS;
         
         ASN_DEFINE_SCHEMA(protocol_version_Schema)
         ASN_DEFINE_SCHEMA(authentication_value_Schema)

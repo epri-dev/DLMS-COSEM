@@ -45,9 +45,9 @@ namespace EPRI
         Cosem_Method_Descriptor     cosem_method_descriptor;
         DLMSOptional<DLMSVector>    method_invocation_parameters;
         
-        virtual bool Parse(COSEMAddressType SourceAddress,
-            COSEMAddressType DestinationAddress,
-            DLMSVector * pData);
+        virtual bool Parse(DLMSVector * pData,
+            COSEMAddressType SourceAddress,
+            COSEMAddressType DestinationAddress);
         virtual std::vector<uint8_t> GetBytes();
         
     };

@@ -14,6 +14,8 @@ namespace EPRI
 {
     
     class ICOSEMObject;
+    class Association;
+    class AssociationContext;
     
     class ICOSEMInterface
     {
@@ -82,13 +84,16 @@ namespace EPRI
         virtual ~ICOSEMObject();
         virtual bool Supports(const Cosem_Attribute_Descriptor& Descriptor) const;
         virtual bool Supports(const Cosem_Method_Descriptor& Descriptor) const;
-        virtual APDUConstants::Data_Access_Result Get(DLMSVector * pData,
+        virtual APDUConstants::Data_Access_Result Get(const AssociationContext& Context,
+            DLMSVector * pData,
             const Cosem_Attribute_Descriptor& Descriptor, 
             SelectiveAccess * pSelectiveAccess = nullptr);
-        virtual APDUConstants::Data_Access_Result Set(const Cosem_Attribute_Descriptor& Descriptor, 
+        virtual APDUConstants::Data_Access_Result Set(const AssociationContext& Context,
+            const Cosem_Attribute_Descriptor& Descriptor, 
             const DLMSVector& Data,
             SelectiveAccess * pSelectiveAccess = nullptr);
-        virtual APDUConstants::Action_Result Action(const Cosem_Method_Descriptor& Descriptor, 
+        virtual APDUConstants::Action_Result Action(const AssociationContext& Context,
+            const Cosem_Method_Descriptor& Descriptor, 
             const DLMSOptional<DLMSVector>& Parameters,
             DLMSVector * pReturnValue = nullptr);
             
@@ -96,14 +101,17 @@ namespace EPRI
         virtual ICOSEMAttribute * FindAttribute(ObjectAttributeIdType AttributeId) const;
         virtual ICOSEMMethod * FindMethod(ObjectAttributeIdType MethodId) const;
         
-        virtual APDUConstants::Data_Access_Result InternalGet(ICOSEMAttribute * pAttribute, 
+        virtual APDUConstants::Data_Access_Result InternalGet(const AssociationContext& Context,
+            ICOSEMAttribute * pAttribute, 
             const Cosem_Attribute_Descriptor& Descriptor, 
             SelectiveAccess * pSelectiveAccess) = 0;
-        virtual APDUConstants::Data_Access_Result InternalSet(ICOSEMAttribute * pAttribute, 
+        virtual APDUConstants::Data_Access_Result InternalSet(const AssociationContext& Context,
+            ICOSEMAttribute * pAttribute, 
             const Cosem_Attribute_Descriptor& Descriptor, 
             const DLMSVector& Data,
             SelectiveAccess * pSelectiveAccess);
-        virtual APDUConstants::Action_Result InternalAction(ICOSEMMethod * pMethod, 
+        virtual APDUConstants::Action_Result InternalAction(const AssociationContext& Context,
+            ICOSEMMethod * pMethod, 
             const Cosem_Method_Descriptor& Descriptor, 
             const DLMSOptional<DLMSVector>& Parameters,
             DLMSVector * pReturnValue = nullptr);

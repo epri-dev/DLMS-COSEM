@@ -41,9 +41,9 @@ namespace EPRI
         //
         Cosem_Attribute_Descriptor  cosem_attribute_descriptor;
         
-        virtual bool Parse(COSEMAddressType SourceAddress,
-            COSEMAddressType DestinationAddress,
-            DLMSVector * pData);
+        virtual bool Parse(DLMSVector * pData, 
+            COSEMAddressType SourceAddress,
+            COSEMAddressType DestinationAddress);
         virtual std::vector<uint8_t> GetBytes();
         
     };

@@ -76,7 +76,8 @@ namespace EPRI
         virtual ~IClockObject();
         
     protected:
-        virtual APDUConstants::Action_Result InternalAction(ICOSEMMethod * pMethod, 
+        virtual APDUConstants::Action_Result InternalAction(const AssociationContext& Context,
+            ICOSEMMethod * pMethod, 
             const Cosem_Method_Descriptor& Descriptor, 
             const DLMSOptional<DLMSVector>& Parameters,
             DLMSVector * pReturnValue = nullptr) = 0;

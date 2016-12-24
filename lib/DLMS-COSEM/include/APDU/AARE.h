@@ -31,7 +31,7 @@ namespace EPRI
         APDU_Implementation_data<29>     implementation_information;
         APDU_Association_information<30> user_information;
         
-        enum AssociationResult : int32_t
+        enum AssociationResult : int8_t
         {
             accepted = 0,
             rejected_permanent = 1,

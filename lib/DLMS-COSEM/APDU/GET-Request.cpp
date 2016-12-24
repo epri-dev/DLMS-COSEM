@@ -48,14 +48,14 @@ namespace EPRI
     {
     }
         
-    bool Get_Request_Normal::Parse(COSEMAddressType SourceAddress,
-        COSEMAddressType DestinationAddress,
-        DLMSVector * pData)
+    bool Get_Request_Normal::Parse(DLMSVector * pData,
+        COSEMAddressType SourceAddress,
+        COSEMAddressType DestinationAddress)
     {
         // Perform the base parse, which just loads
         // the stream.
         //
-        if (Get_Request::Parse(SourceAddress, DestinationAddress, pData))
+        if (Get_Request::Parse(pData, SourceAddress, DestinationAddress))
         {
             int8_t       Choice;
             DLMSValue    Value;

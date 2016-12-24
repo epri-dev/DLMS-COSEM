@@ -186,14 +186,14 @@ int main(void)
 	HAL_Init();  
     
     /* Thread 1 definition */
-    osThreadDef(DLMSCOSEM, DLMSThread, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
+    osThreadDef(DLMSCOSEM, DLMSThread, osPriorityNormal, 0, 2 * configMINIMAL_STACK_SIZE);
   
 	 /*  Thread 2 definition */
     osThreadDef(LED, LEDThread, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
   
 	/* Start thread 1 */
     DLMSThreadHandle = osThreadCreate(osThread(DLMSCOSEM), NULL);
-  
+    
 	/* Start thread 2 */
     LEDThreadHandle = osThreadCreate(osThread(LED), NULL);
   
@@ -238,6 +238,7 @@ static void LEDThread(void const *argument)
 	{
 		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
 		osDelay(1000);
+    	printf("FREE = %u\n", xPortGetFreeHeapSize());
 	}
 }
 

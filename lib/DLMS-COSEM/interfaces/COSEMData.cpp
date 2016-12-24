@@ -317,6 +317,24 @@ namespace EPRI
                 }
                 else
                 {
+                    //
+                    // PRECONDITIONS
+                    //
+                    if (-1 == CURRENT_GET_STATE.m_SequenceIndex)
+                    {
+                        size_t ExpectedLength = 0;
+                        if (m_Data.Get<uint8_t>() == COSEMDataType::STRUCTURE &&
+                            ASNType::GetLength(&m_Data, &ExpectedLength) &&
+                            ExpectedLength == StructureElementCount(CURRENT_GET_STATE.m_SchemaEntry))
+                        {
+                            CURRENT_GET_STATE.m_SequenceIndex = 0;
+                        }
+                        else
+                        {
+                            return SCHEMA_MISMATCH;
+                        }
+                    }
+                        
                     DLMSVariant Value;
                     GetNextRetVal = InternalSimpleGet(CURRENT_GET_STATE.m_SchemaEntry, &Value);
                     if (VALUE_RETRIEVED == GetNextRetVal)
@@ -386,7 +404,8 @@ namespace EPRI
         {
             return INVALID_CONDITION;
         }
-        if (END_SCHEMA_T != m_pCurrentSchema->m_SchemaType)
+        
+        if (!COSEM_IS_SCHEMA_END(m_pCurrentSchema))
         {
             ++m_pCurrentSchema;
             return VALUE_RETRIEVED;
@@ -555,7 +574,7 @@ namespace EPRI
         DLMSVector *   m_pVector;
         SchemaEntryPtr m_SchemaEntry;
     };
-    
+
     bool COSEMType::InternalSimpleAppend(SchemaEntryPtr SchemaEntry, const DLMSVariant& Value)
     {
         m_Data.Append(uint8_t(COSEM_SCHEMA_DATA_TYPE(SchemaEntry)));
@@ -569,6 +588,35 @@ namespace EPRI
             return false;
         }
         return true;
+    }
+    
+    ssize_t COSEMType::StructureElementCount(SchemaEntryPtr pSchemaEntry) const
+    {
+        ssize_t        ElementCount = 0;
+        size_t         Level = 0;
+        SchemaEntryPtr pEntry = ++pSchemaEntry;
+            
+        while (!COSEM_IS_SCHEMA_END(pEntry))
+        {
+            if (COSEM_IS_BEGINNING(pEntry))
+            {
+                ++Level;
+            }
+            else if (COSEM_IS_ENDING(pEntry))
+            {
+                --Level;
+            }
+            if (0 == Level)
+            {
+                if (COSEM_IS_STRUCTURE_END(pEntry))
+                {
+                    return ElementCount;
+                }
+                ++ElementCount;
+            }
+            ++pEntry;
+        }
+        return -1;
     }
     
     bool COSEMType::InternalAppend(const DLMSValue& Value)
@@ -633,22 +681,36 @@ namespace EPRI
                 {
                     if (IsSequence(Value))
                     {
-                        size_t AppendCount = 0;
                         const DLMSSequence& Sequence = DLMSValueGetSequence(Value);
-                        for (DLMSSequence::const_iterator it = Sequence.begin();
-                             it != Sequence.end(); ++it)
+                        //
+                        // PRECONDITIONS
+                        //
+                        if (-1 == CURRENT_APPEND_STATE.m_SequenceIndex)
                         {
-                            if (InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, *it))
+                            if (Sequence.size() == StructureElementCount(CURRENT_APPEND_STATE.m_SchemaEntry))
                             {
-                                ++AppendCount;
+                                m_Data.Append<uint8_t>(COSEMDataType::STRUCTURE);
+                                ASNType::AppendLength(Sequence.size(), &m_Data);
+                                CURRENT_APPEND_STATE.m_SequenceIndex = 0;
+                            }
+                            else
+                            {
+                                return false;
                             }
                         }
-                        return (AppendCount == Sequence.size());
+                        if (false == InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, Sequence[CURRENT_APPEND_STATE.m_SequenceIndex++]))
+                        {
+                            return false;
+                        }
+                        if (CURRENT_APPEND_STATE.m_SequenceIndex == Sequence.size())
+                        {
+                            return true;
+                        }
+                        break;
                     }
-                    else
-                    {
-                        return InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, Value.get<DLMSVariant>());
-                    }
+                    //
+                    // ONLY Sequence Allowed for STRUCTURE
+                    //
                 }
                 return false;
                 

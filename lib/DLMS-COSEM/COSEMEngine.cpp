@@ -6,8 +6,16 @@
 
 namespace EPRI
 {
+
 #define MAKE_TOKEN(SERVICE, INVOKEID)\
     ((SERVICE << 8) | INVOKEID)
+    //
+    // COSEMEngine
+    //
+    bool COSEMEngine::IsTransportConnected() const
+    {
+        return m_pTransport->IsConnected();
+    }
     //
     // COSEMClientEngine
     //
@@ -40,10 +48,11 @@ namespace EPRI
     //
     // COSEM.Open Service
     //
-    bool COSEMClientEngine::Open(COSEMAddressType DestinationAddress, const COSEMSecurityOptions& Security)
+    bool COSEMClientEngine::Open(COSEMAddressType DestinationAddress, const COSEMSecurityOptions& Security,
+                                 const xDLMS::InitiateRequest& xDLMS)
     {
         return m_Client.OpenRequest(APPOpenRequestOrIndication(m_Options.m_Address, DestinationAddress, 
-                                                               Security.Level, Security.Password));
+                                                               xDLMS, Security));
     }
     
     bool COSEMClientEngine::OnOpenConfirmation(COSEMAddressType /*ServerAddress*/)

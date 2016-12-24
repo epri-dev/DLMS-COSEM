@@ -45,9 +45,9 @@ namespace EPRI
         InvokeIdAndPriorityType            invoke_id_and_priority;
         Action_Response_With_Optional_Data single_response;
         //
-        virtual bool Parse(COSEMAddressType SourceAddress,
-            COSEMAddressType DestinationAddress,
-            DLMSVector * pData);
+        virtual bool Parse(DLMSVector * pData,
+            COSEMAddressType SourceAddress,
+            COSEMAddressType DestinationAddress);
         virtual std::vector<uint8_t> GetBytes();
         
     };

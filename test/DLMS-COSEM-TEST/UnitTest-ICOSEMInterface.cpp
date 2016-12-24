@@ -39,7 +39,8 @@ namespace EPRI
         }
         
     protected:
-        virtual APDUConstants::Data_Access_Result InternalGet(ICOSEMAttribute * pAttribute, 
+        virtual APDUConstants::Data_Access_Result InternalGet(const AssociationContext& Context,
+            ICOSEMAttribute * pAttribute, 
             const Cosem_Attribute_Descriptor& Descriptor, 
             SelectiveAccess * pSelectiveAccess) final
         {
@@ -77,8 +78,5 @@ namespace EPRI
     TEST_F(SimpleObjectFixture, Action)
     {
     }
-
-
-
 
 }

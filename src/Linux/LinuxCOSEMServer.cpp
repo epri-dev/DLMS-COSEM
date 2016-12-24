@@ -15,7 +15,8 @@ namespace EPRI
         }
     }
 
-    APDUConstants::Data_Access_Result LinuxData::InternalGet(ICOSEMAttribute * pAttribute, 
+    APDUConstants::Data_Access_Result LinuxData::InternalGet(const AssociationContext& Context,
+        ICOSEMAttribute * pAttribute, 
         const Cosem_Attribute_Descriptor& Descriptor, 
         SelectiveAccess * pSelectiveAccess)
     {
@@ -24,7 +25,8 @@ namespace EPRI
         return APDUConstants::Data_Access_Result::success;
     }
     
-    APDUConstants::Data_Access_Result LinuxData::InternalSet(ICOSEMAttribute * pAttribute, 
+    APDUConstants::Data_Access_Result LinuxData::InternalSet(const AssociationContext& Context,
+        ICOSEMAttribute * pAttribute, 
         const Cosem_Attribute_Descriptor& Descriptor, 
         const DLMSVector& Data,
         SelectiveAccess * pSelectiveAccess)
@@ -34,7 +36,7 @@ namespace EPRI
         {
             DLMSValue Value;
             
-            RetVal = ICOSEMObject::InternalSet(pAttribute, Descriptor, Data, pSelectiveAccess);
+            RetVal = ICOSEMObject::InternalSet(Context, pAttribute, Descriptor, Data, pSelectiveAccess);
             if (APDUConstants::Data_Access_Result::success == RetVal &&
                 pAttribute->GetNextValue(&Value) == COSEMType::GetNextResult::VALUE_RETRIEVED)
             {
@@ -61,7 +63,8 @@ namespace EPRI
     {
     }
 
-    APDUConstants::Data_Access_Result LinuxClock::InternalGet(ICOSEMAttribute * pAttribute, 
+    APDUConstants::Data_Access_Result LinuxClock::InternalGet(const AssociationContext& Context,
+        ICOSEMAttribute * pAttribute, 
         const Cosem_Attribute_Descriptor& Descriptor, 
         SelectiveAccess * pSelectiveAccess)
     {
@@ -84,7 +87,8 @@ namespace EPRI
         return APDUConstants::Data_Access_Result::object_unavailable;
     }
 
-    APDUConstants::Action_Result LinuxClock::InternalAction(ICOSEMMethod * pMethod, 
+    APDUConstants::Action_Result LinuxClock::InternalAction(const AssociationContext& Context,
+        ICOSEMMethod * pMethod, 
         const Cosem_Method_Descriptor& Descriptor, 
         const DLMSOptional<DLMSVector>& Parameters,
         DLMSVector * pReturnValue /*= nullptr*/)

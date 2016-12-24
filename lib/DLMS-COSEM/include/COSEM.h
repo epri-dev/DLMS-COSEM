@@ -10,6 +10,7 @@
 #include "StateMachine.h"
 #include "APDU/APDUDefs.h"
 #include "LogicalDevice.h"
+#include "COSEMSecurity.h"
 
 namespace EPRI
 {
@@ -79,18 +80,6 @@ namespace EPRI
     class COSEM : public Callback<bool, uint16_t>, public StateMachine
     {
     public:
-        static const ASNObjectIdentifier ContextLNRNoCipher;
-        static const ASNObjectIdentifier ContextSNRNoCipher;
-        static const ASNObjectIdentifier MechanismNameLowLevelSecurity;
-        static const ASNObjectIdentifier MechanismNameHighLevelSecurity;
-        
-        enum SecurityLevel : uint8_t
-        {
-            SECURITY_NONE       = 0,
-            SECURITY_LOW_LEVEL  = 1,
-            SECURITY_HIGH_LEVEL = 2
-        };
-        
         typedef int TRANSPORT_HANDLE;
         
         COSEM() = delete;
@@ -160,22 +149,38 @@ namespace EPRI
     {
         static const uint16_t ID = 0x2001;
         using AssociationResultType = AARE::AssociationResult;
+        using DiagnosticSourceType = AARE::AssociateDiagnosticChoice;
+        using BaseDiagnosticType = int8_t;
+        using UserDiagnosticType = AARE::AssociateDiagnosticUser;
+        using ProviderDiagnosticType = AARE::AssociateDiagnosticProvider;
+        using ApplicationContextType = DLMSOptional<ASNObjectIdentifier>;
         
         APPOpenConfirmOrResponse(COSEMAddressType SourceAddress,
                                  COSEMAddressType DestinationAddress,
+                                 const xDLMS::InitiateResponse& xDLMS,
+                                 const COSEMSecurityOptions& Security,
                                  AssociationResultType Result,
-                                 bool LogicalNameReferencing = true, 
-                                 bool WithCiphering = false) : 
+                                 DiagnosticSourceType DiagnosticSource,
+                                 BaseDiagnosticType Diagnostic)
+            : 
             APPBaseCallbackParameter(SourceAddress, DestinationAddress),
-            m_Result(Result),
-            m_LogicalNameReferencing(LogicalNameReferencing), m_WithCiphering(WithCiphering)
+            m_Result(Result), m_SecurityOptions(Security),
+            m_DiagnosticSource(DiagnosticSource), m_Diagnostic(Diagnostic),
+            m_xDLMS(xDLMS)
         {
         }
-        // Application Context Name Building
+        APPOpenConfirmOrResponse(AARE * pAARE);
+        bool ToAPDU(AARE * pAARE);
+
+        AssociationResultType   m_Result;
+        DiagnosticSourceType    m_DiagnosticSource;
+        BaseDiagnosticType      m_Diagnostic;
+        xDLMS::InitiateResponse m_xDLMS;
         //
-        bool                  m_LogicalNameReferencing;
-        bool                  m_WithCiphering;
-        AssociationResultType m_Result;
+        // Mechanism and Security
+        //
+        COSEMSecurityOptions m_SecurityOptions;
+        
     };
     
     struct APPOpenRequestOrIndication : public APPBaseCallbackParameter
@@ -183,25 +188,23 @@ namespace EPRI
         static const uint16_t ID = 0x2002;
         APPOpenRequestOrIndication(COSEMAddressType SourceAddress,
                                    COSEMAddressType DestinationAddress,
-                                   COSEM::SecurityLevel Security = COSEM::SECURITY_NONE, 
-                                   std::string Password = "", 
-                                   bool LogicalNameReferencing = true, bool WithCiphering = false) : 
+                                   const xDLMS::InitiateRequest& xDLMS,
+                                   const COSEMSecurityOptions& Security) : 
             APPBaseCallbackParameter(SourceAddress, DestinationAddress),
-            m_LogicalNameReferencing(LogicalNameReferencing), 
-            m_WithCiphering(WithCiphering),
-            m_SecurityLevel(Security),
-            m_Password(Password)
+            m_xDLMS(xDLMS),
+            m_SecurityOptions(Security)
         {
         }
+        APPOpenRequestOrIndication(AARQ * pAARQ);
+        bool ToAPDU(AARQ * pAARQ);
+        //
         // Application Context Name Building
         //
-        bool                 m_LogicalNameReferencing;
-        bool                 m_WithCiphering;
+        xDLMS::InitiateRequest  m_xDLMS;
         //
         // Mechanism and Security
         //
-        COSEM::SecurityLevel m_SecurityLevel;
-        std::string          m_Password;
+        COSEMSecurityOptions    m_SecurityOptions;
     };
 
     using OpenRequestEventData = COSEMEventData<APPOpenRequestOrIndication>;
@@ -547,27 +550,27 @@ namespace EPRI
         //
         // COSEM-OPEN Service
         //
-        bool OnOpenIndication(const APPOpenRequestOrIndication& Parameters);
+        virtual bool OnOpenIndication(const APPOpenRequestOrIndication& Parameters);
         //
         // COSEM-GET Service
         //
-        bool OnGetIndication(const APPGetRequestOrIndication& Parameters);
+        virtual bool OnGetIndication(const APPGetRequestOrIndication& Parameters);
         //
         // COSEM-SET Service
         //
-        bool OnSetIndication(const APPSetRequestOrIndication& Parameters);
+        virtual bool OnSetIndication(const APPSetRequestOrIndication& Parameters);
         //
         // COSEM-ACTION Service
         //
-        bool OnActionIndication(const APPActionRequestOrIndication& Parameters);
+        virtual bool OnActionIndication(const APPActionRequestOrIndication& Parameters);
         //
         // COSEM-RELEASE Service
         //
-        bool OnReleaseIndication(const APPReleaseRequestOrIndication& Parameters);
+        virtual bool OnReleaseIndication(const APPReleaseRequestOrIndication& Parameters);
         //
         // COSEM-ABORT Service
         //
-        bool OnAbortIndication(const APPAbortIndication& Parameters);
+        virtual bool OnAbortIndication(const APPAbortIndication& Parameters);
         //
         // State Machine
         //

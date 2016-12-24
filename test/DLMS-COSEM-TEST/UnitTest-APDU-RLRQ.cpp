@@ -31,7 +31,7 @@ TEST(RLRQ, Parse)
     RLRQ        r1;
     DLMSVector  Data(FINAL);
     
-    ASSERT_TRUE(r1.Parse(1, 1, &Data)); 
+    ASSERT_TRUE(r1.Parse(&Data,1, 1)); 
 
     DLMSValue   Value1;
     ASSERT_EQ(ASNType::GetNextResult::VALUE_EMPTY, r1.reason.GetNextValue(&Value1));

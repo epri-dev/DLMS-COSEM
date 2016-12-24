@@ -24,7 +24,7 @@ TEST(ACTION_Response, GeneralUsage)
     Action_Response_Normal Response;
     DLMSVector             Data(FINAL);
     
-    ASSERT_TRUE(Response.Parse(1, 1, &Data));
+    ASSERT_TRUE(Response.Parse(&Data, 1, 1));
     ASSERT_EQ(0x81, Response.invoke_id_and_priority);
     ASSERT_EQ(Response.single_response.result, APDUConstants::Action_Result::success);
     ASSERT_FALSE((bool) Response.single_response.return_parameters);

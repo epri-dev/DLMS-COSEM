@@ -99,6 +99,20 @@ namespace EPRI
 #define COSEM_IS_STRUCTURE_END(SCH)\
         (((EPRI::COSEMInternalDataType::END_SPECIAL_T | EPRI::COSEMDataType::STRUCTURE) & \
          (SCH)->m_SchemaType) == (EPRI::COSEMInternalDataType::END_SPECIAL_T | EPRI::COSEMDataType::STRUCTURE))
+
+#define COSEM_IS_BEGINNING(SCH)\
+        (\
+            COSEM_SCHEMA_INTERNAL_DATA_TYPE(SCH) == EPRI::COSEMInternalDataType::BEGIN_SPECIAL_T ||\
+            COSEM_SCHEMA_INTERNAL_DATA_TYPE(SCH) == EPRI::COSEMInternalDataType::BEGIN_SPECIAL_ENTRY_T ||\
+            COSEM_SCHEMA_INTERNAL_DATA_TYPE(SCH) == EPRI::COSEMInternalDataType::BEGIN_CHOICE_T\
+        )
+            
+#define COSEM_IS_ENDING(SCH)\
+        (\
+            COSEM_SCHEMA_INTERNAL_DATA_TYPE(SCH) == EPRI::COSEMInternalDataType::END_SPECIAL_T ||\
+            COSEM_SCHEMA_INTERNAL_DATA_TYPE(SCH) == EPRI::COSEMInternalDataType::END_SPECIAL_ENTRY_T ||\
+            COSEM_SCHEMA_INTERNAL_DATA_TYPE(SCH) == EPRI::COSEMInternalDataType::END_CHOICE_T\
+        )
         
 #define COSEM_SCHEMA_OPTIONS(SCH)\
         COSEMSchemaOptions((SCH)->m_SchemaType & 0x0F000000)
@@ -262,6 +276,7 @@ namespace EPRI
         bool InternalAppend(const DLMSVector& Value);
 
         GetNextResult InternalSimpleGet(SchemaEntryPtr SchemaEntry, DLMSVariant * pValue);
+        ssize_t StructureElementCount(SchemaEntryPtr pSchemaEntry) const;
      
         const COSEMDataType      INVALID_CHOICE = COSEMDataType::DONT_CARE;
         enum ParseStates
@@ -284,6 +299,7 @@ namespace EPRI
             SchemaEntryPtr       m_SchemaEntry;
             ParseStates          m_State;
             COSEMDataType        m_Choice;
+            ssize_t              m_SequenceIndex = -1;
         };
         std::stack<ParseState>   m_GetStates;
         std::stack<ParseState>   m_AppendStates;

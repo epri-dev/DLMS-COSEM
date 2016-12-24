@@ -161,6 +161,32 @@ public:
             }
            
         }
+        else if (CLSID_IAssociationLN == Response.Descriptor.class_id)
+        {
+            IAssociationLN CurrentAssociation;
+            DLMSValue      Value;
+            
+            switch (Response.Descriptor.attribute_id)
+            {
+            case IAssociationLN::ATTR_PARTNERS_ID:
+                {
+                    CurrentAssociation.associated_partners_id = Response.Result.get<DLMSVector>();
+                    if (COSEMType::VALUE_RETRIEVED == CurrentAssociation.associated_partners_id.GetNextValue(&Value) &&
+                        IsSequence(Value))
+                    {
+                        DLMSSequence& Element = DLMSValueGetSequence(Value);
+                        Base()->GetDebug()->TRACE("ClientSAP %d; ServerSAP %d\n", 
+                            DLMSValueGet<INTEGER_CType>(Element[0]),
+                            DLMSValueGet<LONG_UNSIGNED_CType>(Element[1]));
+                    }
+                }
+                break;
+            
+            default:
+                Base()->GetDebug()->TRACE("Attribute %d not supported for parsing.", Response.Descriptor.attribute_id);
+                break;
+            }
+        }
         return true;
     }
     
@@ -367,21 +393,45 @@ protected:
         }            
         else if (RetVal == "1")
         {
-            if (m_pSocket && m_pSocket->IsConnected()) 
+            if (m_pSocket && m_pSocket->IsConnected() & m_pClientEngine->IsTransportConnected()) 
             {
+                bool                 Send = true;
                 int                  DestinationAddress = GetNumericInput("Server Address (Default: 1)", 1);
-                COSEM::SecurityLevel Security = (COSEM::SecurityLevel)
-                    GetNumericInput("Security Level [0 - None, 1 - Low, 2 - High] (Default: 0)", COSEM::SECURITY_NONE);
+                COSEMSecurityOptions::SecurityLevel Security = (COSEMSecurityOptions::SecurityLevel)
+                    GetNumericInput("Security Level [0 - None, 1 - Low, 2 - High] (Default: 0)", COSEMSecurityOptions::SECURITY_NONE);
                 std::string          Password;
-                if (COSEM::SECURITY_LOW_LEVEL == Security)
+                COSEMSecurityOptions SecurityOptions;
+                //
+                // Only supports LN at this time
+                //
+                SecurityOptions.ApplicationContextName = SecurityOptions.ContextLNRNoCipher;
+                switch (Security)
                 {
-                    Password = GetStringInput("Password", "");
+                case COSEMSecurityOptions::SECURITY_NONE: 
+                    break;
+                    
+                case COSEMSecurityOptions::SECURITY_LOW_LEVEL:
+                    SecurityOptions.MechanismName = SecurityOptions.MechanismNameLowLevelSecurity;
+                    SecurityOptions.AuthenticationValue = GetStringInput("Password", "");
+                    break;
+                    
+                case COSEMSecurityOptions::SECURITY_HIGH_LEVEL:
+                default:
+                    Send = false;
+                    PrintLine("Security Level is Not Supported at This Time");
+                    break;
                 }
-                m_pClientEngine->Open(DestinationAddress, { Security, Password });
+                if (Send)
+                {
+                    size_t APDUSize = GetNumericInput("APDU Size (Default: 640)", 640);
+                    m_pClientEngine->Open(DestinationAddress,
+                                          SecurityOptions, 
+                                          xDLMS::InitiateRequest(APDUSize));
+                }
             }
             else
             {
-                PrintLine("TCP Connection Not Established Yet!\n");
+                PrintLine("Transport Connection Not Established Yet!\n");
             }
         }
         else if (RetVal == "2")

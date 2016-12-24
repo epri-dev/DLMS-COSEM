@@ -136,7 +136,8 @@ namespace EPRI
         return nullptr;        
     }
     
-    APDUConstants::Data_Access_Result ICOSEMObject::Get(DLMSVector * pData,
+    APDUConstants::Data_Access_Result ICOSEMObject::Get(const AssociationContext& Context, 
+        DLMSVector * pData,
         const Cosem_Attribute_Descriptor& Descriptor, 
         SelectiveAccess * pSelectiveAccess /*= nullptr*/)
     {
@@ -166,7 +167,7 @@ namespace EPRI
                 break;
                 
             default:
-                RetVal = InternalGet(pAttribute, Descriptor, pSelectiveAccess);
+                RetVal = InternalGet(Context, pAttribute, Descriptor, pSelectiveAccess);
                 break;
             }
             if (APDUConstants::Data_Access_Result::success == RetVal)
@@ -177,7 +178,8 @@ namespace EPRI
         return RetVal;
     }
     
-    APDUConstants::Data_Access_Result ICOSEMObject::Set(const Cosem_Attribute_Descriptor& Descriptor, 
+    APDUConstants::Data_Access_Result ICOSEMObject::Set(const AssociationContext& Context,
+        const Cosem_Attribute_Descriptor& Descriptor, 
         const DLMSVector& Data,
         SelectiveAccess * pSelectiveAccess /*= nullptr*/)
     {
@@ -203,14 +205,15 @@ namespace EPRI
                 break;
                 
             default:
-                RetVal = InternalSet(pAttribute, Descriptor, Data, pSelectiveAccess);
+                RetVal = InternalSet(Context, pAttribute, Descriptor, Data, pSelectiveAccess);
                 break;
             }
         }
         return RetVal;
     }    
 
-    APDUConstants::Action_Result ICOSEMObject::Action(const Cosem_Method_Descriptor& Descriptor, 
+    APDUConstants::Action_Result ICOSEMObject::Action(const AssociationContext& Context,
+        const Cosem_Method_Descriptor& Descriptor, 
         const DLMSOptional<DLMSVector>& Parameters,
         DLMSVector * pReturnValue /* = nullptr*/)
     {
@@ -219,12 +222,13 @@ namespace EPRI
         if (pMethod)
         {
             pMethod->Clear();
-            RetVal = InternalAction(pMethod, Descriptor, Parameters, pReturnValue);
+            RetVal = InternalAction(Context, pMethod, Descriptor, Parameters, pReturnValue);
         }
         return RetVal;
     }   
     
-    APDUConstants::Data_Access_Result ICOSEMObject::InternalSet(ICOSEMAttribute * pAttribute, 
+    APDUConstants::Data_Access_Result ICOSEMObject::InternalSet(const AssociationContext& Context,
+        ICOSEMAttribute * pAttribute, 
         const Cosem_Attribute_Descriptor& /*Descriptor*/, 
         const DLMSVector& Data,
         SelectiveAccess * /*pSelectiveAccess*/)
@@ -239,7 +243,8 @@ namespace EPRI
         }
     }
 
-    APDUConstants::Action_Result ICOSEMObject::InternalAction(ICOSEMMethod * pMethod, 
+    APDUConstants::Action_Result ICOSEMObject::InternalAction(const AssociationContext& Context,
+        ICOSEMMethod * pMethod, 
         const Cosem_Method_Descriptor& Descriptor, 
         const DLMSOptional<DLMSVector>& Parameters,
         DLMSVector * pReturnValue /* = nullptr*/)

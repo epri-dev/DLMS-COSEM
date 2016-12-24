@@ -61,7 +61,7 @@ namespace EPRI
             break;
         }
         if (pRetVal && 
-            !pRetVal->Parse(SourceAddress, DestinationAddress, pData))
+            !pRetVal->Parse(pData, SourceAddress, DestinationAddress))
         {
             pRetVal.release();
         }

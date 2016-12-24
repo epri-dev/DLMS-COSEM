@@ -21,6 +21,7 @@ STM32BaseLibrary    g_BL;
 void RunServer()
 {
     ISerialSocket * pSocket;
+    
     //
     // TODO - HDLCServerLLC ServerAddress should be able to handle multiple SAPs
     //

@@ -24,7 +24,7 @@ namespace EPRI
     
     template <typename T>
         using DLMSOptional = std::experimental::optional<T>;
-    #define DLMSOptionalNone std::experimental::nullopt;
+    #define DLMSOptionalNone std::experimental::nullopt
     
     using DLMSVariantInitList = std::initializer_list<uint32_t>;
     using DLMSBitSet = std::bitset<64>;
@@ -266,6 +266,7 @@ namespace EPRI
         uint8_t& operator[](size_t Index);
         const uint8_t& operator[](size_t Index) const;
         bool operator==(const DLMSVector& rhs) const;
+        bool operator!=(const DLMSVector& rhs) const;
         
     private:
         using RawData = std::vector<uint8_t>;
@@ -284,11 +285,16 @@ namespace EPRI
             return V.get<DLMSVariant>().get<T>();
         }
     
+    inline bool IsVariant(const DLMSValue& Value)
+    {
+        return Value.which() == 0;
+    }
+
     inline bool IsSequence(const DLMSValue& Value)
     {
         return Value.which() == 1;
     }
-    
+
     inline bool IsBlank(const DLMSVariant& Value)
     {
         return Value.which() == VAR_BLANK;
@@ -297,6 +303,21 @@ namespace EPRI
     inline bool IsBlank(const DLMSValue& Value)
     {
         return !IsSequence(Value) && IsBlank(Value.get<DLMSVariant>());
+    }
+    
+    inline bool IsInitialized(const DLMSVariant& Value)
+    {
+        return Value.which() != VAR_BLANK;
+    }
+    
+    inline bool IsInitialized(const DLMSValue& Value)
+    {
+        return IsSequence(Value) || !IsBlank(Value.get<DLMSVariant>());
+    }
+    
+    inline DLMSVariantIndex VariantType(const DLMSVariant& Value)
+    {
+        return DLMSVariantIndex(Value.which());
     }
     
     template <typename T>
@@ -316,10 +337,25 @@ namespace EPRI
     {
         return V.get<DLMSSequence>();
     }
-    
+
+    inline size_t DLMSValueGetSequenceSize(DLMSValue& V)
+    {
+        return V.get<DLMSSequence>().size();
+    }
+
     inline const DLMSSequence& DLMSValueGetSequence(const DLMSValue& V)
     {
         return V.get<DLMSSequence>();
     }
+
+    inline DLMSVariant& DLMSValueGetVariant(DLMSValue& V)
+    {
+        return V.get<DLMSVariant>();
+    }
     
+    inline const DLMSVariant& DLMSValueGetVariant(const DLMSValue& V)
+    {
+        return V.get<DLMSVariant>();
+    }
+
 }

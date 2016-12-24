@@ -164,49 +164,28 @@ namespace EPRI
         //
         // Transmit OPEN Request
         //
-        OpenRequestEventData * pEventData;
-        if ((pEventData = dynamic_cast<OpenRequestEventData *>(pData)) != nullptr)
+        OpenRequestEventData * pEventData = dynamic_cast<OpenRequestEventData *>(pData);
+        if (pEventData)
         {
-            AARQ                        Request;
-            APPOpenRequestOrIndication& Parameters = pEventData->Data;
-            if (Parameters.m_LogicalNameReferencing && !Parameters.m_WithCiphering)
+            Transport::DataRequestParameter TransportParam;
+            AARQ                            Request;
+            APPOpenRequestOrIndication&     Parameters = pEventData->Data;
+            if (Parameters.ToAPDU(&Request))
             {
-                Request.application_context_name.Append(ContextLNRNoCipher);
-            }
-            else if (!Parameters.m_LogicalNameReferencing && !Parameters.m_WithCiphering)
-            {
-                Request.application_context_name.Append(ContextSNRNoCipher);
-            }
-            
-            Request.sender_acse_requirements.Append(ASNBitString(1, 1));
-            
-            if (COSEM::SECURITY_LOW_LEVEL == Parameters.m_SecurityLevel)
-            {
-                Request.mechanism_name.Append(MechanismNameLowLevelSecurity);
-                Request.calling_authentication_value.SelectChoice(APDUConstants::AuthenticationValueChoice::charstring);
-                Request.calling_authentication_value.Append(Parameters.m_Password);
-            }
-            else if (COSEM::SECURITY_HIGH_LEVEL == Parameters.m_SecurityLevel)
-            {
-                Request.mechanism_name.Append(MechanismNameHighLevelSecurity);
-                //
-                // TODO - HLS
-                //
-            }
-            //
-            // TODO - xDLMS
-            //
-            Request.user_information.Append(DLMSVector({ 0x01, 0x00, 0x00, 0x00, 0x06, 0x5F, 
-                                                         0x1F, 0x04, 0x00, 0x00, 0x7E, 0x1F, 0x00, 0x00 }));
-            Transport * pTransport = GetTransport();
-            if (nullptr != pTransport)
-            {
-                pTransport->DataRequest(Transport::DataRequestParameter(GetAddress(),
-                                                                        Parameters.m_DestinationAddress,
-                                                                        Request.GetBytes()));
+                TransportParam.SourceAddress = GetAddress();
+                TransportParam.DestinationAddress = Request.GetDestinationAddress();
+                TransportParam.Data = Request.GetBytes();
+
+                Transport * pTransport = GetTransport();
+                if (pTransport)
+                {
+                    pTransport->DataRequest(TransportParam);
+                    //
+                    // TODO - Retry
+                    //
+                }
             }
         }
-        
     }
     
     void COSEMClient::ST_Association_Release_Pending_Handler(EventData * pData)
@@ -439,9 +418,7 @@ namespace EPRI
                 TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
                 TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_IGNORED)
             END_TRANSITION_MAP(RetVal,
-                new OpenResponseEventData(APPOpenConfirmOrResponse(pAARE->GetSourceAddress(),
-                        pAARE->GetDestinationAddress(),
-                        (APPOpenConfirmOrResponse::AssociationResultType) DLMSValueGet<int8_t>(AssociationResult))))
+                new OpenResponseEventData(APPOpenConfirmOrResponse(pAARE)))
         }
         else
         {

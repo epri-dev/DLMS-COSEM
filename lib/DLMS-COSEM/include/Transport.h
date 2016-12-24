@@ -45,6 +45,11 @@ namespace EPRI
         {
         }
         
+        virtual bool IsConnected() const
+        {
+            return m_Connected;
+        }
+        
         virtual ProcessResultType Process() = 0;
 
         void RegisterTransportEventHandler(COSEMAddressType Address, TransportCallback::CallbackFunction Callback)
@@ -65,6 +70,8 @@ namespace EPRI
         
         bool FireTransportEvent(TransportEvent Event)
         {
+            m_Connected = (TRANSPORT_CONNECTED == Event);
+            
             std::for_each(m_Callbacks.begin(),
                 m_Callbacks.end(), 
                 [&Event](TransportCallbackType::value_type& Value)
@@ -105,6 +112,7 @@ namespace EPRI
         };
         typedef std::map<COSEMAddressType, TransportCallbacks> TransportCallbackType;
         TransportCallbackType                                  m_Callbacks;
+        bool                                                   m_Connected = false;
     };
     
 }

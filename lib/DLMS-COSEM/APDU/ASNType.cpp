@@ -92,6 +92,9 @@ namespace EPRI
         // Length   
         if (!(Options & ASN::CONSTRUCTED))
         {
+            //
+            // TODO - Investigate
+            //
             if (ASN::OBJECT_IDENTIFIER == m_pSchema->m_SchemaType)
             {
                 Length -= 2;
@@ -710,9 +713,19 @@ namespace EPRI
         return rhs == m_Data.GetBytes();
     }
     
+    bool ASNType::operator!=(const std::vector<uint8_t>& rhs) const
+    {
+        return rhs != m_Data.GetBytes();
+    }
+    
     bool ASNType::operator==(const ASNType& rhs) const
     {
         return rhs.m_Data == m_Data;
+    }
+    
+    bool ASNType::operator!=(const ASNType& rhs) const
+    {
+        return rhs.m_Data != m_Data;
     }
     //
     // Protected Methods
@@ -827,6 +840,15 @@ namespace EPRI
                 return true;
             }
             return false;
+        case ASN::BOOLEAN:
+            {
+                if (!ASN_IS_IMPLICIT(SchemaEntry))
+                {
+                    m_Data.Append<uint8_t>(ASN::BOOLEAN);
+                }
+                m_Data.Append(Value);
+            }
+            return true;
         case ASN::INTEGER:
             {
                 ssize_t LengthIndex = -1;
@@ -849,7 +871,7 @@ namespace EPRI
             {
                 if (Value.which() == VAR_BITSET)
                 {
-                    bool   NeedLength = ASN_IS_IMPLICIT(SchemaEntry);
+                    bool   NeedLength = !ASN_IS_IMPLICIT(SchemaEntry);
                     size_t LengthIndex = 0;
                     if (NeedLength)
                     {
@@ -1026,25 +1048,29 @@ namespace EPRI
                     if (IsSequence(Value))
                     {
                         const DLMSSequence& Sequence = DLMSValueGetSequence(Value);
-                        for (DLMSSequence::const_iterator it = Sequence.begin();
-                             it != Sequence.end(); ++it)
+                        bool Constructed = ASN_IS_CONSTRUCTED(CURRENT_APPEND_STATE.m_SchemaEntry);
+                        bool Appended = false;
+                        //
+                        // TODO - Handle real length...
+                        //
+                        ssize_t LengthIndex = -1;
+                        if (Constructed)
                         {
-                            bool Constructed = ASN_IS_CONSTRUCTED(CURRENT_APPEND_STATE.m_SchemaEntry);
-                            bool Appended = false;
-                            //
-                            // TODO - Handle real length...
-                            //
-                            ssize_t LengthIndex = -1;
-                            if (Constructed)
-                            {
-                                LengthIndex = m_Data.Append<uint8_t>(0x00);
-                            }
-                            Appended = InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, *it);
-                            if (Constructed && Appended)
-                            {
-                                m_Data[LengthIndex] = m_Data.Size() - LengthIndex - sizeof(uint8_t);
-                            }
+                            LengthIndex = m_Data.Append<uint8_t>(0x00);
                         }
+                        if (false == (Appended = InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, Sequence[CURRENT_APPEND_STATE.m_SequenceIndex++])))
+                        {
+                            return false;
+                        }
+                        if (Constructed && Appended)
+                        {
+                            m_Data[LengthIndex] = m_Data.Size() - LengthIndex - sizeof(uint8_t);
+                        }
+                        if (CURRENT_APPEND_STATE.m_SequenceIndex == Sequence.size())
+                        {
+                            return true;
+                        }
+                        break;
                     }
                     else
                     {
@@ -1086,6 +1112,11 @@ namespace EPRI
     //
     // ASNObjectIdentifier
     //
+    ASNObjectIdentifier::ASNObjectIdentifier(ASN::ComponentOptions Options /* = ASN::NO_OPTIONS */) :
+        ASNType(ASN::OBJECT_IDENTIFIER | Options)
+    {
+    }
+    
     ASNObjectIdentifier::ASNObjectIdentifier(ArcList List, ASN::ComponentOptions Options /* = ASN::NO_OPTIONS */, OIDType OT /* = ABSOLUTE */)
         : ASNType(ASN::OBJECT_IDENTIFIER | Options)
     {
@@ -1161,6 +1192,12 @@ namespace EPRI
     ASNObjectIdentifier::operator DLMSVariant() const
     {
         return m_Data;
+    }
+
+    ASNObjectIdentifier& ASNObjectIdentifier::operator =(const ASNObjectIdentifier& rhs)
+    {
+        m_Data = rhs.m_Data;
+        return *this;
     }
     
     bool ASNObjectIdentifier::Peek(ASN::SchemaEntryPtr SchemaEntry, const ASNType& Value, DLMSVariant * pVariant, size_t * pBytes /* = nullptr*/)
@@ -1257,7 +1294,7 @@ namespace EPRI
         {
             ++ByteOffset;
         }
-        m_Data.Append<uint8_t>(8 - (BitsExpected % 8));
+        m_Data.Append<uint8_t>((BitsExpected % 8) ? (8 - (BitsExpected % 8)) : 0);
         for (uint8_t ByteIndex = 0; ByteIndex < ByteOffset; ++ByteIndex)
         {
             uint8_t CurrentByte = 0;
@@ -1293,17 +1330,16 @@ namespace EPRI
         else
         {
             Length = (ASN_SCHEMA_DATA_TYPE_SIZE(SchemaEntry) / 8);
-            if (0 == Length) 
+            if (ASN_SCHEMA_DATA_TYPE_SIZE(SchemaEntry) % 8) 
             {
                 ++Length;
             }
-            ++Length;
         }
 
-        // Bit Length & Byte Length
+        // Bit Length & Byte Length & Remaining Bits Byte
         if (pBytes != nullptr)
         {
-            *pBytes = Offset + Length;
+            *pBytes = Offset + Length + sizeof(uint8_t);
         }
 
         // Bits Remaining
@@ -1312,12 +1348,12 @@ namespace EPRI
         {
             return false;
         }
-        Length = (Length - sizeof(uint8_t)) * 8 - Byte;
+        Length = Length * 8 - Byte;
             
         DLMSBitSet Bitset;
         for (size_t BitIndex = 0; BitIndex < Length; ++BitIndex)
         {
-            Bitset[BitIndex] = Value.m_Data[Offset + (BitIndex / 8)] & 
+            Bitset[BitIndex] = Value.m_Data.PeekByte(Offset + (BitIndex / 8)) & 
                 (1 << (8 - (BitIndex % 8) - 1));
         }
         *pVariant = Bitset;

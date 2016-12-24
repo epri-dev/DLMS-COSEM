@@ -37,7 +37,7 @@ TEST(RLRE, Parse)
                                         DLMSVector({ 0x08, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00,
                                                      0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07 }));
     
-    ASSERT_TRUE(r1.Parse(1, 1, &Data));
+    ASSERT_TRUE(r1.Parse(&Data, 1, 1));
 
     DLMSValue   Value1;
     ASSERT_EQ(ASNType::GetNextResult::VALUE_RETRIEVED, r1.reason.GetNextValue(&Value1));

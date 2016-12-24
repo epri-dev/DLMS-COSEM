@@ -76,7 +76,9 @@
     <ClCompile Include="APDU\RLRQ.cpp" />
     <ClCompile Include="APDU\SET-Request.cpp" />
     <ClCompile Include="APDU\SET-Response.cpp" />
+    <ClCompile Include="APDU\xDLMS.cpp" />
     <ClCompile Include="COSEMEngine.cpp" />
+    <ClCompile Include="COSEMSecurity.cpp" />
     <ClCompile Include="DLMS-COSEM.cpp" />
     <ClCompile Include="hdlc\HDLCAddress.cpp" />
     <ClCompile Include="hdlc\HDLCClient.cpp" />
@@ -93,6 +95,7 @@
     <ClCompile Include="COSEMObjectInstanceID.cpp" />
     <ClCompile Include="COSEMDevice.cpp" />
     <ClCompile Include="interfaces\COSEMData.cpp" />
+    <ClCompile Include="interfaces\IAssociationLN.cpp" />
     <ClCompile Include="interfaces\IClock.cpp" />
     <ClCompile Include="interfaces\ICOSEMInterface.cpp" />
     <ClCompile Include="interfaces\IData.cpp" />
@@ -119,6 +122,7 @@
     <ClInclude Include="include\APDU\RLRQ.h" />
     <ClInclude Include="include\APDU\SET-Request.h" />
     <ClInclude Include="include\APDU\SET-Response.h" />
+    <ClInclude Include="include\APDU\xDLMS.h" />
     <ClInclude Include="include\Callback.h" />
     <ClInclude Include="include\COSEM.h" />
     <ClInclude Include="include\COSEMAddress.h" />
@@ -150,6 +154,7 @@
     <ClInclude Include="include\IMemory.h" />
     <ClInclude Include="include\interfaces\COSEMAttribute.h" />
     <ClInclude Include="include\interfaces\COSEMMethod.h" />
+    <ClInclude Include="include\interfaces\IAssociationLN.h" />
     <ClInclude Include="include\interfaces\IClock.h" />
     <ClInclude Include="include\interfaces\IData.h" />
     <ClInclude Include="include\interfaces\ICOSEMInterface.h" />

@@ -15,7 +15,7 @@ TEST(GET_Request, GeneralUsage)
     Get_Request_Normal Request;
     DLMSVector         Data(FINAL);
     
-    ASSERT_TRUE(Request.Parse(1, 1, &Data));
+    ASSERT_TRUE(Request.Parse(&Data,1, 1));
     ASSERT_EQ(0x45, Request.invoke_id_and_priority);
     ASSERT_EQ(0x0007, Request.cosem_attribute_descriptor.class_id);
     ASSERT_EQ(DLMSVector({0x00, 0x00, 0x63, 0x62, 0x01, 0xFF}), Request.cosem_attribute_descriptor.instance_id);

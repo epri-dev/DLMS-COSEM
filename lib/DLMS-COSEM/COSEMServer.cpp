@@ -28,8 +28,8 @@ namespace EPRI
         bool bAllowed = false;
         BEGIN_TRANSITION_MAP
             TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
-            TRANSITION_MAP_ENTRY(ST_IDLE, ST_ASSOCIATION_PENDING)
-            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
+            TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_ASSOCIATION_PENDING)
             TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
             TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_IGNORED)
         END_TRANSITION_MAP(bAllowed, new OpenResponseEventData(Parameters));
@@ -164,51 +164,45 @@ namespace EPRI
     
     void COSEMServer::ST_Association_Pending_Handler(EventData * pData)
     {
-        OpenRequestEventData * pEventData;
-        if ((pEventData = dynamic_cast<OpenRequestEventData *>(pData)) != nullptr)
+        // 
+        // Receive OPEN Request
+        //
+        OpenRequestEventData * pOpenRequest = dynamic_cast<OpenRequestEventData *>(pData);
+        if (pOpenRequest)
         {
-            AARE                        Response;
-            APPOpenRequestOrIndication& Parameters = pEventData->Data;
-            if (OnOpenIndication(Parameters))
+            APPOpenRequestOrIndication& Parameters = pOpenRequest->Data;
+            InitiateOpen(Parameters, 
+                OnOpenIndication(Parameters));
+            return;
+        }        
+        //
+        // Transmit OPEN Response
+        //
+        Transport *             pTransport = GetTransport();
+        OpenResponseEventData * pOpenResponse = dynamic_cast<OpenResponseEventData *>(pData);
+        if (pTransport && pOpenResponse)
+        {
+            Transport::DataRequestParameter TransportParam;
+            AARE                            Response;
+            bool                            Associated = false;
+            APPOpenConfirmOrResponse&       Parameters = pOpenResponse->Data;
+            if (Parameters.ToAPDU(&Response))
             {
-                if (Parameters.m_LogicalNameReferencing && !Parameters.m_WithCiphering)
-                {
-                    Response.application_context_name.Append(ContextLNRNoCipher);
-                }
-                else if (!Parameters.m_LogicalNameReferencing && !Parameters.m_WithCiphering)
-                {
-                    Response.application_context_name.Append(ContextSNRNoCipher);
-                }
-                //
-                // TODO - Actually make this work!
-                //
-                Response.responder_acse_requirements.Append(ASNBitString(1, 1));
-                Response.result.Append(int8_t(AARE::AssociationResult::accepted));
-                Response.result_source_diagnostic.SelectChoice(AARE::AssociateDiagnosticChoice::acse_service_user);
-                Response.result_source_diagnostic.Append(int8_t(AARE::AssociateDiagnosticUser::user_null));
-                Response.user_information.Append(DLMSVector({ 0x08, 0x00, 0x06, 0x5F, 0x1F, 0x04, 
-                                                                    0x00, 0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07 }));    
+                TransportParam.SourceAddress = GetAddress();
+                TransportParam.DestinationAddress = Response.GetDestinationAddress();
+                TransportParam.Data = Response.GetBytes();
+                Associated = pTransport->DataRequest(TransportParam);
             }
-            else 
+            if (Associated)
             {
-                //
-                // TODO - Error Code!
-                //
-            }
-
-            Transport * pTransport = GetTransport();
-            if (nullptr != pTransport &&
-                pTransport->DataRequest(Transport::DataRequestParameter(GetAddress(),
-                                                                        Parameters.m_SourceAddress,
-                                                                        Response.GetBytes())))
-            {
-                InternalEvent(ST_ASSOCIATED, pData);
+                InternalEvent(ST_ASSOCIATED);
             }
             else
             {
                 InternalEvent(ST_IDLE);
             }
-        }
+            return;
+        }             
         
     }
     
@@ -417,18 +411,19 @@ namespace EPRI
         if (pAARQ)
         {
             bool bAllowed = false;
-            BEGIN_TRANSITION_MAP
-                TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_IDLE, ST_ASSOCIATION_PENDING)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_IGNORED)
-            //
-            // TODO - Really parse
-            //
-            END_TRANSITION_MAP(bAllowed, 
-                new OpenRequestEventData(APPOpenRequestOrIndication(pAARQ->GetSourceAddress(),
-                                                                    pAARQ->GetDestinationAddress())));
+            try
+            {
+                BEGIN_TRANSITION_MAP
+                    TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+                    TRANSITION_MAP_ENTRY(ST_IDLE, ST_ASSOCIATION_PENDING)
+                    TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+                    TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
+                    TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_IGNORED)
+                END_TRANSITION_MAP(bAllowed, new OpenRequestEventData(APPOpenRequestOrIndication(pAARQ)));
+            }
+            catch (const std::exception&)
+            {
+            }
             return bAllowed;
         }
         return false;

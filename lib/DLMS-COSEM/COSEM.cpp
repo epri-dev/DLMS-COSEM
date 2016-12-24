@@ -3,14 +3,182 @@
 
 namespace EPRI
 {
+    //
+    // APPOpenRequestOrIndication
+    //
+    APPOpenRequestOrIndication::APPOpenRequestOrIndication(AARQ * pAARQ) :
+        APPBaseCallbackParameter(pAARQ->GetSourceAddress(), pAARQ->GetDestinationAddress())
+    {
+        ASNType::GetNextResult RetVal;
+        //
+        // Application Context is Required
+        //
+        RetVal = pAARQ->application_context_name.GetNextValue(&m_SecurityOptions.ApplicationContextName);
+        if (RetVal != ASNType::GetNextResult::VALUE_RETRIEVED)
+        {
+            throw std::logic_error("application_context_name Required");
+        }
+        //
+        // Mechanism is Optional
+        //
+        RetVal = pAARQ->mechanism_name.GetNextValue(&m_SecurityOptions.MechanismName);
+        if (RetVal != ASNType::GetNextResult::VALUE_RETRIEVED &&
+            RetVal != ASNType::GetNextResult::VALUE_EMPTY)
+        {
+            throw std::logic_error("mechanism_name Invalid");
+        }
+        //
+        // Sender ACSE Requirements is Optional
+        //
+        DLMSValue RequestValue;
+        RetVal = pAARQ->sender_acse_requirements.GetNextValue(&RequestValue);
+        if (RetVal != ASNType::GetNextResult::VALUE_RETRIEVED &&
+            RetVal != ASNType::GetNextResult::VALUE_EMPTY)
+        {
+            throw std::logic_error("sender_acse_requirements Invalid");
+        }
+        else if (ASNType::GetNextResult::VALUE_RETRIEVED == RetVal &&
+                 DLMSValueGet<DLMSBitSet>(RequestValue)[0])
+        {
+            RetVal = pAARQ->calling_authentication_value.GetNextValue(&m_SecurityOptions.AuthenticationValue);
+            if (RetVal != ASNType::GetNextResult::VALUE_RETRIEVED)
+            {
+                throw std::logic_error("Authentication is Required");
+            }
+        }
+        //
+        // xDLMS Context is Optional
+        //
+        RetVal = pAARQ->user_information.GetNextValue(&RequestValue);
+        if (RetVal != ASNType::GetNextResult::VALUE_RETRIEVED &&
+            RetVal != ASNType::GetNextResult::VALUE_EMPTY)
+        {
+            throw std::logic_error("user_information Invalid");
+        }
+        else if (ASNType::GetNextResult::VALUE_RETRIEVED == RetVal)
+        {
+            if (!m_xDLMS.Parse(&DLMSValueGet<DLMSVector>(RequestValue)))
+            {
+                throw std::logic_error("xDLMS Context Invalid");
+            }
+        }
+    } 
     
-    const ASNObjectIdentifier COSEM::ContextLNRNoCipher({ 2, 16, 756, 5, 8, 1, 1 });
-    const ASNObjectIdentifier COSEM::ContextSNRNoCipher({ 2, 16, 756, 5, 8, 1, 2 });
-    const ASNObjectIdentifier COSEM::MechanismNameLowLevelSecurity({ 2, 16, 756, 5, 8, 2, 1 }, 
-                                                                   ASN::IMPLICIT);
-    const ASNObjectIdentifier COSEM::MechanismNameHighLevelSecurity({ 2, 16, 756, 5, 8, 2, 5 }, 
-                                                                    ASN::IMPLICIT);
-
+    bool APPOpenRequestOrIndication::ToAPDU(AARQ * pAARQ)
+    {
+        //
+        // PRECONDITIONS
+        //
+        // ApplicationContext is the only required parameter
+        //
+        if (m_SecurityOptions.ApplicationContextName.IsEmpty())
+        {
+            return false;
+        }
+        bool RetVal = pAARQ->application_context_name.Append(m_SecurityOptions.ApplicationContextName) &&
+                      pAARQ->mechanism_name.Append(m_SecurityOptions.MechanismName);
+        if (m_SecurityOptions.Authentication())
+        {
+            RetVal = RetVal &&
+                pAARQ->sender_acse_requirements.Append(ASNBitString(1, m_SecurityOptions.Authentication() ? 1 : 0)) &&
+                pAARQ->calling_authentication_value.SelectChoice(m_SecurityOptions.AuthenticationType()) &&
+                pAARQ->calling_authentication_value.Append(m_SecurityOptions.AuthenticationValue);
+        }
+        return RetVal &&
+            pAARQ->user_information.Append(m_xDLMS.GetBytes());    
+    }
+    //
+    // APPOpenConfirmOrResponse
+    //
+    APPOpenConfirmOrResponse::APPOpenConfirmOrResponse(AARE * pAARE)
+        : APPBaseCallbackParameter(pAARE->GetSourceAddress(), pAARE->GetDestinationAddress())
+    {
+        ASNType::GetNextResult RetVal;
+        //
+        // Application Context is Required
+        //
+        RetVal = pAARE->application_context_name.GetNextValue(&m_SecurityOptions.ApplicationContextName);
+        if (RetVal != ASNType::GetNextResult::VALUE_RETRIEVED)
+        {
+            throw std::logic_error("application_context_name Required");
+        }
+        //
+        // Mechanism is Optional
+        //
+        RetVal = pAARE->mechanism_name.GetNextValue(&m_SecurityOptions.MechanismName);
+        if (RetVal != ASNType::GetNextResult::VALUE_RETRIEVED &&
+            RetVal != ASNType::GetNextResult::VALUE_EMPTY)
+        {
+            throw std::logic_error("mechanism_name Invalid");
+        }
+        //
+        // Sender ACSE Requirements is Optional
+        //
+        DLMSValue RequestValue;
+        RetVal = pAARE->responder_acse_requirements.GetNextValue(&RequestValue);
+        if (RetVal != ASNType::GetNextResult::VALUE_RETRIEVED &&
+            RetVal != ASNType::GetNextResult::VALUE_EMPTY)
+        {
+            throw std::logic_error("responder_acse_requirements Invalid");
+        }
+        else if (ASNType::GetNextResult::VALUE_RETRIEVED == RetVal &&
+                 DLMSValueGet<DLMSBitSet>(RequestValue)[0])
+        {
+            RetVal = pAARE->responding_authentication_value.GetNextValue(&m_SecurityOptions.AuthenticationValue);
+            if (RetVal != ASNType::GetNextResult::VALUE_RETRIEVED)
+            {
+                throw std::logic_error("Authentication is Required");
+            }
+        }
+        //
+        // xDLMS Context is Optional
+        //
+        RetVal = pAARE->user_information.GetNextValue(&RequestValue);
+        if (RetVal != ASNType::GetNextResult::VALUE_RETRIEVED &&
+            RetVal != ASNType::GetNextResult::VALUE_EMPTY)
+        {
+            throw std::logic_error("user_information Invalid");
+        }
+        else if (ASNType::GetNextResult::VALUE_RETRIEVED == RetVal)
+        {
+            if (!m_xDLMS.Parse(&DLMSValueGet<DLMSVector>(RequestValue)))
+            {
+                throw std::logic_error("xDLMS Context Invalid");
+            }
+        }        
+        //
+        // Result and Diagnostics are Required
+        //
+        if (ASNType::GetNextResult::VALUE_RETRIEVED == pAARE->result.GetNextValue(&RequestValue) &&
+            IsVariant(RequestValue))
+        {
+            m_Result = (AssociationResultType) DLMSValueGet<int8_t>(RequestValue);
+        }
+        if (ASNType::GetNextResult::VALUE_RETRIEVED == pAARE->result_source_diagnostic.GetNextValue(&RequestValue) &&
+            IsVariant(RequestValue) && pAARE->result_source_diagnostic.GetChoice((int8_t *) &m_DiagnosticSource))
+        {
+            m_Diagnostic = DLMSValueGet<int8_t>(RequestValue);
+        }
+    }
+    
+    bool APPOpenConfirmOrResponse::ToAPDU(AARE * pAARE)
+    {
+        //
+        // PRECONDITIONS
+        //
+        if (m_SecurityOptions.ApplicationContextName.IsEmpty())
+        {
+            return false;
+        }
+        return pAARE->application_context_name.Append(m_SecurityOptions.ApplicationContextName) &&
+            pAARE->result.Append(int8_t(m_Result)) &&
+            pAARE->result_source_diagnostic.SelectChoice(m_DiagnosticSource) &&
+            pAARE->result_source_diagnostic.Append(m_Diagnostic) &&
+            pAARE->user_information.Append(m_xDLMS.GetBytes());
+    }
+    //
+    // COSEM
+    //
     COSEM::COSEM(COSEMAddressType Address) :
         StateMachine(ST_MAX_STATES),
         m_Address(Address)

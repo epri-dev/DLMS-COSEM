@@ -36,7 +36,8 @@ namespace EPRI
         // We should not be able to perform a COSEM-CONNECT until
         // we are connected at the transport.
         //
-        ASSERT_FALSE(OpenRequest(APPOpenRequestOrIndication(0x02, 0x03)));
+        ASSERT_FALSE(OpenRequest(APPOpenRequestOrIndication(0x02, 0x03, xDLMS::InitiateRequest(),
+                                                            COSEMSecurityOptions())));
     }
     
     TEST_F(COSEMClientFixture, ConnectRequest)

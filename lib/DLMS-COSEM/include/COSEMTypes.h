@@ -11,7 +11,7 @@ namespace EPRI
     typedef int8_t   ObjectAttributeIdType;
     typedef uint8_t  InvokeIdAndPriorityType;
     typedef uint8_t  ShortNameOffsetType;
-   
+    
     typedef struct __Cosem_Attribute_Descriptor
     {
         ClassIDType            class_id;
@@ -46,7 +46,6 @@ namespace EPRI
     COSEMPriority(VAL & 0b01000000)
 
     const InvokeIdAndPriorityType ALLOWED_INVOCATION_IDS = 16;
-
     //
     // Get Data Result
     //
