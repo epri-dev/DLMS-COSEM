@@ -3,10 +3,12 @@
 #include <cstdint>
 #include <functional>
 #include <map>
+#include <memory>
+
+#include "ISynchronization.h"
 
 namespace EPRI
 {
-
     class EventData 
     {
     public:
@@ -48,6 +50,7 @@ namespace EPRI
         const int                    m_MaxStates;
         bool                         m_EventGenerated;
         EventData *                  m_pEventData;
+        ISemaphorePtr                m_pSemaphore;
         std::map<uint8_t, StateFunc> m_States;
     };
  

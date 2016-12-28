@@ -79,6 +79,7 @@ namespace EPRI
         case ATTR_DST_ENABLED:
         case ATTR_CLOCK_BASE:
         default:
+            std::cout << "Clock GET Received" << std::endl;
             break;
         }
         //
@@ -102,6 +103,7 @@ namespace EPRI
         case METHOD_PRESET_ADJUSTING_TIME:
         case METHOD_SHIFT_TIME:
         default:
+            std::cout << "Clock ACTION Received" << std::endl;
             break;
         }
         //

@@ -84,8 +84,12 @@ namespace EPRI
                 pAARQ->calling_authentication_value.SelectChoice(m_SecurityOptions.AuthenticationType()) &&
                 pAARQ->calling_authentication_value.Append(m_SecurityOptions.AuthenticationValue);
         }
-        return RetVal &&
-            pAARQ->user_information.Append(m_xDLMS.GetBytes());    
+        if (m_xDLMS.Initialized())
+        {
+            RetVal = RetVal &&
+                pAARQ->user_information.Append(m_xDLMS.GetBytes());    
+        }
+        return RetVal;
     }
     //
     // APPOpenConfirmOrResponse
@@ -170,11 +174,122 @@ namespace EPRI
         {
             return false;
         }
-        return pAARE->application_context_name.Append(m_SecurityOptions.ApplicationContextName) &&
+        bool RetVal = pAARE->application_context_name.Append(m_SecurityOptions.ApplicationContextName) &&
             pAARE->result.Append(int8_t(m_Result)) &&
             pAARE->result_source_diagnostic.SelectChoice(m_DiagnosticSource) &&
-            pAARE->result_source_diagnostic.Append(m_Diagnostic) &&
-            pAARE->user_information.Append(m_xDLMS.GetBytes());
+            pAARE->result_source_diagnostic.Append(m_Diagnostic);
+        if (m_xDLMS.Initialized())
+        {
+            RetVal = RetVal &&
+                pAARE->user_information.Append(m_xDLMS.GetBytes());    
+        }
+        return RetVal;
+    }
+    //
+    // APPReleaseRequestOrIndication
+    //
+    APPReleaseRequestOrIndication::APPReleaseRequestOrIndication(RLRQ * pRLRQ)
+        : APPBaseCallbackParameter(pRLRQ->GetSourceAddress(), pRLRQ->GetDestinationAddress())
+    {
+        ASNType::GetNextResult RetVal;
+        DLMSValue              RequestValue;
+        //
+        // Release Request Reason is Optional
+        //
+        RetVal = pRLRQ->reason.GetNextValue(&RequestValue);
+        if (RetVal != ASNType::GetNextResult::VALUE_RETRIEVED &&
+            RetVal != ASNType::GetNextResult::VALUE_EMPTY)
+        {
+            throw std::logic_error("reason Invalid");
+        }
+        else if (ASNType::GetNextResult::VALUE_RETRIEVED == RetVal)
+        {
+            m_Reason = ReleaseReason(DLMSValueGet<int8_t>(RequestValue));
+        }
+        //
+        // xDLMS Context is Optional
+        //
+        RetVal = pRLRQ->user_information.GetNextValue(&RequestValue);
+        if (RetVal != ASNType::GetNextResult::VALUE_RETRIEVED &&
+            RetVal != ASNType::GetNextResult::VALUE_EMPTY)
+        {
+            throw std::logic_error("user_information Invalid");
+        }
+        else if (ASNType::GetNextResult::VALUE_RETRIEVED == RetVal)
+        {
+            if (!m_xDLMS.Parse(&DLMSValueGet<DLMSVector>(RequestValue)))
+            {
+                throw std::logic_error("xDLMS Context Invalid");
+            }
+        }        
+    }
+    
+    bool APPReleaseRequestOrIndication::ToAPDU(RLRQ * pRLRQ)
+    {
+        bool RetVal = true;
+        if (m_Reason)
+        {
+            RetVal = pRLRQ->reason.Append((int8_t)m_Reason.value());
+        }
+        if (m_xDLMS.Initialized())
+        {
+            RetVal = RetVal &&
+                pRLRQ->user_information.Append(m_xDLMS.GetBytes());    
+        }
+        return RetVal;
+    }
+    //
+    // APPReleaseConfirmOrResponse
+    //
+    APPReleaseConfirmOrResponse::APPReleaseConfirmOrResponse(RLRE * pRLRE)
+        : APPBaseCallbackParameter(pRLRE->GetSourceAddress(), pRLRE->GetDestinationAddress())
+    {
+        ASNType::GetNextResult RetVal;
+        DLMSValue              ResponseValue;
+        //
+        // Release Request Reason is Required
+        //
+        RetVal = pRLRE->reason.GetNextValue(&ResponseValue);
+        if (RetVal != ASNType::GetNextResult::VALUE_RETRIEVED &&
+            RetVal != ASNType::GetNextResult::VALUE_EMPTY)
+        {
+            throw std::logic_error("reason Invalid");
+        }
+        else if (ASNType::GetNextResult::VALUE_RETRIEVED == RetVal)
+        {
+            m_Reason = ReleaseReason(DLMSValueGet<int8_t>(ResponseValue));
+        }
+        //
+        // xDLMS Context is Optional
+        //
+        RetVal = pRLRE->user_information.GetNextValue(&ResponseValue);
+        if (RetVal != ASNType::GetNextResult::VALUE_RETRIEVED &&
+            RetVal != ASNType::GetNextResult::VALUE_EMPTY)
+        {
+            throw std::logic_error("user_information Invalid");
+        }
+        else if (ASNType::GetNextResult::VALUE_RETRIEVED == RetVal)
+        {
+            if (!m_xDLMS.Parse(&DLMSValueGet<DLMSVector>(ResponseValue)))
+            {
+                throw std::logic_error("xDLMS Context Invalid");
+            }
+        }        
+    }
+    
+    bool APPReleaseConfirmOrResponse::ToAPDU(RLRE * pRLRE)
+    {
+        bool RetVal = true;
+        if (m_Reason)
+        {
+            RetVal = pRLRE->reason.Append(int8_t(m_Reason.value()));
+        }
+        if (m_xDLMS.Initialized())
+        {
+            RetVal = RetVal &&
+                pRLRE->user_information.Append(m_xDLMS.GetBytes());    
+        }
+        return RetVal;
     }
     //
     // COSEM

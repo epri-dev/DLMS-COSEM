@@ -224,12 +224,15 @@ namespace EPRI
             InitiateBase(InitiateResponse_Schema),
             m_LogicalNameReferencing(LogicalNameReferencing)
         {
-            m_Initialized = true;
-            m_APDUSize = Request.m_APDUSize;
-            m_Conformance = Request.m_Conformance;
-            m_DLMSVersion = Request.m_DLMSVersion;
-            m_DedicatedKey = Request.m_DedicatedKey;
-            m_QOS = Request.m_QOS;
+            if (Request.m_Initialized)
+            {
+                m_Initialized = true;
+                m_APDUSize = Request.m_APDUSize;
+                m_Conformance = Request.m_Conformance;
+                m_DLMSVersion = Request.m_DLMSVersion;
+                m_DedicatedKey = Request.m_DedicatedKey;
+                m_QOS = Request.m_QOS;
+            }
         }
 
         InitiateResponse::~InitiateResponse()

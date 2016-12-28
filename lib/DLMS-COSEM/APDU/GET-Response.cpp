@@ -11,7 +11,7 @@ namespace EPRI
             ASN_END_CHOICE_ENTRY
         ASN_END_CHOICE
         //
-        // TODO
+        // TODO - Other response types. Phase II.
         //
     ASN_END_SCHEMA
         

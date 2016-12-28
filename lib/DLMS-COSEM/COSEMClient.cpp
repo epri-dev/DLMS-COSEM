@@ -181,7 +181,7 @@ namespace EPRI
                 {
                     pTransport->DataRequest(TransportParam);
                     //
-                    // TODO - Retry
+                    // TODO - Retry.  Phase II.
                     //
                 }
             }
@@ -206,18 +206,12 @@ namespace EPRI
                 RLRQ Request;
                 
                 Transport * pTransport = GetTransport();
-                if (nullptr != pTransport)
+                if (pTransport)
                 {
                     pTransport->DataRequest(Transport::DataRequestParameter(GetAddress(),
                         Parameters.m_DestinationAddress,
                         Request.GetBytes()));
                 }
-            }
-            else
-            {
-                //
-                // TODO - Just drop the connection
-                //
             }
             return;
         }
@@ -534,15 +528,20 @@ namespace EPRI
         RLRE * pReleaseResponse = dynamic_cast<RLRE *>(pAPDU.get());
         if (pReleaseResponse)
         {
-            BEGIN_TRANSITION_MAP
-                TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_ASSOCIATION_RELEASE_PENDING)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_IGNORED)
-            END_TRANSITION_MAP(RetVal,
-                                new ReleaseResponseEventData(APPReleaseConfirmOrResponse(pReleaseResponse->GetSourceAddress(),
-                                    pReleaseResponse->GetDestinationAddress())));
+            try
+            {
+                BEGIN_TRANSITION_MAP
+                    TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+                    TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
+                    TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+                    TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_ASSOCIATION_RELEASE_PENDING)
+                    TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_IGNORED)
+                END_TRANSITION_MAP(RetVal,
+                    new ReleaseResponseEventData(APPReleaseConfirmOrResponse(pReleaseResponse)));
+            }
+            catch (const std::exception&)
+            {
+            }
         }
         return RetVal;
     }

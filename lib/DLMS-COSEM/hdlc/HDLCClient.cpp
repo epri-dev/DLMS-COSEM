@@ -261,7 +261,8 @@ namespace EPRI
         if (m_pSerial->SetOptions(IECOptions) == SUCCESS &&
             m_pSerial->Write(DLMSVector((const uint8_t *)("/?!\r\n"), 5)) == SUCCESS)
         {
-            // TODO - BETTER!
+            // TODO - Improve Implementation.  Phase II.
+            //
             const uint8_t MODE_E_9600[] = { 0x06, 0x32, 0x35, 0x32, 0x0D, 0x0A };
             DLMSVector    Data;
 

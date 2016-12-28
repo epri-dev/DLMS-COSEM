@@ -95,8 +95,9 @@ namespace EPRI
             {
                 // My tag?
                 //
-                if(ASN_MAKE_TAG(APDUTagClass | Tag, Options) == pData->Peek<uint8_t>() &&
-                    pData->Skip(sizeof(uint8_t)))
+                if(false == pData->IsAtEnd() &&
+                   ASN_MAKE_TAG(APDUTagClass | Tag, Options) == pData->Peek<uint8_t>() &&
+                   pData->Skip(sizeof(uint8_t)))
                 {
                     size_t Length = 0;
                     RetVal = GetLength(pData, &Length);

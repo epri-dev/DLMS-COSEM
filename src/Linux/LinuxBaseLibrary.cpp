@@ -33,7 +33,7 @@ namespace EPRI
 
 	ISynchronization * LinuxBaseLibrary::GetSynchronization()
 	{
-		return nullptr;
+		return &m_Synchronization;
 	}
 
 	IDebug * LinuxBaseLibrary::GetDebug()

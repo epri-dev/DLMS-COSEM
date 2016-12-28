@@ -7,6 +7,7 @@
 #include "LinuxCore.h"
 #include "LinuxDebug.h"
 #include "LinuxScheduler.h"
+#include "LinuxSynchronization.h"
 
 namespace EPRI
 {
@@ -33,11 +34,12 @@ namespace EPRI
     	}
 		
 	private:
-    	asio::io_service    m_IO;
-		LinuxMemory	        m_Memory;
-		LinuxCore           m_Core;
-    	LinuxDebug          m_Debug;
-    	LinuxScheduler      m_Scheduler;
+    	asio::io_service     m_IO;
+		LinuxMemory	         m_Memory;
+		LinuxCore            m_Core;
+    	LinuxDebug           m_Debug;
+    	LinuxScheduler       m_Scheduler;
+    	LinuxSynchronization m_Synchronization;
 
 	};
 	

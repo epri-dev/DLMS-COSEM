@@ -73,6 +73,7 @@
     <ClCompile Include="LinuxSerial.cpp" />
     <ClCompile Include="LinuxSimpleTimer.cpp" />
     <ClCompile Include="LinuxSocket.cpp" />
+    <ClCompile Include="LinuxSynchronization.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
@@ -87,6 +88,7 @@
     <ClInclude Include="include\LinuxCOSEMServer.h" />
     <ClInclude Include="include\LinuxDebug.h" />
     <ClInclude Include="include\LinuxSocket.h" />
+    <ClInclude Include="include\LinuxSynchronization.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

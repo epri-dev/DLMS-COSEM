@@ -29,6 +29,19 @@ Open another console for the Client.
 
 The Client and Server applications are menu-driven.  Start the server listening first, then TCP Connect, COSEM Open, COSEM Get, and COSEM Release.
 
+The Server supports the following objects:
+
+	0-0:96.1.{0-9}*255 [IData Class: 1]
+		- Fully implemented for GET and SET.
+
+	0-0:1.0.0*255 [IClock Class: 8]
+		- Available with hooks for GET, SET, and ACTION.
+
+	0-0:40.0.{0-1}*255 [IAssociationLN Class: 15]
+		- Available for GET
+
+These classes are not fully implemented, but they give the reader an indication of how to complete.  
+
 To run unit tests.
 
 	cd [DLMS-COSEM Directory]/bin/test/DLMS-COSEM-TEST

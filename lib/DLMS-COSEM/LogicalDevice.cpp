@@ -31,7 +31,7 @@ namespace EPRI
     size_t Association::AvailableAssociations() const
     {
         //
-        // TODO - Only 1 association allowed for this release
+        // TODO - Only 1 association allowed for this release. Phase II.
         //
         return 1 - m_Associations.size();
     }
@@ -88,8 +88,9 @@ namespace EPRI
             return APDUConstants::Data_Access_Result::object_unavailable;
         }
         switch (pAttribute->AttributeID)
-        {
+        {  
         case ATTR_OBJ_LIST:
+            RetVal = APDUConstants::Data_Access_Result::object_unavailable;
             break;
         case ATTR_PARTNERS_ID:
             AppendResult = pAttribute->Append(
@@ -98,17 +99,9 @@ namespace EPRI
                     pContext->m_ClientSAP,
                     pContext->m_ServerSAP,
                 }));
-            if (AppendResult)
-            {
-                RetVal = APDUConstants::Data_Access_Result::success;
-            }
             break;
         case ATTR_APP_CON_NAME:   
             AppendResult = pAttribute->Append(pContext->m_SecurityOptions.ApplicationContextName);
-            if (AppendResult)
-            {
-                RetVal = APDUConstants::Data_Access_Result::success;
-            }
             break;
         case ATTR_XDLMS_CON_INFO:     
             AppendResult = pAttribute->Append(
@@ -121,17 +114,9 @@ namespace EPRI
                     pContext->m_xDLMS.QOS(),
                     pContext->m_xDLMS.DedicatedKey()
                 }));
-            if (AppendResult)
-            {
-                RetVal = APDUConstants::Data_Access_Result::success;
-            }
             break;
         case ATTR_AUTH_MECH_NAME:    
             AppendResult = pAttribute->Append(pContext->m_SecurityOptions.MechanismName);
-            if (AppendResult)
-            {
-                RetVal = APDUConstants::Data_Access_Result::success;
-            }
             break;
         case ATTR_SECRET:
             //
@@ -141,10 +126,6 @@ namespace EPRI
             break;
         case ATTR_STATUS:
             AppendResult = pAttribute->Append((uint8_t) pContext->m_Status);
-            if (AppendResult)
-            {
-                RetVal = APDUConstants::Data_Access_Result::success;
-            }
             break;
         case ATTR_SECURITY_SETUP_REF:
             //
@@ -366,12 +347,13 @@ namespace EPRI
     {
         APPReleaseConfirmOrResponse Response(SAP(),
             Request.m_SourceAddress,
+            xDLMS::InitiateRequest(Request.m_xDLMS),
             Request.m_UseRLRQRLRE,
             UpperLayerAllowed ? APPReleaseConfirmOrResponse::ReleaseReason::normal : 
                   APPReleaseConfirmOrResponse::ReleaseReason::not_finished);
         if (m_pServer->ReleaseResponse(Response))
         {
-            return m_Association.ReleaseAssociation(Response);
+            return !UpperLayerAllowed || m_Association.ReleaseAssociation(Response);
         }
         return false;
     }

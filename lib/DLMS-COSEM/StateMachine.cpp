@@ -1,5 +1,9 @@
 #include <assert.h>
+#include <mutex>
+
 #include "StateMachine.h"
+#include "IBaseLibrary.h"
+#include "ISynchronization.h"
  
 namespace EPRI
 {
@@ -9,6 +13,7 @@ namespace EPRI
         m_EventGenerated(false),
         m_pEventData(nullptr)
     {
+//        m_pSemaphore = Base()->GetSynchronization()->CreateSemaphore();
     }    
     
     void StateMachine::AddStateToMachine(uint8_t State, StateFunc Func)
@@ -45,31 +50,42 @@ namespace EPRI
  
     void StateMachine::StateEngine()
     {
-        EventData * pDataTemp = nullptr;
- 
-        // TODO - lock semaphore here
+        EventData *                  pDataTemp = nullptr;
 
-        while (m_EventGenerated) 
-        {         
-            pDataTemp = m_pEventData;  
-            m_pEventData = nullptr; 
-            m_EventGenerated = false;
+        // TODO - Utilize semaphore here.  Will need rework in other parts of the
+        // code.  Phase II.
+        // m_pSemaphore->Take();
+        try
+        {
+            while (m_EventGenerated) 
+            {         
+                pDataTemp = m_pEventData;  
+                m_pEventData = nullptr; 
+                m_EventGenerated = false;
  
-            if (m_States.find(m_CurrentState) != m_States.end())
-            {
-                m_States[m_CurrentState](pDataTemp);
-            }
+                if (m_States.find(m_CurrentState) != m_States.end())
+                {
+                    m_States[m_CurrentState](pDataTemp);
+                }
             
-            // If we are cascading states, then don't release
-            //  
-            if (pDataTemp && pDataTemp != m_pEventData) 
-            {
-                pDataTemp->Release();
-                pDataTemp = nullptr;
-            }
+                // If we are cascading states, then don't release
+                //  
+                if (pDataTemp && pDataTemp != m_pEventData) 
+                {
+                    pDataTemp->Release();
+                    pDataTemp = nullptr;
+                }
+            }            
         }
-        
-        // TODO - unlock semaphore here
+        catch (...)
+        {
+            //
+            // Always ensure release of semaphore
+            //
+            // m_pSemaphore->Give();
+            throw;
+        }
+        // m_pSemaphore->Give();
     }
 
 }

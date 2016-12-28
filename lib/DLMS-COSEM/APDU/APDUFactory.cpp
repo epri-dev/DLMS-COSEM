@@ -26,7 +26,7 @@ namespace EPRI
             break;
         case Get_Request_Base::Tag:
             //
-            // TODO - Appropriate GET types...
+            // TODO - Appropriate GET types... Phase II.
             //
             pRetVal.reset(new Get_Request_Normal());
             break;
@@ -35,7 +35,7 @@ namespace EPRI
             break;
         case Set_Request_Base::Tag:
             //
-            // TODO - Appropriate SET types...
+            // TODO - Appropriate SET types... Phase II.
             //
             pRetVal.reset(new Set_Request_Normal());
             break;
@@ -44,7 +44,7 @@ namespace EPRI
             break;
         case Action_Request_Base::Tag:
             //
-            // TODO - Appropriate ACTION types...
+            // TODO - Appropriate ACTION types... Phase II.
             //
             pRetVal.reset(new Action_Request_Normal());
             break;

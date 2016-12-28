@@ -12,14 +12,14 @@ namespace EPRI
                     ASN_FIXED_OCTET_STRING_TYPE(ASN::IMPLICIT, 6)
                     ASN_BASE_TYPE(ASN::DT_Integer8)
                     //
-                    // TODO - Selective Access
+                    // TODO - Selective Access.  Phase II.
                     //
                     ASN_BASE_TYPE(ASN::DT_Unsigned8)
                     ASN_DATA_TYPE
                 ASN_END_SEQUENCE
             ASN_END_CHOICE_ENTRY
             //
-            // TODO - Other Request Types
+            // TODO - Other Request Types.  Phase II.
             //
         ASN_END_CHOICE
     ASN_END_SCHEMA
@@ -100,7 +100,7 @@ namespace EPRI
             m_Type.Append(cosem_attribute_descriptor.instance_id);
             m_Type.Append(cosem_attribute_descriptor.attribute_id);
             //
-            // TODO - Selective Access
+            // TODO - Selective Access.  Phase II.
             //
             m_Type.Append(uint8_t(0x00));
             m_Type.Append(value);

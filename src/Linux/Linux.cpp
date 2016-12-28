@@ -515,13 +515,13 @@ protected:
             }
             else
             {
-                PrintLine("Not Connected!\n");
+                PrintLine("Not Connected!\n"); 
             }
             
         }         
         else if (RetVal == "5")
         {
-            if (!m_pClientEngine->Release())
+            if (!m_pClientEngine->Release(xDLMS::InitiateRequest()))
             {
                 PrintLine("Problem submitting COSEM Release!\n");
             }
@@ -563,7 +563,7 @@ protected:
     HDLCClientLLC *                 m_pHDLC = nullptr;
     COSEMClientEngine::RequestToken m_GetToken;
     COSEMClientEngine::RequestToken m_SetToken;
-    COSEMClientEngine::RequestToken m_ActionToken;
+    COSEMClientEngine::RequestToken m_ActionToken; 
    
 };
 

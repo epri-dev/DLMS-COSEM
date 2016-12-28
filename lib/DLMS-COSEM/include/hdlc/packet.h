@@ -72,7 +72,7 @@ namespace EPRI
     	
     	operator const uint8_t *() const;
     	//
-    	// TODO - Rework to Base Packet on DLMSVector
+    	// TODO - Rework to Base Packet on DLMSVector. Phase II.
     	//
     	operator DLMSVector() const;
 

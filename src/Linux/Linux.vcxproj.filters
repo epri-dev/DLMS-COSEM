@@ -45,6 +45,9 @@
     <ClCompile Include="LinuxScheduler.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="LinuxSynchronization.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt">
@@ -77,6 +80,9 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="include\LinuxScheduler.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\LinuxSynchronization.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>

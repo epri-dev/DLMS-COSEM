@@ -228,23 +228,21 @@ namespace EPRI
         {
             Transport::DataRequestParameter TransportParam;
             RLRE                            Response;
-            //
-            // TODO - For Real
-            //
-            Response.reason.Append(int8_t(EPRI::RLRE::ReleaseResponseReason::normal)); 
-            Response.user_information.Append(DLMSVector({ 0x08, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00,
-                                                                0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07 }));
-            
-            TransportParam.SourceAddress = GetAddress();
-            TransportParam.DestinationAddress = pReleaseResponse->Data.m_SourceAddress;
-            TransportParam.Data = Response.GetBytes();
-                
-            pTransport->DataRequest(TransportParam);
-            
-            InternalEvent(ST_IDLE);
+            bool                            Released = false;
+            APPReleaseConfirmOrResponse&    Parameters = pReleaseResponse->Data;
+            if (Parameters.ToAPDU(&Response))
+            {
+                TransportParam.SourceAddress = GetAddress();
+                TransportParam.DestinationAddress = Response.GetDestinationAddress();
+                TransportParam.Data = Response.GetBytes();
+                Released = pTransport->DataRequest(TransportParam);
+            }
+            if (Released)
+            {
+                InternalEvent(ST_IDLE);
+            }
             return;
-        }              
-        
+        }  
     }
     
     void COSEMServer::ST_Associated_Handler(EventData * pData)
@@ -529,26 +527,25 @@ namespace EPRI
     
     bool COSEMServer::RLRQ_Handler(const IAPDUPtr& pAPDU)
     {
+        bool    bAllowed = false;
         RLRQ *  pRLRQ = dynamic_cast<RLRQ *>(pAPDU.get());
         if (pRLRQ)
         {
-            //
-            // TODO - Really implement this...
-            //
-            bool bAllowed = false;
-            BEGIN_TRANSITION_MAP
-                TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATION_RELEASE_PENDING)
-            END_TRANSITION_MAP(bAllowed, 
-                new ReleaseRequestEventData(APPReleaseRequestOrIndication(pRLRQ->GetSourceAddress(),
-                                                                          pRLRQ->GetDestinationAddress(),
-                                                                          true)));
-            return bAllowed;
+            try
+            {
+                BEGIN_TRANSITION_MAP
+                    TRANSITION_MAP_ENTRY(ST_INACTIVE, ST_IGNORED)
+                    TRANSITION_MAP_ENTRY(ST_IDLE, ST_IGNORED)
+                    TRANSITION_MAP_ENTRY(ST_ASSOCIATION_PENDING, ST_IGNORED)
+                    TRANSITION_MAP_ENTRY(ST_ASSOCIATION_RELEASE_PENDING, ST_IGNORED)
+                    TRANSITION_MAP_ENTRY(ST_ASSOCIATED, ST_ASSOCIATION_RELEASE_PENDING)
+                END_TRANSITION_MAP(bAllowed, new ReleaseRequestEventData(APPReleaseRequestOrIndication(pRLRQ)));
+            }
+            catch (std::exception&)
+            {
+            }
         }
-        return false;
+        return bAllowed;
     }
     
     bool COSEMServer::RLRE_Handler(const IAPDUPtr& pAPDU)

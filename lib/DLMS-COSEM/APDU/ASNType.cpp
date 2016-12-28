@@ -92,9 +92,6 @@ namespace EPRI
         // Length   
         if (!(Options & ASN::CONSTRUCTED))
         {
-            //
-            // TODO - Investigate
-            //
             if (ASN::OBJECT_IDENTIFIER == m_pSchema->m_SchemaType)
             {
                 Length -= 2;
@@ -327,7 +324,7 @@ namespace EPRI
                 RetVal = ASNBitString::Get(SchemaEntry, this, pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
                 break;
                 //
-                // TODO - Make Smarter and Smaller
+                // TODO - Make Smarter and Smaller. Phase II.
                 //
             case ASN::DT_Integer8:
                 RetVal = m_Data.Get<int8_t>(pValue) ? VALUE_RETRIEVED : INVALID_CONDITION;
@@ -494,7 +491,7 @@ namespace EPRI
                     DLMSVariant Value;
                     if (ASN_SCHEMA_OPTIONS(CURRENT_GET_STATE.m_SchemaEntry) & ASN::CONSTRUCTED)
                     {
-                        // TODO
+                        // TODO - Validate Value
                         m_Data.Skip(sizeof(uint8_t));
                     }
                     GetNextRetVal = InternalSimpleGet(CURRENT_GET_STATE.m_SchemaEntry, &Value);
@@ -538,7 +535,7 @@ namespace EPRI
                     DLMSVariant Value;
                     if (ASN_SCHEMA_OPTIONS(CURRENT_GET_STATE.m_SchemaEntry) & ASN::CONSTRUCTED)
                     {
-                        // TODO
+                        // TODO - Validate Value
                         m_Data.Skip(sizeof(uint8_t));
                     }
                     GetNextRetVal = InternalSimpleGet(CURRENT_GET_STATE.m_SchemaEntry, &Value);
@@ -1007,7 +1004,7 @@ namespace EPRI
                     bool Constructed = ASN_IS_CONSTRUCTED(CURRENT_APPEND_STATE.m_SchemaEntry);
                     bool Appended = false;
                     //
-                    // TODO - Handle real length...
+                    // TODO - Handle Larger Lengths.  Phase II.
                     //
                     ssize_t LengthIndex = -1;
                     if (Constructed)
@@ -1051,7 +1048,7 @@ namespace EPRI
                         bool Constructed = ASN_IS_CONSTRUCTED(CURRENT_APPEND_STATE.m_SchemaEntry);
                         bool Appended = false;
                         //
-                        // TODO - Handle real length...
+                        // TODO - Handle Larger Lengths.  Phase II.
                         //
                         ssize_t LengthIndex = -1;
                         if (Constructed)
@@ -1077,7 +1074,7 @@ namespace EPRI
                         bool Constructed = ASN_IS_CONSTRUCTED(CURRENT_APPEND_STATE.m_SchemaEntry);
                         bool Appended = false;
                         //
-                        // TODO - Handle real length...
+                        // TODO - Handle Larger Lengths.  Phase II.
                         //
                         ssize_t LengthIndex = -1;
                         if (Constructed)

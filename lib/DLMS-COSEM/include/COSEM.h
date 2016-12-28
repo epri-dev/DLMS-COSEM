@@ -69,7 +69,7 @@ namespace EPRI
         {
         }
         //
-        // TODO - Make useful
+        // TODO - Make useful.  Phase II.
         //
         uint32_t      m_Diagnostic;
         
@@ -412,19 +412,25 @@ namespace EPRI
     {
         static const uint16_t ID = 0x2009;
         using ReleaseReason = RLRE::ReleaseResponseReason;
+        using ReasonType = DLMSOptional<ReleaseReason>;
         
         APPReleaseConfirmOrResponse(COSEMAddressType SourceAddress,
             COSEMAddressType DestinationAddress,
+            const xDLMS::InitiateResponse& xDLMS,
             bool UseRLRQRLRE = true,
-            ReleaseReason Reason = ReleaseReason::normal)
-            : APPBaseCallbackParameter(SourceAddress, DestinationAddress)
-            , m_UseRLRQRLRE(UseRLRQRLRE)
-            , m_Reason(Reason)
+            const ReasonType& Reason = DLMSOptionalNone) : 
+            APPBaseCallbackParameter(SourceAddress, DestinationAddress), 
+            m_UseRLRQRLRE(UseRLRQRLRE), 
+            m_Reason(Reason), 
+            m_xDLMS(xDLMS)
         {
         }
+        APPReleaseConfirmOrResponse(RLRE * pRLRE);
+        bool ToAPDU(RLRE * pRLRE);
 
-        bool          m_UseRLRQRLRE;
-        ReleaseReason m_Reason;    
+        xDLMS::InitiateResponse  m_xDLMS;
+        bool                     m_UseRLRQRLRE;
+        ReasonType               m_Reason;    
 
     };
     
@@ -432,25 +438,32 @@ namespace EPRI
     {
         static const uint16_t ID = 0x200A;
         using ReleaseReason = RLRQ::ReleaseRequestReason;
+        using ReasonType = DLMSOptional<ReleaseReason>;
         
         APPReleaseRequestOrIndication(COSEMAddressType SourceAddress,
             COSEMAddressType DestinationAddress,
+            const xDLMS::InitiateRequest& xDLMS,
             bool UseRLRQRLRE = true,
-            ReleaseReason Reason = ReleaseReason::normal) : 
+            const ReasonType& Reason = DLMSOptionalNone) : 
             APPBaseCallbackParameter(SourceAddress, DestinationAddress), 
             m_UseRLRQRLRE(UseRLRQRLRE), 
-            m_Reason(Reason)
+            m_Reason(Reason),
+            m_xDLMS(xDLMS)
         {
         }
-        
-        bool          m_UseRLRQRLRE;
-        ReleaseReason m_Reason;    
-        
+        APPReleaseRequestOrIndication(RLRQ * pRLRQ);
+        bool ToAPDU(RLRQ * pRLRQ);
+       
+        xDLMS::InitiateRequest  m_xDLMS;
+        bool                    m_UseRLRQRLRE;
+        ReasonType              m_Reason;    
     };
 
     using ReleaseRequestEventData = COSEMEventData<APPReleaseRequestOrIndication>;
     using ReleaseResponseEventData = COSEMEventData<APPReleaseConfirmOrResponse>;
-   
+    //
+    // COSEMClient
+    //
     class COSEMClient : public COSEM
     {
     public:

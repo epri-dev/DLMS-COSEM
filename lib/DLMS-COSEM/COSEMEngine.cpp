@@ -176,13 +176,15 @@ namespace EPRI
     //
     // COSEM.Release Service
     //
-    bool COSEMClientEngine::Release()
+    bool COSEMClientEngine::Release(const xDLMS::InitiateRequest& xDLMS, bool UseRLRE /* = true */)
     {
         if (m_Client.IsOpen())
         {
             m_Client.ReleaseRequest(
                 APPReleaseRequestOrIndication(m_Options.m_Address,
-                m_Client.GetAssociatedAddress()));
+                    m_Client.GetAssociatedAddress(),
+                    xDLMS,
+                    UseRLRE));
         }
         return true;    
     }

@@ -162,6 +162,7 @@
     <ClInclude Include="include\ISerial.h" />
     <ClInclude Include="include\ISimpleTimer.h" />
     <ClInclude Include="include\ISocket.h" />
+    <ClInclude Include="include\ISynchronization.h" />
     <ClInclude Include="include\LogicalDevice.h" />
     <ClInclude Include="include\mapbox\optional.hpp" />
     <ClInclude Include="include\mapbox\recursive_wrapper.hpp" />

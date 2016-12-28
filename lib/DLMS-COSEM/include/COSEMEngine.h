@@ -126,7 +126,7 @@ namespace EPRI
             const DLMSOptional<DLMSVector>& Parameters,
             RequestToken * pToken);    
         virtual bool OnActionConfirmation(RequestToken Token, const ActionResponse& Response);
-        virtual bool Release();
+        virtual bool Release(const xDLMS::InitiateRequest& xDLMS, bool UseRLRE = true);
         virtual bool OnReleaseConfirmation(COSEMAddressType ServerAddress);
         virtual bool OnAbortIndication(COSEMAddressType ServerAddress);
         

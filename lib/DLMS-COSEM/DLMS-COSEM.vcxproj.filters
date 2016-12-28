@@ -345,6 +345,9 @@
     <ClInclude Include="include\APDU\xDLMS.h">
       <Filter>Header files</Filter>
     </ClInclude>
+    <ClInclude Include="include\ISynchronization.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Makefile" />
