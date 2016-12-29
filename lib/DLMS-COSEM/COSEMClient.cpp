@@ -13,6 +13,11 @@ namespace EPRI
     COSEMClient::~COSEMClient()
     {
     }
+
+    COSEMAddressType COSEMClient::GetAssociatedAddress() const
+    {
+        return m_AssociatedAddress;
+    }
     //
     // COSEM
     //
@@ -173,7 +178,7 @@ namespace EPRI
             if (Parameters.ToAPDU(&Request))
             {
                 TransportParam.SourceAddress = GetAddress();
-                TransportParam.DestinationAddress = Request.GetDestinationAddress();
+                TransportParam.DestinationAddress = Parameters.m_DestinationAddress;
                 TransportParam.Data = Request.GetBytes();
 
                 Transport * pTransport = GetTransport();
@@ -269,7 +274,7 @@ namespace EPRI
                         pGetRequest->Data.m_Parameter.get<Cosem_Attribute_Descriptor>();
                     
                     TransportParam.SourceAddress = GetAddress();
-                    TransportParam.DestinationAddress = pGetRequest->Data.m_SourceAddress;
+                    TransportParam.DestinationAddress = pGetRequest->Data.m_DestinationAddress;
                     TransportParam.Data = Request.GetBytes();
                 }
                 break;
@@ -316,7 +321,7 @@ namespace EPRI
                     Request.value = Parameters.m_Value;
                     
                     TransportParam.SourceAddress = GetAddress();
-                    TransportParam.DestinationAddress = Parameters.m_SourceAddress;
+                    TransportParam.DestinationAddress = Parameters.m_DestinationAddress;
                     TransportParam.Data = Request.GetBytes();
                 }
                 break;
@@ -369,7 +374,7 @@ namespace EPRI
                     Request.method_invocation_parameters = Parameters.m_ActionParameters;
                     
                     TransportParam.SourceAddress = GetAddress();
-                    TransportParam.DestinationAddress = Parameters.m_SourceAddress;
+                    TransportParam.DestinationAddress = Parameters.m_DestinationAddress;
                     TransportParam.Data = Request.GetBytes();
                 }
                 break;

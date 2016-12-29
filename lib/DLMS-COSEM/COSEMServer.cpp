@@ -152,14 +152,17 @@ namespace EPRI
         TransportEventData * pTransportData = dynamic_cast<TransportEventData *>(pData);
         if (pTransportData && pTransportData->Data == Transport::TRANSPORT_DISCONNECTED)
         {
-            OnAbortIndication(APPAbortIndication(m_AssociatedAddress, GetAddress()));
+            //
+            // TODO - Phase II.  When there are more than one association.
+            //
+            OnAbortIndication(APPAbortIndication(GetAssociatedAddress(), GetAddress()));
         }
-        m_AssociatedAddress = INVALID_ADDRESS;
+        ReleaseTransientAssociations();
     }
     
     void COSEMServer::ST_Idle_Handler(EventData * pData)
     {
-        m_AssociatedAddress = INVALID_ADDRESS;
+        ReleaseTransientAssociations();
     }
     
     void COSEMServer::ST_Association_Pending_Handler(EventData * pData)
@@ -189,7 +192,7 @@ namespace EPRI
             if (Parameters.ToAPDU(&Response))
             {
                 TransportParam.SourceAddress = GetAddress();
-                TransportParam.DestinationAddress = Response.GetDestinationAddress();
+                TransportParam.DestinationAddress = Parameters.m_DestinationAddress;
                 TransportParam.Data = Response.GetBytes();
                 Associated = pTransport->DataRequest(TransportParam);
             }
@@ -233,7 +236,7 @@ namespace EPRI
             if (Parameters.ToAPDU(&Response))
             {
                 TransportParam.SourceAddress = GetAddress();
-                TransportParam.DestinationAddress = Response.GetDestinationAddress();
+                TransportParam.DestinationAddress = Parameters.m_DestinationAddress;
                 TransportParam.Data = Response.GetBytes();
                 Released = pTransport->DataRequest(TransportParam);
             }
@@ -253,7 +256,6 @@ namespace EPRI
         OpenRequestEventData * pOpenRequest = dynamic_cast<OpenRequestEventData *>(pData);
         if (pOpenRequest)
         {
-            m_AssociatedAddress = pOpenRequest->Data.m_SourceAddress;
             return;
         }
         // 
@@ -284,7 +286,7 @@ namespace EPRI
                     Response.result = pGetResponse->Data.m_Result;
                     
                     TransportParam.SourceAddress = GetAddress();
-                    TransportParam.DestinationAddress = pGetResponse->Data.m_SourceAddress;
+                    TransportParam.DestinationAddress = pGetResponse->Data.m_DestinationAddress;
                     TransportParam.Data = Response.GetBytes();
                 }
                 break;
@@ -329,7 +331,7 @@ namespace EPRI
                     Response.result = Parameters.m_Result;
 
                     TransportParam.SourceAddress = GetAddress();
-                    TransportParam.DestinationAddress = Parameters.m_SourceAddress;
+                    TransportParam.DestinationAddress = Parameters.m_DestinationAddress;
                     TransportParam.Data = Response.GetBytes();
                 }
                 break;
@@ -379,7 +381,7 @@ namespace EPRI
                     Response.single_response.result = Parameters.m_Result;
 
                     TransportParam.SourceAddress = GetAddress();
-                    TransportParam.DestinationAddress = Parameters.m_SourceAddress;
+                    TransportParam.DestinationAddress = Parameters.m_DestinationAddress;
                     TransportParam.Data = Response.GetBytes();
                 }
                 break;

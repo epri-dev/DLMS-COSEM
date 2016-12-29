@@ -64,6 +64,8 @@ namespace EPRI
         virtual bool ReleaseAssociation(const APPReleaseConfirmOrResponse& Response);
         virtual const AssociationContext * GetAssociationContext(
             const APPBaseCallbackParameter& Parameter);
+        COSEMAddressType GetAssociatedAddress() const;
+        virtual void ReleaseTransientAssociations();
         
     protected:
         using AssociationInfoList = std::list<AssociationContext>;
@@ -79,7 +81,6 @@ namespace EPRI
     
     class LogicalDevice
     {
-        
     public:
         LogicalDevice() = delete;
         LogicalDevice(COSEMServer * pServer);
@@ -91,12 +92,14 @@ namespace EPRI
         virtual bool InitiateAction(const APPActionRequestOrIndication& Request, bool UpperLayerAllowed);
         virtual bool InitiateRelease(const APPReleaseRequestOrIndication& Request, bool UpperLayerAllowed);
         virtual COSEMAddressType SAP() const;
+        virtual COSEMAddressType GetAssociatedAddress() const;
         
     protected:
         virtual void RegisterObject(ICOSEMObject * pObject);
         virtual ssize_t FindObject(const Cosem_Attribute_Descriptor& Descriptor) const;
         virtual ssize_t FindObject(const Cosem_Method_Descriptor& Descriptor) const;
         virtual bool IsForMe(const APPBaseCallbackParameter& Parameter) const;
+        virtual void ReleaseTransientAssociations();
 
         std::vector<ICOSEMObject *>  m_Objects;
         Association                  m_Association;

@@ -226,7 +226,14 @@ public:
 
     virtual bool OnAbortIndication(COSEMAddressType ServerAddress)
     {
-        Base()->GetDebug()->TRACE("\n\nAbort Indication from Server %d\n\n", ServerAddress);
+        if (INVALID_ADDRESS == ServerAddress)
+        {
+            Base()->GetDebug()->TRACE("\n\nAbort Indication.  Not Associated.\n\n");
+        }
+        else
+        {
+            Base()->GetDebug()->TRACE("\n\nAbort Indication from Server %d\n\n", ServerAddress);
+        }
         return true;
     }
 
@@ -386,7 +393,7 @@ protected:
                             Base()->GetCore()->GetSerial()->CreateSocket(LinuxSerial::Options(ISerial::Options::BaudRate(BaudRate))))));
             if (m_pSerialSocket->Open(SerialPort.c_str()) != SUCCESS)
             {
-                PrintLine("Failed to initiate connect\n");
+                PrintLine("Failed to initiate connect\n"); 
             }
             m_pSocket = m_pSerialSocket;
             
@@ -400,7 +407,7 @@ protected:
                 COSEMSecurityOptions::SecurityLevel Security = (COSEMSecurityOptions::SecurityLevel)
                     GetNumericInput("Security Level [0 - None, 1 - Low, 2 - High] (Default: 0)", COSEMSecurityOptions::SECURITY_NONE);
                 std::string          Password;
-                COSEMSecurityOptions SecurityOptions;
+                COSEMSecurityOptions SecurityOptions; 
                 //
                 // Only supports LN at this time
                 //

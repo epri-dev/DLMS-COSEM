@@ -90,7 +90,6 @@ namespace EPRI
         virtual TRANSPORT_HANDLE RegisterTransport(Transport * pTransport);
         virtual bool IsOpen() const;
         virtual COSEMAddressType GetAddress() const;
-        virtual COSEMAddressType GetAssociatedAddress() const;
         //
         // COSEM-ABORT Service
         //
@@ -139,7 +138,6 @@ namespace EPRI
         
         std::map<TRANSPORT_HANDLE, Transport *> m_Transports;
         COSEMAddressType                        m_Address;
-        COSEMAddressType                        m_AssociatedAddress = INVALID_ADDRESS;
         
     };
     //
@@ -470,6 +468,8 @@ namespace EPRI
         COSEMClient() = delete;
         COSEMClient(COSEMAddressType ClientAddress);
         virtual ~COSEMClient();
+
+        virtual COSEMAddressType GetAssociatedAddress() const;
         //
         // COSEM
         //
@@ -522,6 +522,8 @@ namespace EPRI
         virtual bool ACTION_Response_Handler(const IAPDUPtr& pAPDU);
         virtual bool RLRQ_Handler(const IAPDUPtr& pAPDU);
         virtual bool RLRE_Handler(const IAPDUPtr& pAPDU);
+
+        COSEMAddressType  m_AssociatedAddress = INVALID_ADDRESS;
        
     };
     

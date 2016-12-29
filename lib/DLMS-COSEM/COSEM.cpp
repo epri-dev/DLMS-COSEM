@@ -362,11 +362,6 @@ namespace EPRI
     {
         return m_Address;
     }
-    
-    COSEMAddressType COSEM::GetAssociatedAddress() const
-    {
-        return m_AssociatedAddress;
-    }
 
     size_t COSEM::MaxTransports()
     {

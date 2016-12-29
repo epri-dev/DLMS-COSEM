@@ -55,11 +55,31 @@ namespace EPRI
             });
         return true;
     }
+    
+    COSEMAddressType Association::GetAssociatedAddress() const
+    {
+        if (m_Associations.size())
+        {
+            //
+            // Only one at this point.  Phase II.
+            //
+            return (*m_Associations.cbegin()).m_ClientSAP;
+        }
+        return INVALID_ADDRESS;
+    }
 
+    void Association::ReleaseTransientAssociations()
+    {
+        //
+        // All are transient at this phase.
+        //
+        m_Associations.clear();
+    }
+    
     const AssociationContext * Association::GetAssociationContext(
         const APPBaseCallbackParameter& Parameter) 
     {
-        return GetAssociationContextByAddress(Parameter.m_DestinationAddress);
+        return GetAssociationContextByAddress(Parameter.m_SourceAddress);
     }
         
     APDUConstants::Data_Access_Result Association::InternalGet(const AssociationContext& Context,
@@ -362,6 +382,11 @@ namespace EPRI
     {
         return dynamic_cast<COSEM *>(m_pServer)->GetAddress();
     }
+    
+    COSEMAddressType LogicalDevice::GetAssociatedAddress() const
+    {
+        return m_Association.GetAssociatedAddress();
+    }
 
     void LogicalDevice::RegisterObject(ICOSEMObject * pObject)
     {
@@ -398,6 +423,11 @@ namespace EPRI
     {
         return SAP() == Parameter.m_DestinationAddress ||
             Parameter.m_DestinationAddress == ReservedAddresses::BROADCAST;
+    }
+
+    void LogicalDevice::ReleaseTransientAssociations()
+    {
+        m_Association.ReleaseTransientAssociations();
     }
 
 }
