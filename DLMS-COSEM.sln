@@ -24,6 +24,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8AFD757B-D4F2-4B75-8A1E-7C1F6F8FBCD8}"
 	ProjectSection(SolutionItems) = preProject
 		CMakeLists.txt = CMakeLists.txt
+		DeveloperGuide.docx = DeveloperGuide.docx
+		DeveloperGuide.pdf = DeveloperGuide.pdf
 		README = README
 		README.md = README.md
 	EndProjectSection

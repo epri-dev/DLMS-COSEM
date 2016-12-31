@@ -76,5 +76,9 @@ To create doxygen documentation:
 	doxygen
 
 	The output will be located in [DLMS-COSEM Directory]/docs. 
+
+For additional detailed information regarding the project, please refer to the Developer Guide.
+
+![Developer and Maintainer Guide](DeveloperGuide.pdf)
 	
 
