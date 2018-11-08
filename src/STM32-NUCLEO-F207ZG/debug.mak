@@ -24,8 +24,8 @@ START_GROUP := -Wl,--start-group
 END_GROUP := -Wl,--end-group
 
 #Additional options detected from testing the toolchain
-USE_DEL_TO_CLEAN := 1
-CP_NOT_AVAILABLE := 1
+USE_DEL_TO_CLEAN := 0
+CP_NOT_AVAILABLE := 0
 
 ADDITIONAL_MAKE_FILES := stm32.mak
 GENERATE_BIN_FILE := 1

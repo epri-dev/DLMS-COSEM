@@ -9,17 +9,18 @@ EFP_BASE ?= $(LOCALAPPDATA)/VisualGDB/EmbeddedEFPs
 TESTFW_BASE ?= $(LOCALAPPDATA)/VisualGDB/TestFrameworks
 TOOLCHAIN_ROOT ?= $(ARM_TOOLCHAIN_ROOT)
 #Embedded toolchain
-CC := $(TOOLCHAIN_ROOT)/bin/arm-eabi-gcc.exe
-CXX := $(TOOLCHAIN_ROOT)/bin/arm-eabi-g++.exe
+CC := $(TOOLCHAIN_ROOT)/arm-none-eabi-gcc
+CXX := $(TOOLCHAIN_ROOT)/arm-none-eabi-g++
 LD := $(CXX)
-AR := $(TOOLCHAIN_ROOT)/bin/arm-eabi-ar.exe
-OBJCOPY := $(TOOLCHAIN_ROOT)/bin/arm-eabi-objcopy.exe
+AR := $(TOOLCHAIN_ROOT)/arm-none-eabi-ar
+OBJCOPY := $(TOOLCHAIN_ROOT)/arm-none-eabi-objcopy
 
 #Additional flags
 PREPROCESSOR_MACROS += ARM_MATH_CM3 STM32F207ZG USE_FREERTOS stm32_flash_layout STM32F207xx DEBUG_DEFAULT_INTERRUPT_HANDLERS
 INCLUDE_DIRS += . ./BSP/FreeRTOS/Source/CMSIS_RTOS ./BSP/FreeRTOS/Source/Include ./BSP/FreeRTOS/Source/Portable/gcc/ARM_CM3 ./BSP/STM32F2xxxx/STM32F2xx_HAL_Driver/Inc ./BSP/STM32F2xxxx/STM32F2xx_HAL_Driver/Inc/Legacy ./BSP/STM32F2xxxx/CMSIS_HAL/Device/ST/STM32F2xx/Include ./BSP/STM32F2xxxx/CMSIS_HAL/Include
 LIBRARY_DIRS += 
-LIBRARY_NAMES += compactcpp
+LIBRARY_NAMES += 
+#compactcpp
 ADDITIONAL_LINKER_INPUTS += 
 MACOS_FRAMEWORKS += 
 LINUX_PACKAGES += 
@@ -27,7 +28,7 @@ LINUX_PACKAGES +=
 CFLAGS += 
 CXXFLAGS += 
 ASFLAGS += 
-LDFLAGS += 
+LDFLAGS += -static --specs=rdimon.specs
 COMMONFLAGS += -mcpu=cortex-m3 -mthumb
 LINKER_SCRIPT := ./BSP/STM32F207ZG_flash.lds
 

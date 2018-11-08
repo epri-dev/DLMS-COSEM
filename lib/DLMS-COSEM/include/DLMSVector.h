@@ -151,7 +151,7 @@ namespace EPRI
                 return RetVal;
             }
         template <typename T, uint8_t BitsToGet = 0>
-            T Get(bool BigEndian = true) throw(std::out_of_range)
+            T Get(bool BigEndian = true) 
             {
                 DLMSVariant Value;
                 if (Get<T, BitsToGet>(&Value, BigEndian))
@@ -247,7 +247,7 @@ namespace EPRI
                 return false;
             }
         template <typename T, uint8_t BitsToGet = 0>
-            T Peek(size_t Offset = 0, bool BigEndian = true) const throw(std::out_of_range)
+            T Peek(size_t Offset = 0, bool BigEndian = true) const 
             {
                 DLMSVariant Value;
                 if (Peek<T, BitsToGet>(&Value, BigEndian, Offset))

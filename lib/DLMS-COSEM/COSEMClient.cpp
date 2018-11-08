@@ -23,7 +23,7 @@ namespace EPRI
     //
     COSEMRunResult COSEMClient::Process()
     {
-
+        return COSEM_RUN_WAIT;
     }
     //
     // COSEM-OPEN Service

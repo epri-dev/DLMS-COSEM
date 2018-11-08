@@ -1,4 +1,4 @@
-#include "STM32COSEMServer.h"
+#include "STM32CosemServer.h"
 #include "COSEMAddress.h"
 
 namespace EPRI

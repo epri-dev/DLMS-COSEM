@@ -238,7 +238,7 @@ static void LEDThread(void const *argument)
 	{
 		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
 		osDelay(1000);
-    	printf("FREE = %u\n", xPortGetFreeHeapSize());
+    	//printf("FREE = %u\n", xPortGetFreeHeapSize());
 	}
 }
 

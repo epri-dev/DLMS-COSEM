@@ -18,9 +18,8 @@ namespace EPRI
 
 	ERROR_TYPE LinuxMemory::Free(void* p)
 	{
-		if (p)
-		{
-			std::free(p);
-		}
+        std::free(p);
+        p = nullptr;
+        return SRC_DONT_CARE;
 	}
 }

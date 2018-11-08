@@ -9,11 +9,11 @@ EFP_BASE ?= $(LOCALAPPDATA)/VisualGDB/EmbeddedEFPs
 TESTFW_BASE ?= $(LOCALAPPDATA)/VisualGDB/TestFrameworks
 TOOLCHAIN_ROOT ?= $(ARM_TOOLCHAIN_ROOT)
 #Embedded toolchain
-CC := $(TOOLCHAIN_ROOT)/bin/arm-eabi-gcc.exe
-CXX := $(TOOLCHAIN_ROOT)/bin/arm-eabi-g++.exe
+CC := $(TOOLCHAIN_ROOT)/arm-none-eabi-gcc
+CXX := $(TOOLCHAIN_ROOT)/arm-none-eabi-g++
 LD := $(CXX)
-AR := $(TOOLCHAIN_ROOT)/bin/arm-eabi-ar.exe
-OBJCOPY := $(TOOLCHAIN_ROOT)/bin/arm-eabi-objcopy.exe
+AR := $(TOOLCHAIN_ROOT)/arm-none-eabi-ar
+OBJCOPY := $(TOOLCHAIN_ROOT)/arm-none-eabi-objcopy
 
 #Additional flags
 PREPROCESSOR_MACROS += ARM_MATH_CM3 STM32F207ZG
@@ -29,5 +29,5 @@ CXXFLAGS +=
 ASFLAGS += 
 LDFLAGS += --specs=nano.specs 
 COMMONFLAGS += -mcpu=cortex-m3 -mthumb
-LINKER_SCRIPT := $(BSP_ROOT)/STM32F2xxxx/LinkerScripts/STM32F207ZG_flash.lds
+LINKER_SCRIPT := ../../src/STM32-NUCLEO-F207ZG/BSP/STM32F207ZG_flash.lds
 
