@@ -2,8 +2,6 @@
 
 The goal of this project is to create an open reference implementation of a DLMS-COSEM compliant communications stack. 
 
-** IMPORTANT - This is a work in progress and is rapidly changing. ** 
-
 To build:
 
 mkdir bin
