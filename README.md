@@ -4,10 +4,10 @@ The goal of this project is to create an open reference implementation of a DLMS
 
 To build:
 
-mkdir bin
-cd bin
-cmake ..
-make
+    mkdir bin
+    cd bin
+    cmake ..
+    make
 
 To run:
 
