@@ -79,6 +79,7 @@
 #include <string>
 #include <type_traits>
 #include <iostream>
+#include <vector>
 
 #include "mapbox/variant.hpp"
 #include "optional.h"
@@ -98,7 +99,7 @@ namespace EPRI
         using DLMSOptional = std::experimental::optional<T>;
     #define DLMSOptionalNone std::experimental::nullopt
     
-    using DLMSVariantInitList = std::initializer_list<uint32_t>;
+    using DLMSVariantInitList = std::vector<uint32_t>;
     using DLMSBitSet = std::bitset<64>;
 
     using DLMSVariant = variant<blank, bool, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t, 

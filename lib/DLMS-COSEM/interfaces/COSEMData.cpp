@@ -571,7 +571,7 @@ namespace EPRI
                 throw std::logic_error("Not implemented");
             }
         }
-        void operator()(const std::initializer_list<uint32_t>& Value)
+        void operator()(const std::vector<uint32_t>& Value)
         {
             throw std::logic_error("Not implemented");
         }
