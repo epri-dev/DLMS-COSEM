@@ -70,6 +70,7 @@
 // DEALINGS IN THE SOFTWARE.
 // 
 
+#include <cstdlib>
 #include <memory>
 #include "LinuxMemory.h"
 
