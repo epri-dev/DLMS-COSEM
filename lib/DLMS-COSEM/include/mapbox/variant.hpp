@@ -10,8 +10,11 @@
 #include <type_traits>
 #include <typeinfo>
 #include <utility>
+#include <functional>
+#include <limits>
 
 #include <mapbox/recursive_wrapper.hpp>
+#include <mapbox/variant_visitor.hpp>
 
 // clang-format off
 // [[deprecated]] is only available in C++14, use this for the time being
@@ -72,19 +75,19 @@ public:
 
 }; // class bad_variant_access
 
-template <typename R = void>
-struct MAPBOX_VARIANT_DEPRECATED static_visitor
-{
-    using result_type = R;
-
-protected:
-    static_visitor() {}
-    ~static_visitor() {}
-};
+#if !defined(MAPBOX_VARIANT_MINIMIZE_SIZE)
+using type_index_t = unsigned int;
+#else
+#if defined(MAPBOX_VARIANT_OPTIMIZE_FOR_SPEED)
+using type_index_t = std::uint_fast8_t;
+#else
+using type_index_t = std::uint_least8_t;
+#endif
+#endif
 
 namespace detail {
 
-static constexpr std::size_t invalid_value = std::size_t(-1);
+static constexpr type_index_t invalid_value = type_index_t(-1);
 
 template <typename T, typename... Types>
 struct direct_type;
@@ -92,7 +95,7 @@ struct direct_type;
 template <typename T, typename First, typename... Types>
 struct direct_type<T, First, Types...>
 {
-    static constexpr std::size_t index = std::is_same<T, First>::value
+    static constexpr type_index_t index = std::is_same<T, First>::value
         ? sizeof...(Types)
         : direct_type<T, Types...>::index;
 };
@@ -100,14 +103,27 @@ struct direct_type<T, First, Types...>
 template <typename T>
 struct direct_type<T>
 {
-    static constexpr std::size_t index = invalid_value;
+    static constexpr type_index_t index = invalid_value;
 };
 
 #if __cpp_lib_logical_traits >= 201510L
 
+using std::conjunction;
 using std::disjunction;
 
 #else
+
+template <typename...>
+struct conjunction : std::true_type {};
+
+template <typename B1>
+struct conjunction<B1> : B1 {};
+
+template <typename B1, typename B2>
+struct conjunction<B1, B2> : std::conditional<B1::value, B2, B1>::type {};
+
+template <typename B1, typename... Bs>
+struct conjunction<B1, Bs...> : std::conditional<B1::value, conjunction<Bs...>, B1>::type {};
 
 template <typename...>
 struct disjunction : std::false_type {};
@@ -129,7 +145,7 @@ struct convertible_type;
 template <typename T, typename First, typename... Types>
 struct convertible_type<T, First, Types...>
 {
-    static constexpr std::size_t index = std::is_convertible<T, First>::value
+    static constexpr type_index_t index = std::is_convertible<T, First>::value
         ? disjunction<std::is_convertible<T, Types>...>::value ? invalid_value : sizeof...(Types)
         : convertible_type<T, Types...>::index;
 };
@@ -137,18 +153,21 @@ struct convertible_type<T, First, Types...>
 template <typename T>
 struct convertible_type<T>
 {
-    static constexpr std::size_t index = invalid_value;
+    static constexpr type_index_t index = invalid_value;
 };
 
 template <typename T, typename... Types>
 struct value_traits
 {
     using value_type = typename std::remove_const<typename std::remove_reference<T>::type>::type;
-    static constexpr std::size_t direct_index = direct_type<value_type, Types...>::index;
+    using value_type_wrapper = recursive_wrapper<value_type>;
+    static constexpr type_index_t direct_index = direct_type<value_type, Types...>::index;
     static constexpr bool is_direct = direct_index != invalid_value;
-    static constexpr std::size_t index = is_direct ? direct_index : convertible_type<value_type, Types...>::index;
+    static constexpr type_index_t index_direct_or_wrapper = is_direct ? direct_index : direct_type<value_type_wrapper, Types...>::index;
+    static constexpr bool is_direct_or_wrapper = index_direct_or_wrapper != invalid_value;
+    static constexpr type_index_t index = is_direct_or_wrapper ? index_direct_or_wrapper : convertible_type<value_type, Types...>::index;
     static constexpr bool is_valid = index != invalid_value;
-    static constexpr std::size_t tindex = is_valid ? sizeof...(Types)-index : 0;
+    static constexpr type_index_t tindex = is_valid ? sizeof...(Types)-index : 0;
     using target_type = typename std::tuple_element<tindex, std::tuple<void, Types...>>::type;
 };
 
@@ -182,19 +201,19 @@ struct result_of_binary_visit<F, V, typename enable_if_type<typename F::result_t
     using type = typename F::result_type;
 };
 
-template <std::size_t arg1, std::size_t... others>
+template <type_index_t arg1, type_index_t... others>
 struct static_max;
 
-template <std::size_t arg>
+template <type_index_t arg>
 struct static_max<arg>
 {
-    static const std::size_t value = arg;
+    static const type_index_t value = arg;
 };
 
-template <std::size_t arg1, std::size_t arg2, std::size_t... others>
+template <type_index_t arg1, type_index_t arg2, type_index_t... others>
 struct static_max<arg1, arg2, others...>
 {
-    static const std::size_t value = arg1 >= arg2 ? static_max<arg1, others...>::value : static_max<arg2, others...>::value;
+    static const type_index_t value = arg1 >= arg2 ? static_max<arg1, others...>::value : static_max<arg2, others...>::value;
 };
 
 template <typename... Types>
@@ -203,7 +222,7 @@ struct variant_helper;
 template <typename T, typename... Types>
 struct variant_helper<T, Types...>
 {
-    VARIANT_INLINE static void destroy(const std::size_t type_index, void* data)
+    VARIANT_INLINE static void destroy(const type_index_t type_index, void* data)
     {
         if (type_index == sizeof...(Types))
         {
@@ -215,7 +234,7 @@ struct variant_helper<T, Types...>
         }
     }
 
-    VARIANT_INLINE static void move(const std::size_t old_type_index, void* old_value, void* new_value)
+    VARIANT_INLINE static void move(const type_index_t old_type_index, void* old_value, void* new_value)
     {
         if (old_type_index == sizeof...(Types))
         {
@@ -227,7 +246,7 @@ struct variant_helper<T, Types...>
         }
     }
 
-    VARIANT_INLINE static void copy(const std::size_t old_type_index, const void* old_value, void* new_value)
+    VARIANT_INLINE static void copy(const type_index_t old_type_index, const void* old_value, void* new_value)
     {
         if (old_type_index == sizeof...(Types))
         {
@@ -243,9 +262,9 @@ struct variant_helper<T, Types...>
 template <>
 struct variant_helper<>
 {
-    VARIANT_INLINE static void destroy(const std::size_t, void*) {}
-    VARIANT_INLINE static void move(const std::size_t, void*, void*) {}
-    VARIANT_INLINE static void copy(const std::size_t, const void*, void*) {}
+    VARIANT_INLINE static void destroy(const type_index_t, void*) {}
+    VARIANT_INLINE static void move(const type_index_t, void*, void*) {}
+    VARIANT_INLINE static void copy(const type_index_t, const void*, void*) {}
 };
 
 template <typename T>
@@ -531,18 +550,27 @@ private:
     Variant const& lhs_;
 };
 
+// hashing visitor
+struct hasher
+{
+    template <typename T>
+    std::size_t operator()(const T& hashable) const
+    {
+        return std::hash<T>{}(hashable);
+    }
+};
+
 } // namespace detail
 
-struct no_init
-{
-};
+struct no_init {};
 
 template <typename... Types>
 class variant
 {
-    static_assert(sizeof...(Types) > 0, "Template parameter type list of variant can not be empty");
+    static_assert(sizeof...(Types) > 0, "Template parameter type list of variant can not be empty.");
     static_assert(!detail::disjunction<std::is_reference<Types>...>::value, "Variant can not hold reference types. Maybe use std::reference_wrapper?");
-
+    static_assert(!detail::disjunction<std::is_array<Types>...>::value, "Variant can not hold array types.");
+    static_assert(sizeof...(Types) < std::numeric_limits<type_index_t>::max(), "Internal index type must be able to accommodate all alternatives.");
 private:
     static const std::size_t data_size = detail::static_max<sizeof(Types)...>::value;
     static const std::size_t data_align = detail::static_max<alignof(Types)...>::value;
@@ -554,14 +582,18 @@ private:
     using data_type = typename std::aligned_storage<data_size, data_align>::type;
     using helper_type = detail::variant_helper<Types...>;
 
-    std::size_t type_index;
+    type_index_t type_index;
+#ifdef __clang_analyzer__
+    data_type data {};
+#else
     data_type data;
-
+#endif
+    
 public:
     VARIANT_INLINE variant() noexcept(std::is_nothrow_default_constructible<first_type>::value)
         : type_index(sizeof...(Types)-1)
     {
-        static_assert(std::is_default_constructible<first_type>::value, "First type in variant must be default constructible to allow default construction of variant");
+        static_assert(std::is_default_constructible<first_type>::value, "First type in variant must be default constructible to allow default construction of variant.");
         new (&data) first_type();
     }
 
@@ -570,7 +602,7 @@ public:
 
     // http://isocpp.org/blog/2012/11/universal-references-in-c11-scott-meyers
     template <typename T, typename Traits = detail::value_traits<T, Types...>,
-              typename Enable = typename std::enable_if<Traits::is_valid>::type>
+              typename Enable = typename std::enable_if<Traits::is_valid && !std::is_same<variant<Types...>, typename Traits::value_type>::value>::type >
     VARIANT_INLINE variant(T&& val) noexcept(std::is_nothrow_constructible<typename Traits::target_type, T&&>::value)
         : type_index(Traits::index)
     {
@@ -583,7 +615,8 @@ public:
         helper_type::copy(old.type_index, &old.data, &data);
     }
 
-    VARIANT_INLINE variant(variant<Types...>&& old) noexcept(std::is_nothrow_move_constructible<types>::value)
+    VARIANT_INLINE variant(variant<Types...>&& old)
+        noexcept(detail::conjunction<std::is_nothrow_move_constructible<Types>...>::value)
         : type_index(old.type_index)
     {
         helper_type::move(old.type_index, &old.data, &data);
@@ -608,6 +641,9 @@ private:
 
 public:
     VARIANT_INLINE variant<Types...>& operator=(variant<Types...>&& other)
+        // note we check for nothrow-constructible, not nothrow-assignable, since
+        // move_assign uses move-construction via placement new.
+        noexcept(detail::conjunction<std::is_nothrow_move_constructible<Types>...>::value)
     {
         move_assign(std::move(other));
         return *this;
@@ -621,8 +657,13 @@ public:
 
     // conversions
     // move-assign
-    template <typename T>
-    VARIANT_INLINE variant<Types...>& operator=(T&& rhs) noexcept
+    template <typename T, typename Traits = detail::value_traits<T, Types...>,
+              typename Enable = typename std::enable_if<Traits::is_valid && !std::is_same<variant<Types...>, typename Traits::value_type>::value>::type >
+    VARIANT_INLINE variant<Types...>& operator=(T&& rhs)
+        // not that we check is_nothrow_constructible<T>, not is_nothrow_move_assignable<T>,
+        // since we construct a temporary
+        noexcept(std::is_nothrow_constructible<typename Traits::target_type, T&&>::value
+                 && std::is_nothrow_move_assignable<variant<Types...>>::value)
     {
         variant<Types...> temp(std::forward<T>(rhs));
         move_assign(std::move(temp));
@@ -812,14 +853,14 @@ public:
 
     // This function is deprecated because it returns an internal index field.
     // Use which() instead.
-    MAPBOX_VARIANT_DEPRECATED VARIANT_INLINE std::size_t get_type_index() const
+    MAPBOX_VARIANT_DEPRECATED VARIANT_INLINE type_index_t get_type_index() const
     {
         return type_index;
     }
 
     VARIANT_INLINE int which() const noexcept
     {
-        return static_cast<int>(sizeof...(Types)-type_index - 1);
+        return static_cast<int>(sizeof...(Types) - type_index - 1);
     }
 
     template <typename T, typename std::enable_if<
@@ -859,6 +900,22 @@ public:
         -> decltype(detail::binary_dispatcher<F, V, R, Types...>::apply(v0, v1, std::forward<F>(f)))
     {
         return detail::binary_dispatcher<F, V, R, Types...>::apply(v0, v1, std::forward<F>(f));
+    }
+
+    // match
+    // unary
+    template <typename... Fs>
+    auto VARIANT_INLINE match(Fs&&... fs) const
+        -> decltype(variant::visit(*this, ::mapbox::util::make_visitor(std::forward<Fs>(fs)...)))
+    {
+        return variant::visit(*this, ::mapbox::util::make_visitor(std::forward<Fs>(fs)...));
+    }
+    // non-const
+    template <typename... Fs>
+    auto VARIANT_INLINE match(Fs&&... fs)
+        -> decltype(variant::visit(*this, ::mapbox::util::make_visitor(std::forward<Fs>(fs)...)))
+    {
+        return variant::visit(*this, ::mapbox::util::make_visitor(std::forward<Fs>(fs)...));
     }
 
     ~variant() noexcept // no-throw destructor
@@ -968,7 +1025,91 @@ ResultType const& get_unchecked(T const& var)
 {
     return var.template get_unchecked<ResultType>();
 }
+// variant_size
+template <typename T>
+struct variant_size;
+
+//variable templates is c++14
+//template <typename T>
+//constexpr std::size_t variant_size_v = variant_size<T>::value;
+
+template <typename T>
+struct variant_size<const T>
+    : variant_size<T> {};
+
+template <typename T>
+struct variant_size<volatile T>
+    : variant_size<T> {};
+
+template <typename T>
+struct variant_size<const volatile T>
+    : variant_size<T> {};
+
+template <typename... Types>
+struct variant_size<variant<Types...>>
+    : std::integral_constant<std::size_t, sizeof...(Types)> {};
+
+// variant_alternative
+template <std::size_t Index, typename T>
+struct variant_alternative;
+
+#if defined(__clang__)
+#if __has_builtin(__type_pack_element)
+#define has_type_pack_element
+#endif
+#endif
+
+#if defined(has_type_pack_element)
+template <std::size_t Index, typename ...Types>
+struct variant_alternative<Index, variant<Types...>>
+{
+    static_assert(sizeof...(Types) > Index , "Index out of range");
+    using type = __type_pack_element<Index, Types...>;
+};
+#else
+template <std::size_t Index, typename First, typename...Types>
+struct variant_alternative<Index, variant<First, Types...>>
+    : variant_alternative<Index - 1, variant<Types...>>
+{
+    static_assert(sizeof...(Types) > Index -1 , "Index out of range");
+};
+
+template <typename First, typename...Types>
+struct variant_alternative<0, variant<First, Types...>>
+{
+    using type = First;
+};
+
+#endif
+
+template <size_t Index, typename T>
+using variant_alternative_t = typename variant_alternative<Index, T>::type;
+
+template <size_t Index, typename T>
+struct variant_alternative<Index, const T>
+    : std::add_const<variant_alternative<Index, T>> {};
+
+template <size_t Index, typename T>
+struct variant_alternative<Index, volatile T>
+    : std::add_volatile<variant_alternative<Index, T>> {};
+
+template <size_t Index, typename T>
+struct variant_alternative<Index, const volatile T>
+    : std::add_cv<variant_alternative<Index, T>> {};
+
 } // namespace util
 } // namespace mapbox
+
+// hashable iff underlying types are hashable
+namespace std {
+template <typename... Types>
+struct hash< ::mapbox::util::variant<Types...>> {
+    std::size_t operator()(const ::mapbox::util::variant<Types...>& v) const noexcept
+    {
+        return ::mapbox::util::apply_visitor(::mapbox::util::detail::hasher{}, v);
+    }
+};
+
+}
 
 #endif // MAPBOX_UTIL_VARIANT_HPP
