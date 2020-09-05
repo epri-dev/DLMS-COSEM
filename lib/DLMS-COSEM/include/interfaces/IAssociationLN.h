@@ -68,7 +68,7 @@
 // FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
-// 
+//
 
 #pragma once
 
@@ -77,7 +77,7 @@
 namespace EPRI
 {
     const uint16_t CLSID_IAssociationLN = 15;
-    
+
     class IAssociationLN_0 : public ICOSEMInterface
     {
         COSEM_DEFINE_SCHEMA(Object_List_Schema)
@@ -90,7 +90,7 @@ namespace EPRI
     public :
         IAssociationLN_0();
         virtual ~IAssociationLN_0();
-        
+
         enum Attributes : ObjectAttributeIdType
         {
             ATTR_OBJ_LIST            = 2,
@@ -102,14 +102,26 @@ namespace EPRI
             ATTR_STATUS              = 8,
             ATTR_SECURITY_SETUP_REF  = 9
         };
-        
+
         enum AssociationState : uint8_t
         {
             non_associated      = 0,
             association_pending = 1,
             associated          = 2
         };
-        
+
+        enum AccessModeBitmask : uint8_t
+        {
+            read_access               = 0x01,
+            write_access              = 0x02,
+            authenticated_request     = 0x04,
+            encrypted_request         = 0x08,
+            digitally_signed_request  = 0x10,
+            authenticated_response    = 0x20,
+            encrypted_response        = 0x40,
+            digitally_signed_response = 0x80
+        };
+
         COSEMAttribute<ATTR_OBJ_LIST, Object_List_Schema, 0x08>           object_list;
         COSEMAttribute<ATTR_PARTNERS_ID, Assoc_Partners_Schema, 0x10>     associated_partners_id;
         COSEMAttribute<ATTR_APP_CON_NAME, App_Context_Name_Schema, 0x18>  application_context_name;
@@ -122,14 +134,14 @@ namespace EPRI
         // All Methods Are Optional; Not Implementing at this Time
         //
     };
-    
+
     typedef IAssociationLN_0 IAssociationLN;
-    
+
     class IAssociationLNObject : public IAssociationLN, public ICOSEMObject
     {
     public:
         IAssociationLNObject() = delete;
-        IAssociationLNObject(const COSEMObjectInstanceCriteria& OIDCriteria, 
+        IAssociationLNObject(const COSEMObjectInstanceCriteria& OIDCriteria,
             uint16_t ShortNameBase = std::numeric_limits<uint16_t>::max());
         virtual ~IAssociationLNObject();
     };
