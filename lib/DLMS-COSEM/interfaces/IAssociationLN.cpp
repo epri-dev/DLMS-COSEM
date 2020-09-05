@@ -78,7 +78,36 @@
 namespace EPRI
 {
     COSEM_BEGIN_SCHEMA(IAssociationLN_0::Object_List_Schema)
-        
+        COSEM_BEGIN_ARRAY
+            COSEM_BEGIN_STRUCTURE
+                COSEM_LONG_UNSIGNED_TYPE
+                COSEM_UNSIGNED_TYPE
+                COSEM_OCTET_STRING_TYPE
+                /* access rights */
+                COSEM_BEGIN_STRUCTURE
+                    /* attribute access */
+                    COSEM_BEGIN_ARRAY
+                        COSEM_BEGIN_STRUCTURE
+                            COSEM_INTEGER_TYPE
+                            COSEM_INTEGER_TYPE
+                            COSEM_BEGIN_CHOICE
+                                COSEM_NULL_DATA_TYPE
+                                COSEM_BEGIN_ARRAY
+                                    COSEM_INTEGER_TYPE
+                                COSEM_END_ARRAY
+                            COSEM_END_CHOICE
+                        COSEM_END_STRUCTURE
+                    COSEM_END_ARRAY
+                    /* method access */
+                    COSEM_BEGIN_ARRAY
+                        COSEM_BEGIN_STRUCTURE
+                            COSEM_INTEGER_TYPE
+                            COSEM_INTEGER_TYPE
+                        COSEM_END_STRUCTURE
+                    COSEM_END_ARRAY
+                COSEM_END_STRUCTURE
+            COSEM_END_STRUCTURE
+        COSEM_END_ARRAY
     COSEM_END_SCHEMA
     COSEM_BEGIN_SCHEMA(IAssociationLN_0::Assoc_Partners_Schema)
         COSEM_BEGIN_STRUCTURE
