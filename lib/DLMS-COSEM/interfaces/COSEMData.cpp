@@ -602,6 +602,7 @@ namespace EPRI
                 break;
             case UNSIGNED:
             case BOOLEAN:
+            case ENUM:
                 m_pVector->Append<uint8_t>(VectorValue);
                 break;
             case DOUBLE_LONG:
@@ -690,7 +691,7 @@ namespace EPRI
         }
         return -1;
     }
-    
+
     bool COSEMType::InternalAppend(const DLMSValue& Value)
     {
         if (m_AppendStates.empty())
