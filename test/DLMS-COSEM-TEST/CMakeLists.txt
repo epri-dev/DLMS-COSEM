@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.1)
 project(DLMS-COSEM-TEST)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 include_directories(../../lib/DLMS-COSEM/include/ ../../lib/googletest-release-1.7.0/include/)
 find_package(Threads REQUIRED)
 
