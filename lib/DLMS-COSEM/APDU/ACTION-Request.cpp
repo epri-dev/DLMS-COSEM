@@ -139,17 +139,17 @@ namespace EPRI
                     if (IsSequence(Value))
                     {
                         DLMSSequence& Sequence = DLMSValueGetSequence(Value);
-                        invoke_id_and_priority = Sequence[0].get<uint8_t>();
-                        cosem_method_descriptor.class_id = Sequence[1].get<uint16_t>();
-                        cosem_method_descriptor.instance_id = Sequence[2].get<DLMSVector>();
-                        cosem_method_descriptor.method_id = Sequence[3].get<int8_t>();
+                        invoke_id_and_priority = std::get<uint8_t>(Sequence[0]);
+                        cosem_method_descriptor.class_id = std::get<uint16_t>(Sequence[1]);
+                        cosem_method_descriptor.instance_id = std::get<DLMSVector>(Sequence[2]);
+                        cosem_method_descriptor.method_id = std::get<int8_t>(Sequence[3]);
                         if (IsBlank(Sequence[4]))
                         {
                             method_invocation_parameters = DLMSOptionalNone;
                         }
                         else
                         {
-                            method_invocation_parameters = Sequence[4].get<DLMSVector>();
+                            method_invocation_parameters = std::get<DLMSVector>(Sequence[4]);
                         }
                         return true;
                     }

@@ -213,9 +213,9 @@ namespace EPRI
                 else if (std::is_same<ActionResponse, TResponse>::value)
                     Service = SERVICE_ACTION;
                 ResponseMap::iterator it = m_Responses.find(Token);
-                if (it != m_Responses.end() && it->second.which() == Service)
+                if (it != m_Responses.end() && it->second.index() == Service)
                 {
-                    return it->second.get<TResponse>();
+                    return std::get<TResponse>(it->second);
                 }
                 throw std::out_of_range("Token not found");
             }
@@ -231,7 +231,7 @@ namespace EPRI
         virtual InvokeIdAndPriorityType CurrentInvokeID(ServiceID Service) const;
         virtual InvokeIdAndPriorityType GetAndIncrementInvokeID(ServiceID Service);
         
-        typedef variant<GetResponse, SetResponse, ActionResponse> ResponseTypes;
+        typedef std::variant<GetResponse, SetResponse, ActionResponse> ResponseTypes;
         typedef std::map<RequestToken, ResponseTypes>             ResponseMap;
         
         COSEMClient                            m_Client;

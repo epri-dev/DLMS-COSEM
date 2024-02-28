@@ -232,24 +232,24 @@ namespace EPRI
                     m_DedicatedKey = DLMSOptionalNone;
                     if (IsInitialized(Elements[0]))
                     {
-                        m_DedicatedKey = Elements[0].get<DLMSVector>();
+                        m_DedicatedKey = std::get<DLMSVector>(Elements[0]);
                     }
                     m_ResponseAllowed = DLMSOptionalNone;
                     if (IsInitialized(Elements[1]))
                     {
-                        m_ResponseAllowed = Elements[1].get<bool>();
+                        m_ResponseAllowed = std::get<bool>(Elements[1]);
                     }
                     m_QOS = DLMSOptionalNone;
                     if (IsInitialized(Elements[2]))
                     {
-                        m_QOS = Elements[2].get<bool>();
+                        m_QOS = std::get<bool>(Elements[2]);
                     }
-                    m_DLMSVersion = Elements[3].get<uint8_t>();
+                    m_DLMSVersion = std::get<uint8_t>(Elements[3]);
                     //
                     // Skip the APPLICATION 32 Encoding
                     //
-                    m_Conformance = Elements[6].get<ConformanceBitsType>();
-                    m_APDUSize = Elements[7].get<uint16_t>();
+                    m_Conformance = std::get<ConformanceBitsType>(Elements[6]);
+                    m_APDUSize = std::get<uint16_t>(Elements[7]);
                     return true;
                 }
             }
@@ -351,15 +351,15 @@ namespace EPRI
                     m_QOS = DLMSOptionalNone;
                     if (IsInitialized(Elements[0]))
                     {
-                        m_QOS = Elements[0].get<int8_t>();
+                        m_QOS = std::get<int8_t>(Elements[0]);
                     }
-                    m_DLMSVersion = Elements[1].get<uint8_t>();
+                    m_DLMSVersion = std::get<uint8_t>(Elements[1]);
                     //
                     // Skip the APPLICATION 32 Encoding
                     //
-                    m_Conformance = Elements[4].get<ConformanceBitsType>();
-                    m_APDUSize = Elements[5].get<uint16_t>();
-                    m_LogicalNameReferencing = (Elements[6].get<uint16_t>() == 0x0007);
+                    m_Conformance = std::get<ConformanceBitsType>(Elements[4]);
+                    m_APDUSize = std::get<uint16_t>(Elements[5]);
+                    m_LogicalNameReferencing = (std::get<uint16_t>(Elements[6]) == 0x0007);
                     return true;
                 }
             }

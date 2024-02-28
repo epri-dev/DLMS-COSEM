@@ -315,13 +315,13 @@ namespace EPRI
                     if (pContext)
                     {
                         ssize_t                       ObjectIndex = 
-                                                         FindObject(Request.m_Parameter.get<Cosem_Attribute_Descriptor>());
+                                                         FindObject(std::get<Cosem_Attribute_Descriptor>(Request.m_Parameter));
                         if (ObjectIndex != -1)
                         {
                             Result = 
                                 m_Objects[ObjectIndex]->Get(*pContext,
                                                              &Data, 
-                                                             Request.m_Parameter.get<Cosem_Attribute_Descriptor>());
+                                                             std::get<Cosem_Attribute_Descriptor>(Request.m_Parameter));
                         }
                         else
                         {
@@ -363,11 +363,11 @@ namespace EPRI
                     if (pContext)
                     {
                         ssize_t ObjectIndex = 
-                            FindObject(Request.m_Parameter.get<Cosem_Attribute_Descriptor>());
+                            FindObject(std::get<Cosem_Attribute_Descriptor>(Request.m_Parameter));
                         if (ObjectIndex != -1)
                         {
                             Result = m_Objects[ObjectIndex]->Set(*pContext,
-                                                                 Request.m_Parameter.get<Cosem_Attribute_Descriptor>(), 
+                                                                 std::get<Cosem_Attribute_Descriptor>(Request.m_Parameter), 
                                                                  Request.m_Value);
                         }
                         else
@@ -408,11 +408,11 @@ namespace EPRI
                     if (pContext)
                     {
                         ssize_t ObjectIndex = 
-                            FindObject(Request.m_Parameter.get<Cosem_Method_Descriptor>());
+                            FindObject(std::get<Cosem_Method_Descriptor>(Request.m_Parameter));
                         if (ObjectIndex != -1)
                         {
                             Result = m_Objects[ObjectIndex]->Action(*pContext,
-                                                                    Request.m_Parameter.get<Cosem_Method_Descriptor>(), 
+                                                                    std::get<Cosem_Method_Descriptor>(Request.m_Parameter), 
                                                                     Request.m_ActionParameters);
                         }
                         else

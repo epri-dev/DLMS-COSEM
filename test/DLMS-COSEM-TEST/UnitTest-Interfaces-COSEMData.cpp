@@ -194,7 +194,7 @@ TEST(COSEMData, CHOICE)
     Test1.Rewind();
     ASSERT_EQ(COSEMType::VALUE_RETRIEVED, Test1.GetNextValue(&Value1));
     ASSERT_FALSE(IsSequence(Value1));
-    ASSERT_EQ(VAR_BLANK, Value1.get<DLMSVariant>().which());
+    ASSERT_EQ(VAR_BLANK, std::get<DLMSVariant>(Value1).index());
     
     Vector1.Clear();
     Test1.Clear();

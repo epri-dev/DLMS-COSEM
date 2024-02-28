@@ -79,12 +79,10 @@
 #include <string>
 #include <type_traits>
 #include <iostream>
+#include <optional>
 #include <vector>
+#include <variant>
 
-#include "mapbox/variant.hpp"
-#include "optional.h"
-
-using namespace mapbox::util;
 
 namespace EPRI
 {
@@ -96,16 +94,16 @@ namespace EPRI
     class DLMSVector;
     
     template <typename T>
-        using DLMSOptional = std::experimental::optional<T>;
-    #define DLMSOptionalNone std::experimental::nullopt
+        using DLMSOptional = std::optional<T>;
+    #define DLMSOptionalNone std::nullopt
     
     using DLMSVariantInitList = std::vector<uint32_t>;
     using DLMSBitSet = std::bitset<64>;
 
-    using DLMSVariant = variant<blank, bool, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t, 
+    using DLMSVariant = std::variant<blank, bool, int8_t, uint8_t, int16_t, uint16_t, int32_t, uint32_t, int64_t, uint64_t, 
         std::string, float, double, DLMSVector, DLMSVariantInitList, DLMSBitSet>;
     using DLMSSequence = std::vector<DLMSVariant>;
-    using DLMSValue = variant<DLMSVariant, DLMSSequence>;
+    using DLMSValue = std::variant<DLMSVariant, DLMSSequence>;
     enum DLMSVariantIndex
     {
         VAR_BLANK     = 0,
@@ -229,7 +227,7 @@ namespace EPRI
                 DLMSVariant Value;
                 if (Get<T, BitsToGet>(&Value, BigEndian))
                 {
-                    return Value.get<T>();
+                    return std::get<T>(Value);
                 }
                 throw std::out_of_range("Get failed.");
             }
@@ -310,7 +308,7 @@ namespace EPRI
                                     (sizeof(PeekBaseType) - Index) - 1]) << ((sizeof(PeekBaseType) - Index - 1) * 8));
                         }
                     }
-                    pValue->set<_VariantType>(*((_VariantType *)&V));
+                    *pValue = *((_VariantType *)&V);
                     if (nullptr != pBytesPeeked)
                     {
                         *pBytesPeeked = sizeof(PeekBaseType);
@@ -325,7 +323,7 @@ namespace EPRI
                 DLMSVariant Value;
                 if (Peek<T, BitsToGet>(&Value, BigEndian, Offset))
                 {
-                    return Value.get<T>();
+                    return std::get<T>(Value);
                 }
                 throw std::out_of_range("Peek failed.");
             }
@@ -350,47 +348,47 @@ namespace EPRI
     template <typename T>
         T& DLMSValueGet(DLMSValue& V)
         {
-            return V.get<DLMSVariant>().get<T>();
+            return std::get<T>(std::get<DLMSVariant>(V));
         }
     template <typename T>
         const T& DLMSValueGet(const DLMSValue& V)
         {
-            return V.get<DLMSVariant>().get<T>();
+            return std::get<T>(std::get<DLMSVariant>(V));
         }
     
     inline bool IsVariant(const DLMSValue& Value)
     {
-        return Value.which() == 0;
+        return Value.index() == 0;
     }
 
     inline bool IsSequence(const DLMSValue& Value)
     {
-        return Value.which() == 1;
+        return Value.index() == 1;
     }
 
     inline bool IsBlank(const DLMSVariant& Value)
     {
-        return Value.which() == VAR_BLANK;
+        return Value.index() == VAR_BLANK;
     }
     
     inline bool IsBlank(const DLMSValue& Value)
     {
-        return !IsSequence(Value) && IsBlank(Value.get<DLMSVariant>());
+        return !IsSequence(Value) && IsBlank(std::get<DLMSVariant>(Value));
     }
     
     inline bool IsInitialized(const DLMSVariant& Value)
     {
-        return Value.which() != VAR_BLANK;
+        return Value.index() != VAR_BLANK;
     }
     
     inline bool IsInitialized(const DLMSValue& Value)
     {
-        return IsSequence(Value) || !IsBlank(Value.get<DLMSVariant>());
+        return IsSequence(Value) || !IsBlank(std::get<DLMSVariant>(Value));
     }
     
-    inline DLMSVariantIndex VariantType(const DLMSVariant& Value)
+    inline DLMSVariantIndex VariantType(const DLMSVariant& Value) 
     {
-        return DLMSVariantIndex(Value.which());
+        return DLMSVariantIndex(Value.index());
     }
     
     template <typename T>
@@ -408,27 +406,27 @@ namespace EPRI
     
     inline DLMSSequence& DLMSValueGetSequence(DLMSValue& V)
     {
-        return V.get<DLMSSequence>();
+        return std::get<DLMSSequence>(V);
     }
 
     inline size_t DLMSValueGetSequenceSize(DLMSValue& V)
     {
-        return V.get<DLMSSequence>().size();
+        return std::get<DLMSSequence>(V).size();
     }
 
     inline const DLMSSequence& DLMSValueGetSequence(const DLMSValue& V)
     {
-        return V.get<DLMSSequence>();
+        return std::get<DLMSSequence>(V);
     }
 
     inline DLMSVariant& DLMSValueGetVariant(DLMSValue& V)
     {
-        return V.get<DLMSVariant>();
+        return std::get<DLMSVariant>(V);
     }
     
     inline const DLMSVariant& DLMSValueGetVariant(const DLMSValue& V)
     {
-        return V.get<DLMSVariant>();
+        return std::get<DLMSVariant>(V);
     }
 
 }

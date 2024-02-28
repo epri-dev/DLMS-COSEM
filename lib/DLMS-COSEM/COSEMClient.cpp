@@ -343,7 +343,7 @@ namespace EPRI
                     Get_Request_Normal Request;
                     Request.invoke_id_and_priority = pGetRequest->Data.m_InvokeIDAndPriority;
                     Request.cosem_attribute_descriptor = 
-                        pGetRequest->Data.m_Parameter.get<Cosem_Attribute_Descriptor>();
+                        std::get<Cosem_Attribute_Descriptor>(pGetRequest->Data.m_Parameter);
                     
                     TransportParam.SourceAddress = GetAddress();
                     TransportParam.DestinationAddress = pGetRequest->Data.m_DestinationAddress;
@@ -389,7 +389,7 @@ namespace EPRI
                     const APPSetRequestOrIndication& Parameters = pSetRequest->Data;
                     Request.invoke_id_and_priority = Parameters.m_InvokeIDAndPriority;
                     Request.cosem_attribute_descriptor = 
-                        Parameters.m_Parameter.get<Cosem_Attribute_Descriptor>();
+                        std::get<Cosem_Attribute_Descriptor>(Parameters.m_Parameter);
                     Request.value = Parameters.m_Value;
                     
                     TransportParam.SourceAddress = GetAddress();
@@ -442,7 +442,7 @@ namespace EPRI
                     const APPActionRequestOrIndication& Parameters = pActionRequest->Data;
                     Request.invoke_id_and_priority = Parameters.m_InvokeIDAndPriority;
                     Request.cosem_method_descriptor = 
-                        Parameters.m_Parameter.get<Cosem_Method_Descriptor>();
+                        std::get<Cosem_Method_Descriptor>(Parameters.m_Parameter);
                     Request.method_invocation_parameters = Parameters.m_ActionParameters;
                     
                     TransportParam.SourceAddress = GetAddress();

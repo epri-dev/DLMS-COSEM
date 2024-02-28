@@ -166,15 +166,15 @@ namespace EPRI
         if (m_Type.SelectChoice(get_response_normal))
         {
             m_Type.Append(invoke_id_and_priority);
-            if (m_Type.SelectChoice(result.which()))
+            if (m_Type.SelectChoice(result.index()))
             {
-                switch (result.which())
+                switch (result.index())
                 {
                 case data:
-                    m_Type.Append(result.get<DLMSVector>());
+                    m_Type.Append(std::get<DLMSVector>(result));
                     break;
                 case data_access_result:
-                    m_Type.Append((uint8_t) result.get<APDUConstants::Data_Access_Result>());
+                    m_Type.Append((uint8_t) std::get<APDUConstants::Data_Access_Result>(result));
                     break;
                 }
                 return Get_Response::GetBytes();                

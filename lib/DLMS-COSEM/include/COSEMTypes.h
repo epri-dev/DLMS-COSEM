@@ -126,7 +126,7 @@ namespace EPRI
         data               = 0,
         data_access_result = 1
     };
-    typedef variant<DLMSVector, APDUConstants::Data_Access_Result> Get_Data_Result;
+    typedef std::variant<DLMSVector, APDUConstants::Data_Access_Result> Get_Data_Result;
 #define ASN_GET_DATA_RESULT(OPTIONS)\
     ASN_BEGIN_CHOICE_WITH_OPTIONS(OPTIONS)\
         ASN_BEGIN_CHOICE_ENTRY_WITH_OPTIONS(EPRI::Get_Data_Result_Choice::data, ASN::IMPLICIT)\

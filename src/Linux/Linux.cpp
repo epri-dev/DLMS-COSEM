@@ -214,10 +214,10 @@ public:
     virtual bool OnGetConfirmation(RequestToken Token, const GetResponse& Response)
     {
         Base()->GetDebug()->TRACE("\n\nGet Confirmation for Token %d...\n", Token);
-        if (Response.ResultValid && Response.Result.which() == Get_Data_Result_Choice::data_access_result)
+        if (Response.ResultValid && Response.Result.index() == Get_Data_Result_Choice::data_access_result)
         {
             Base()->GetDebug()->TRACE("\tReturned Error Code %d...\n", 
-                Response.Result.get<APDUConstants::Data_Access_Result>());
+                std::get<APDUConstants::Data_Access_Result>(Response.Result));
             return false;
         }
         
@@ -226,7 +226,7 @@ public:
             IData     SerialNumbers;
             DLMSValue Value;
         
-            SerialNumbers.value = Response.Result.get<DLMSVector>();
+            SerialNumbers.value = std::get<DLMSVector>(Response.Result);
             if (COSEMType::VALUE_RETRIEVED == SerialNumbers.value.GetNextValue(&Value))
             {
                 Base()->GetDebug()->TRACE("%s\n", DLMSValueGet<VISIBLE_STRING_CType>(Value).c_str());
@@ -242,7 +242,7 @@ public:
             {
             case IAssociationLN::ATTR_PARTNERS_ID:
                 {
-                    CurrentAssociation.associated_partners_id = Response.Result.get<DLMSVector>();
+                    CurrentAssociation.associated_partners_id = std::get<DLMSVector>(Response.Result);
                     if (COSEMType::VALUE_RETRIEVED == CurrentAssociation.associated_partners_id.GetNextValue(&Value) &&
                         IsSequence(Value))
                     {
