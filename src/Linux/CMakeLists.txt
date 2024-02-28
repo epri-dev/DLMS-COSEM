@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.1)
 project(Linux VERSION 1.0.0)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 find_package(Threads REQUIRED)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/include/ ${CMAKE_CURRENT_LIST_DIR}/../../lib/DLMS-COSEM/include/ ${CMAKE_CURRENT_LIST_DIR}/../../lib/asio-1.10.6/include/)
 
