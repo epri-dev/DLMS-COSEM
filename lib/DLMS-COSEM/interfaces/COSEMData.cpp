@@ -654,7 +654,7 @@ namespace EPRI
         try
         {
             COSEMTypeAppendVisitor Visitor(SchemaEntry, &m_Data);
-            apply_visitor(Visitor, Value);
+            std::visit(Visitor, Value);
         }
         catch (const std::exception&)
         {
@@ -716,7 +716,7 @@ namespace EPRI
                 }
                 else 
                 {
-                    return InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, Value.get<DLMSVariant>());                  
+                    return InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, std::get<DLMSVariant>(Value));                  
                 }
                 return false;
             case ST_CHOICE:
@@ -735,7 +735,7 @@ namespace EPRI
                     }
                     else
                     {
-                        return InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, Value.get<DLMSVariant>());
+                        return InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, std::get<DLMSVariant>(Value));
                     }
                 }
                 break;

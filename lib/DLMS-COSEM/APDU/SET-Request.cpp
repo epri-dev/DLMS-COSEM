@@ -143,14 +143,14 @@ namespace EPRI
                     if (IsSequence(Value))
                     {
                         DLMSSequence& Sequence = DLMSValueGetSequence(Value);
-                        invoke_id_and_priority = Sequence[0].get<uint8_t>();
-                        cosem_attribute_descriptor.class_id = Sequence[1].get<uint16_t>();
-                        cosem_attribute_descriptor.instance_id = Sequence[2].get<DLMSVector>();
-                        cosem_attribute_descriptor.attribute_id = Sequence[3].get<int8_t>();
+                        invoke_id_and_priority = std::get<uint8_t>(Sequence[0]);
+                        cosem_attribute_descriptor.class_id = std::get<uint16_t>(Sequence[1]);
+                        cosem_attribute_descriptor.instance_id = std::get<DLMSVector>(Sequence[2]);
+                        cosem_attribute_descriptor.attribute_id = std::get<int8_t>(Sequence[3]);
                         //
                         // TODO - Selective Access
                         //
-                        value = Sequence[5].get<DLMSVector>();
+                        value = std::get<DLMSVector>(Sequence[5]);
                         return true;
                     }
                 }

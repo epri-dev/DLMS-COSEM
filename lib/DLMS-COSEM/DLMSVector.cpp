@@ -86,29 +86,29 @@ namespace EPRI
     {
         bool RetVal = true;
         uint32_t    CompareValue = 0;
-        switch (Variant.which())
+        switch (Variant.index())
         {
         case VAR_INIT_LIST:
             {
-                switch (Value.which())
+                switch (Value.index())
                 {
                 case VAR_INT8:  
-                    CompareValue = Value.get<int8_t>();
+                    CompareValue = std::get<int8_t>(Value);
                     break;
                 case VAR_UINT8: 
-                    CompareValue = Value.get<uint8_t>();
+                    CompareValue = std::get<uint8_t>(Value);
                     break;
                 case VAR_INT16: 
-                    CompareValue = Value.get<int16_t>();
+                    CompareValue = std::get<int16_t>(Value);
                     break;
                 case VAR_UINT16:
-                    CompareValue = Value.get<uint16_t>();
+                    CompareValue = std::get<uint16_t>(Value);
                     break;
                 case VAR_INT32 :
-                    CompareValue = Value.get<int32_t>();
+                    CompareValue = std::get<int32_t>(Value);
                     break;
                 case VAR_UINT32:
-                    CompareValue = Value.get<uint32_t>();
+                    CompareValue = std::get<uint32_t>(Value);
                     break;
                 default:
                     RetVal = false;
@@ -120,9 +120,9 @@ namespace EPRI
         }
         if (RetVal)
         {
-            RetVal = std::find(Variant.get<DLMSVariantInitList>().begin(),
-                Variant.get<DLMSVariantInitList>().end(),
-                CompareValue) != Variant.get<DLMSVariantInitList>().end();
+            RetVal = std::find(std::get<DLMSVariantInitList>(Variant).begin(),
+                std::get<DLMSVariantInitList>(Variant).end(),
+                CompareValue) != std::get<DLMSVariantInitList>(Variant).end();
         }
         return RetVal;
     }
@@ -455,7 +455,7 @@ namespace EPRI
     {
         size_t RetVal = m_Data.size();
         AppendVisitor Visitor(this, Trim);
-        apply_visitor(Visitor, Value);
+        std::visit(Visitor, Value);
         return RetVal;
     }
 

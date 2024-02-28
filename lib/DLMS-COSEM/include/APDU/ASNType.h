@@ -80,8 +80,8 @@
 #include <bitset>
 #include <limits>
 #include <stack>
+#include <variant>
 
-#include "mapbox/variant.hpp"
 #include "DLMSVector.h"
 
 namespace EPRI

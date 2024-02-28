@@ -334,7 +334,7 @@ namespace EPRI
                         DLMSVector Vector;
                         if (m_Data.GetVector(&Vector, Length))
                         {
-                            pValue->set<DLMSVector>(Vector);
+                            *pValue = Vector;
                             RetVal = VALUE_RETRIEVED;
                         }
                     }
@@ -344,7 +344,7 @@ namespace EPRI
                         std::string String;
                         if (m_Data.Get(&String, Length))
                         {
-                            pValue->set<std::string>(String);
+                            *pValue = String;
                             RetVal = VALUE_RETRIEVED;
                         }
                     }
@@ -359,7 +359,7 @@ namespace EPRI
     
     ASNType::GetNextResult ASNType::InternalGetOptional(DLMSVariant * pValue)
     {
-        pValue->set<blank>();
+        *pValue = DLMSBlank;
         m_Data.Skip(sizeof(uint8_t));
         return VALUE_RETRIEVED;
     }
@@ -428,7 +428,7 @@ namespace EPRI
                     DLMSVector Vector;
                     if (m_Data.GetVector(&Vector, m_Data.Size() - m_Data.GetReadPosition()))
                     {
-                        pValue->set<DLMSVector>(Vector);
+                        *pValue = Vector;
                         RetVal = VALUE_RETRIEVED;
                     }
                 }
@@ -659,7 +659,7 @@ namespace EPRI
             if (VALUE_RETRIEVED == RetVal)
             {
                 pValue->SetSchemaType(SchemaEntry->m_SchemaType);
-                if (!pValue->Append(Value.get<DLMSVariant>()))
+                if (!pValue->Append(std::get<DLMSVariant>(Value)))
                 {
                     RetVal = INVALID_CONDITION;
                 }
@@ -880,22 +880,22 @@ namespace EPRI
         switch (DT)
         {
         case ASN::GraphicString:
-            if (Value.which() == VAR_STRING)
+            if (Value.index() == VAR_STRING)
             {
-                AppendLength(Value.get<std::string>().length(), &m_Data);
-                m_Data.Append(Value.get<std::string>());
+                AppendLength(std::get<std::string>(Value).length(), &m_Data);
+                m_Data.Append(std::get<std::string>(Value));
                 return true;
             }
             return false;
         case ASN::OCTET_STRING:
-            if (Value.which() == VAR_VECTOR)
+            if (Value.index() == VAR_VECTOR)
             {
                 ssize_t Length = -1;
                 bool    IsImplicit = ASN_IS_IMPLICIT(SchemaEntry);
                 if (!IsImplicit)
                 {
                     m_Data.Append<uint8_t>(ASN::OCTET_STRING);
-                    Length = Value.get<DLMSVector>().Size();
+                    Length = std::get<DLMSVector>(Value).Size();
                 }
                 else if (ASN_SCHEMA_DATA_TYPE_SIZE(SchemaEntry))
                 {
@@ -903,9 +903,9 @@ namespace EPRI
                 }
                 if (!IsImplicit && Length >= 0)
                 {
-                    AppendLength(Value.get<DLMSVector>().Size(), &m_Data);
+                    AppendLength(std::get<DLMSVector>(Value).Size(), &m_Data);
                 }
-                m_Data.Append(Value.get<DLMSVector>(), 0, Length);
+                m_Data.Append(std::get<DLMSVector>(Value), 0, Length);
                 return true;
             }
             return false;
@@ -938,7 +938,7 @@ namespace EPRI
             return true;
         case ASN::BIT_STRING:
             {
-                if (Value.which() == VAR_BITSET)
+                if (Value.index() == VAR_BITSET)
                 {
                     bool   NeedLength = !ASN_IS_IMPLICIT(SchemaEntry);
                     size_t LengthIndex = 0;
@@ -947,16 +947,16 @@ namespace EPRI
                         m_Data.Append<uint8_t>(ASN::BIT_STRING);
                         LengthIndex = m_Data.Append<uint8_t>(0);
                     }
-                    ASNBitString Conversion(ASN_SCHEMA_DATA_TYPE_SIZE(SchemaEntry), Value.get<DLMSBitSet>());
+                    ASNBitString Conversion(ASN_SCHEMA_DATA_TYPE_SIZE(SchemaEntry), std::get<DLMSBitSet>(Value));
                     m_Data.Append(Conversion.GetBytes());
                     if (NeedLength)
                     {
                         m_Data[LengthIndex] = m_Data.Size() - LengthIndex - 1;
                     }
                 }
-                else if (Value.which() == VAR_VECTOR)
+                else if (Value.index() == VAR_VECTOR)
                 {
-                    m_Data.Append(Value.get<DLMSVector>());
+                    m_Data.Append(std::get<DLMSVector>(Value));
                 }
                 else
                 {
@@ -976,9 +976,9 @@ namespace EPRI
             m_Data.Append(Value, false);
             return true;
         case ASN::DT_Data:
-            if (Value.which() == VAR_VECTOR)
+            if (Value.index() == VAR_VECTOR)
             {
-                m_Data.Append(Value.get<DLMSVector>());
+                m_Data.Append(std::get<DLMSVector>(Value));
                 return true;
             }
             break;
@@ -1026,7 +1026,7 @@ namespace EPRI
                 }
                 else 
                 {
-                    return InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, Value.get<DLMSVariant>());                  
+                    return InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, std::get<DLMSVariant>(Value));                  
                 }
                 return false;
             case ST_CHOICE:
@@ -1083,7 +1083,7 @@ namespace EPRI
                     {
                         LengthIndex = m_Data.Append<uint8_t>(0x00);
                     }
-                    Appended = InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, Value.get<DLMSVariant>());
+                    Appended = InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, std::get<DLMSVariant>(Value));
                     if (Constructed && Appended)
                     {
                         m_Data[LengthIndex] = m_Data.Size() - LengthIndex - sizeof(uint8_t);
@@ -1153,7 +1153,7 @@ namespace EPRI
                         {
                             LengthIndex = m_Data.Append<uint8_t>(0x00);
                         }
-                        Appended = InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, Value.get<DLMSVariant>());
+                        Appended = InternalSimpleAppend(CURRENT_APPEND_STATE.m_SchemaEntry, std::get<DLMSVariant>(Value));
                         if (Constructed && Appended)
                         {
                             m_Data[LengthIndex] = m_Data.Size() - LengthIndex - sizeof(uint8_t);
@@ -1300,7 +1300,7 @@ namespace EPRI
                 Offset,
                 Count) >= 0)
             {
-                pVariant->set<DLMSVector>(Output);
+                *pVariant = Output;
                 if (pBytes)
                 {
                     *pBytes = Output.Size();

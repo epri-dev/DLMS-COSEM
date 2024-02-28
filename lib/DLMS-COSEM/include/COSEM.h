@@ -285,7 +285,7 @@ namespace EPRI
     struct APPGetRequestOrIndication : public APPBaseCallbackParameter
     {
         static const uint16_t ID = 0x2003;
-        typedef variant<Cosem_Attribute_Descriptor, uint32_t> RequestParameter;
+        typedef std::variant<Cosem_Attribute_Descriptor, uint32_t> RequestParameter;
         using GetRequestType = Get_Request::Get_Request_Choice;
 
         APPGetRequestOrIndication(COSEMAddressType SourceAddress,
@@ -354,7 +354,7 @@ namespace EPRI
     struct APPSetRequestOrIndication : public APPBaseCallbackParameter
     {
         static const uint16_t ID = 0x2005;
-        typedef variant<Cosem_Attribute_Descriptor, uint32_t> RequestParameter;
+        typedef std::variant<Cosem_Attribute_Descriptor, uint32_t> RequestParameter;
         using SetRequestType = Set_Request::Set_Request_Choice;
 
         APPSetRequestOrIndication(COSEMAddressType SourceAddress,
@@ -417,7 +417,7 @@ namespace EPRI
     struct APPActionRequestOrIndication : public APPBaseCallbackParameter
     {
         static const uint16_t ID = 0x2007;
-        typedef variant<Cosem_Method_Descriptor, uint32_t> RequestParameter;
+        typedef std::variant<Cosem_Method_Descriptor, uint32_t> RequestParameter;
         using ActionRequestType = Action_Request::Action_Request_Choice;
 
         APPActionRequestOrIndication(COSEMAddressType SourceAddress,

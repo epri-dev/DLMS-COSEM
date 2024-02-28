@@ -136,15 +136,15 @@ namespace EPRI
                     if (IsSequence(Response))
                     {
                         DLMSSequence& Sequence = DLMSValueGetSequence(Response);
-                        invoke_id_and_priority = Sequence[0].get<uint8_t>();
-                        single_response.result = (APDUConstants::Action_Result) Sequence[1].get<uint8_t>();
+                        invoke_id_and_priority = std::get<uint8_t>(Sequence[0]);
+                        single_response.result = (APDUConstants::Action_Result) std::get<uint8_t>(Sequence[1]);
                         if (IsBlank(Sequence[2]))
                         {
                             single_response.return_parameters = DLMSOptionalNone;
                         }
                         else
                         {
-                            single_response.return_parameters.value() = Sequence[2].get<DLMSVector>();
+                            single_response.return_parameters.value() = std::get<DLMSVector>(Sequence[2]);
                         }
                     }
                     else
@@ -171,7 +171,7 @@ namespace EPRI
             m_Type.Append((uint8_t) single_response.result);
             if (single_response.return_parameters)
             {
-                m_Type.Append(single_response.return_parameters.value().get<DLMSVector>());
+                m_Type.Append(std::get<DLMSVector>(single_response.return_parameters.value()));
             }
             else
             {
