@@ -5,6 +5,11 @@ endif (POLICY CMP0048)
 
 project(DLMS-COSEM VERSION 1.0.0)
 
+option(WITH_DOC "Create project documentation" OFF)
+
 add_subdirectory(lib)
 add_subdirectory(src)
 add_subdirectory(test)
+if (WITH_DOC)
+    add_subdirectory(doc)
+endif()
