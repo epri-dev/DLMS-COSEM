@@ -70,78 +70,43 @@
 // DEALINGS IN THE SOFTWARE.
 // 
 
-#include <gtest/gtest.h>
-
-#include "../../lib/DLMS-COSEM/COSEMClient.cpp"
-#include "../../lib/DLMS-COSEM/include/HDLCLLC.h"
-#include "DummySerial.h"
-
-namespace EPRI
-{
-    static DummySerial    TestSerial;
-
-    class COSEMClientFixture : public COSEMClient, public::testing::Test
-    {
-    public:
-        COSEMClientFixture() : 
-            COSEMClient(0x02),
-            m_MyClient(HDLCAddress(0x02), &TestSerial, HDLCOptions({ false, 3, 500 })),
-            m_MyServer(HDLCAddress(0x03), &TestSerial, HDLCOptions({ false, 3, 500 }))
-        {
-        }
-        
-    protected:
-        virtual void SetUp()
-        {
-            //
-            // Register the transport with COSEM...
-            //
-            RegisterTransport(&m_MyClient);
-        }
-        
-        HDLCClientLLC m_MyClient;
-        HDLCServerLLC m_MyServer;
-    };
-    
-    TEST_F(COSEMClientFixture, APPConnectRequestFailBeforeDLConnect)
-    {
-        // We should not be able to perform a COSEM-CONNECT until
-        // we are connected at the transport.
-        //
-        ASSERT_FALSE(OpenRequest(APPOpenRequestOrIndication(0x02, 0x03, xDLMS::InitiateRequest(),
-                                                            COSEMSecurityOptions())));
-    }
-    
-    TEST_F(COSEMClientFixture, ConnectRequest)
-    {
-#ifdef TODO
-        //
-        // Get them connected...
-        //
-        bool bConfirmation = false;
-        HDLCClientLLC::CallbackFunction ConnectConfirm = [&](const BaseCallbackParameter& _) -> bool
-        {
-            bConfirmation = true;
-            return true;
-        };
-        //
-        // Register the other callbacks...
-        //
-        m_MyClient.RegisterConnectConfirm(ConnectConfirm);
-        EXPECT_TRUE(m_MyClient.ConnectRequest(DLConnectRequestOrIndication(HDLCAddress(0x03))));
-        //
-        // Run the server...
-        //
-        m_MyServer.ConnectResponse(DLConnectConfirmOrResponse(HDLCAddress(0x02)));
-        //
-        // Run the client...
-        //
-        ASSERT_TRUE(bConfirmation);
-        //
-        // We are DL connected, we can now issue an APP Connect
-        //
-        ASSERT_TRUE(OpenRequest(APPOpenRequestOrIndication(0x02, 0x03)));
+#include "APDU/ACTION-Response.h"
+#if USE_CATCH2_VERSION == 2
+#  define CATCH_CONFIG_MAIN
+#  include <catch2/catch.hpp>
+#elif USE_CATCH2_VERSION == 3
+#  include <catch2/catch_test_macros.hpp>
+#else
+#  error "Catch2 version unknown"
 #endif
-    }
 
+using namespace EPRI;
+
+//<action-response-normal>
+//  <invoke-id-and-priority>
+//    <invoke-id>1</invoke-id>
+//    <is-priority>True</is-priority>
+//    <requires-confirmation>False</requires-confirmation>
+//  </invoke-id-and-priority>
+//  <response>
+//    <action-result-code raw="0">Success</action-result-code>
+//  </response>
+//</action-response-normal>
+static const std::vector<uint8_t> FINAL = 
+{ 
+    0xC7, 0x01, 0x81, 0x00, 0x00
+};
+
+TEST_CASE("ACTION_Response GeneralUsage") 
+{
+    Action_Response_Normal Response;
+    DLMSVector             Data(FINAL);
+    
+    REQUIRE(Response.Parse(&Data, 1, 1));
+    REQUIRE(0x81 == Response.invoke_id_and_priority);
+    REQUIRE(Response.single_response.result == APDUConstants::Action_Result::success);
+    REQUIRE_FALSE((bool) Response.single_response.return_parameters);
+    
+    REQUIRE(FINAL == Response.GetBytes());
+    
 }

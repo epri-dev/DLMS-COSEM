@@ -70,9 +70,17 @@
 // DEALINGS IN THE SOFTWARE.
 // 
 
-#include <gtest/gtest.h>
+#if USE_CATCH2_VERSION == 2
+#  define CATCH_CONFIG_MAIN
+#  include <catch2/catch.hpp>
+#elif USE_CATCH2_VERSION == 3
+#  include <catch2/catch_test_macros.hpp>
+#else
+#  error "Catch2 version unknown"
+#endif
 
-#include "../../lib/DLMS-COSEM/hdlc/HDLCClient.cpp"
+#include "HDLCLLC.h"
+
 #include "DummySerial.h"
 
 using namespace EPRI;
@@ -81,21 +89,26 @@ static DummySerial    TestSerial;
 
 static const uint8_t PH_TEST1[] = { 0xE6, 0xE6, 0x00, 0x1D, 0x64, 0x00, 0x14, 0x00, 0x00 };
 
-class HDLCClientFixture : public HDLCClient, public testing::Test
+class HDLCClientFixture : private HDLCClient
 {
 public:
     HDLCClientFixture()
         : HDLCClient(HDLCAddress(uint8_t(0x67), uint8_t(0x7f)), &TestSerial, HDLCOptions({ false, 3, 500 }), 10)
     {
     }
+    // expose a few protected functions as public
+    Packet * publicGetWorkingRXPacket() { return this->GetWorkingRXPacket(); }
+    void publicEnqueueWorkingRXPacket() { this->EnqueueWorkingRXPacket(); }            
+    HDLCErrorCode publicProcessPacketReception() { return this->ProcessPacketReception(); }
 };
 
-TEST_F(HDLCClientFixture, PacketHandler)
+TEST_CASE("HDLCClientFixture PacketHandler")
 {
+    HDLCClientFixture fixture{};
     // Get a working packet...
     //
-    Packet * pPacket = this->GetWorkingRXPacket();
-    ASSERT_NE(nullptr, pPacket);
+    Packet * pPacket = fixture.publicGetWorkingRXPacket();
+    REQUIRE(pPacket != nullptr);
     
     // Make a packet to pretend that we have received it...
     //
@@ -105,14 +118,14 @@ TEST_F(HDLCClientFixture, PacketHandler)
         HDLCControl(HDLCControl::UI),
         PH_TEST1,
         sizeof(PH_TEST1));
-    ASSERT_EQ(SUCCESS, Error);
+    REQUIRE(SUCCESS == Error);
     
     // Done with it, enqueue it for handling and dispatch...
     //
-    this->EnqueueWorkingRXPacket();
+    fixture.publicEnqueueWorkingRXPacket();
     
     // Process it...
     //
-    EXPECT_EQ(SUCCESS, this->ProcessPacketReception());
+    REQUIRE(SUCCESS == fixture.publicProcessPacketReception());
 
 }

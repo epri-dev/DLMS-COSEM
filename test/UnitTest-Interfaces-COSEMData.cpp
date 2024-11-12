@@ -70,9 +70,17 @@
 // DEALINGS IN THE SOFTWARE.
 // 
 
-#include <gtest/gtest.h>
+#if USE_CATCH2_VERSION == 2
+#  define CATCH_CONFIG_MAIN
+#  include <catch2/catch.hpp>
+#elif USE_CATCH2_VERSION == 3
+#  include <catch2/catch_test_macros.hpp>
+#else
+#  error "Catch2 version unknown"
+#endif
 
-#include "../../lib/DLMS-COSEM/interfaces/COSEMData.cpp"
+
+#include "interfaces/COSEMData.h"
 
 using namespace EPRI;
 
@@ -171,162 +179,162 @@ COSEM_BEGIN_SCHEMA(Structure_Schema_Test2)
     COSEM_END_STRUCTURE
 COSEM_END_SCHEMA
 
-TEST(COSEMData, Constructors) 
+TEST_CASE("COSEMData Constructors") 
 {
     COSEMType Empty;
-    ASSERT_TRUE(Empty.IsEmpty());
-    ASSERT_FALSE(Empty.Append(42));
+    REQUIRE(Empty.IsEmpty());
+    REQUIRE_FALSE(Empty.Append(42));
     
     COSEMType Test1(Octet_String_Schema_Test);
     const DLMSVector TEST1({ 1, 2, 3, 4 });
-    ASSERT_TRUE(Test1.Append(TEST1));
+    REQUIRE(Test1.Append(TEST1));
 }
 
-TEST(COSEMData, CHOICE) 
+TEST_CASE("COSEMData CHOICE") 
 {
     DLMSVector Vector1;
     DLMSValue  Value1;
     COSEMType Test1(Choice_Schema_Test1);
-    ASSERT_TRUE(Test1.SelectChoice(COSEMDataType::NULL_DATA));
-    ASSERT_TRUE(Test1.Append());
+    REQUIRE(Test1.SelectChoice(COSEMDataType::NULL_DATA));
+    REQUIRE(Test1.Append());
     Test1.GetBytes(&Vector1);
-    ASSERT_EQ(Vector1, DLMSVector({ 0x00 }));
+    REQUIRE(Vector1 == DLMSVector({ 0x00 }));
     Test1.Rewind();
-    ASSERT_EQ(COSEMType::VALUE_RETRIEVED, Test1.GetNextValue(&Value1));
-    ASSERT_FALSE(IsSequence(Value1));
-    ASSERT_EQ(VAR_BLANK, std::get<DLMSVariant>(Value1).index());
+    REQUIRE(COSEMType::VALUE_RETRIEVED == Test1.GetNextValue(&Value1));
+    REQUIRE_FALSE(IsSequence(Value1));
+    REQUIRE(VAR_BLANK == std::get<DLMSVariant>(Value1).index());
     
     Vector1.Clear();
     Test1.Clear();
-    ASSERT_TRUE(Test1.SelectChoice(COSEMDataType::BIT_STRING));
+    REQUIRE(Test1.SelectChoice(COSEMDataType::BIT_STRING));
     COSEMBitString  BitString1(8, 42);
-    ASSERT_TRUE(Test1.Append(BitString1));
+    REQUIRE(Test1.Append(BitString1));
     Test1.GetBytes(&Vector1);
-    ASSERT_EQ(Vector1, DLMSVector({ 0x04, 0x08, 0x2A }));
+    REQUIRE(Vector1 == DLMSVector({ 0x04, 0x08, 0x2A }));
     Test1.Rewind();
-    ASSERT_EQ(COSEMType::VALUE_RETRIEVED, Test1.GetNextValue(&Value1)); 
-    ASSERT_FALSE(IsSequence(Value1));
-    ASSERT_EQ(42, DLMSValueGet<BIT_STRING_CType>(Value1).to_ulong());
+    REQUIRE(COSEMType::VALUE_RETRIEVED == Test1.GetNextValue(&Value1)); 
+    REQUIRE_FALSE(IsSequence(Value1));
+    REQUIRE(42 == DLMSValueGet<BIT_STRING_CType>(Value1).to_ulong());
 
     Vector1.Clear();
     Test1.Clear();
-    ASSERT_TRUE(Test1.SelectChoice(COSEMDataType::DOUBLE_LONG));
-    ASSERT_TRUE(Test1.Append(-23872872));
+    REQUIRE(Test1.SelectChoice(COSEMDataType::DOUBLE_LONG));
+    REQUIRE(Test1.Append(-23872872));
     Test1.GetBytes(&Vector1);
-    ASSERT_EQ(Vector1, DLMSVector({ 0x05, 0xFE, 0x93, 0xBA, 0x98 }));
+    REQUIRE(Vector1 == DLMSVector({ 0x05, 0xFE, 0x93, 0xBA, 0x98 }));
     Test1.Rewind();
-    ASSERT_EQ(COSEMType::VALUE_RETRIEVED, Test1.GetNextValue(&Value1));
-    ASSERT_FALSE(IsSequence(Value1));
-    ASSERT_EQ(-23872872, DLMSValueGet<DOUBLE_LONG_CType>(Value1));
+    REQUIRE(COSEMType::VALUE_RETRIEVED == Test1.GetNextValue(&Value1));
+    REQUIRE_FALSE(IsSequence(Value1));
+    REQUIRE(-23872872 == DLMSValueGet<DOUBLE_LONG_CType>(Value1));
 
     Vector1.Clear();
     Test1.Clear();
-    ASSERT_TRUE(Test1.SelectChoice(COSEMDataType::DOUBLE_LONG_UNSIGNED));
-    ASSERT_TRUE(Test1.Append(0x539343));
+    REQUIRE(Test1.SelectChoice(COSEMDataType::DOUBLE_LONG_UNSIGNED));
+    REQUIRE(Test1.Append(0x539343));
     Test1.GetBytes(&Vector1);
-    ASSERT_EQ(Vector1, DLMSVector({ 0x06, 0x00, 0x53, 0x93, 0x43 }));
+    REQUIRE(Vector1 == DLMSVector({ 0x06, 0x00, 0x53, 0x93, 0x43 }));
     Test1.Rewind();
-    ASSERT_EQ(COSEMType::VALUE_RETRIEVED, Test1.GetNextValue(&Value1));
-    ASSERT_FALSE(IsSequence(Value1));
-    ASSERT_EQ(0x539343, DLMSValueGet<DOUBLE_LONG_UNSIGNED_CType>(Value1));
+    REQUIRE(COSEMType::VALUE_RETRIEVED == Test1.GetNextValue(&Value1));
+    REQUIRE_FALSE(IsSequence(Value1));
+    REQUIRE(0x539343 == DLMSValueGet<DOUBLE_LONG_UNSIGNED_CType>(Value1));
 
     Vector1.Clear();
     Test1.Clear();
-    ASSERT_TRUE(Test1.SelectChoice(COSEMDataType::OCTET_STRING));
+    REQUIRE(Test1.SelectChoice(COSEMDataType::OCTET_STRING));
     const DLMSVector TEST1({ 1, 2, 3, 4 });
-    ASSERT_TRUE(Test1.Append(TEST1));
+    REQUIRE(Test1.Append(TEST1));
     Test1.GetBytes(&Vector1);
-    ASSERT_EQ(Vector1, DLMSVector({ 0x09, 0x04, 0x01, 0x02, 0x03, 0x04 }));
+    REQUIRE(Vector1 == DLMSVector({ 0x09, 0x04, 0x01, 0x02, 0x03, 0x04 }));
     Test1.Rewind();
-    ASSERT_EQ(COSEMType::VALUE_RETRIEVED, Test1.GetNextValue(&Value1));
-    ASSERT_FALSE(IsSequence(Value1));
-    ASSERT_EQ(TEST1, DLMSValueGet<OCTET_STRING_CType>(Value1));
+    REQUIRE(COSEMType::VALUE_RETRIEVED == Test1.GetNextValue(&Value1));
+    REQUIRE_FALSE(IsSequence(Value1));
+    REQUIRE(TEST1 == DLMSValueGet<OCTET_STRING_CType>(Value1));
 
     Vector1.Clear();
     Test1.Clear();
-    ASSERT_TRUE(Test1.SelectChoice(COSEMDataType::VISIBLE_STRING));
+    REQUIRE(Test1.SelectChoice(COSEMDataType::VISIBLE_STRING));
     const std::string TEST2("TEST");
-    ASSERT_TRUE(Test1.Append(TEST2));
+    REQUIRE(Test1.Append(TEST2));
     Test1.GetBytes(&Vector1);
-    ASSERT_EQ(Vector1, DLMSVector({ 0x0A, 0x04, 0x54, 0x45, 0x53, 0x54 }));
+    REQUIRE(Vector1 == DLMSVector({ 0x0A, 0x04, 0x54, 0x45, 0x53, 0x54 }));
     Test1.Rewind();
-    ASSERT_EQ(COSEMType::VALUE_RETRIEVED, Test1.GetNextValue(&Value1));
-    ASSERT_FALSE(IsSequence(Value1));
-    ASSERT_EQ(TEST2, DLMSValueGet<VISIBLE_STRING_CType>(Value1));
+    REQUIRE(COSEMType::VALUE_RETRIEVED == Test1.GetNextValue(&Value1));
+    REQUIRE_FALSE(IsSequence(Value1));
+    REQUIRE(TEST2 == DLMSValueGet<VISIBLE_STRING_CType>(Value1));
  
     Vector1.Clear();
     Test1.Clear();
-    ASSERT_TRUE(Test1.SelectChoice(COSEMDataType::INTEGER));
-    ASSERT_TRUE(Test1.Append(-42));
+    REQUIRE(Test1.SelectChoice(COSEMDataType::INTEGER));
+    REQUIRE(Test1.Append(-42));
     Test1.GetBytes(&Vector1);
-    ASSERT_EQ(Vector1, DLMSVector({ 0x0F, 0xD6 }));
+    REQUIRE(Vector1 == DLMSVector({ 0x0F, 0xD6 }));
     Test1.Rewind();
-    ASSERT_EQ(COSEMType::VALUE_RETRIEVED, Test1.GetNextValue(&Value1));
-    ASSERT_FALSE(IsSequence(Value1));
-    ASSERT_EQ(-42, DLMSValueGet<INTEGER_CType>(Value1));
+    REQUIRE(COSEMType::VALUE_RETRIEVED == Test1.GetNextValue(&Value1));
+    REQUIRE_FALSE(IsSequence(Value1));
+    REQUIRE(-42 == DLMSValueGet<INTEGER_CType>(Value1));
   
     Vector1.Clear();
     Test1.Clear();
-    ASSERT_TRUE(Test1.SelectChoice(COSEMDataType::LONG));
-    ASSERT_TRUE(Test1.Append(-30123));
+    REQUIRE(Test1.SelectChoice(COSEMDataType::LONG));
+    REQUIRE(Test1.Append(-30123));
     Test1.GetBytes(&Vector1);
-    ASSERT_EQ(Vector1, DLMSVector({ 0x10, 0x8A, 0x55 }));
+    REQUIRE(Vector1 == DLMSVector({ 0x10, 0x8A, 0x55 }));
     Test1.Rewind();
-    ASSERT_EQ(COSEMType::VALUE_RETRIEVED, Test1.GetNextValue(&Value1));
-    ASSERT_FALSE(IsSequence(Value1));
-    ASSERT_EQ(-30123, DLMSValueGet<LONG_CType>(Value1));
+    REQUIRE(COSEMType::VALUE_RETRIEVED == Test1.GetNextValue(&Value1));
+    REQUIRE_FALSE(IsSequence(Value1));
+    REQUIRE(-30123 == DLMSValueGet<LONG_CType>(Value1));
 
     Vector1.Clear();
     Test1.Clear();
-    ASSERT_TRUE(Test1.SelectChoice(COSEMDataType::UNSIGNED));
-    ASSERT_TRUE(Test1.Append(0x43));
+    REQUIRE(Test1.SelectChoice(COSEMDataType::UNSIGNED));
+    REQUIRE(Test1.Append(0x43));
     Test1.GetBytes(&Vector1);
-    ASSERT_EQ(Vector1, DLMSVector({ 0x11, 0x43 }));
+    REQUIRE(Vector1 == DLMSVector({ 0x11, 0x43 }));
     Test1.Rewind();
-    ASSERT_EQ(COSEMType::VALUE_RETRIEVED, Test1.GetNextValue(&Value1));
-    ASSERT_FALSE(IsSequence(Value1));
-    ASSERT_EQ(0x43, DLMSValueGet<UNSIGNED_CType>(Value1));
+    REQUIRE(COSEMType::VALUE_RETRIEVED == Test1.GetNextValue(&Value1));
+    REQUIRE_FALSE(IsSequence(Value1));
+    REQUIRE(0x43 == DLMSValueGet<UNSIGNED_CType>(Value1));
 
     Vector1.Clear();
     Test1.Clear();
-    ASSERT_TRUE(Test1.SelectChoice(COSEMDataType::LONG_UNSIGNED));
-    ASSERT_TRUE(Test1.Append(0x3554));
+    REQUIRE(Test1.SelectChoice(COSEMDataType::LONG_UNSIGNED));
+    REQUIRE(Test1.Append(0x3554));
     Test1.GetBytes(&Vector1);
-    ASSERT_EQ(Vector1, DLMSVector({ COSEMDataType::LONG_UNSIGNED, 0x35, 0x54 }));
+    REQUIRE(Vector1 == DLMSVector({ COSEMDataType::LONG_UNSIGNED, 0x35, 0x54 }));
     Test1.Rewind();
-    ASSERT_EQ(COSEMType::VALUE_RETRIEVED, Test1.GetNextValue(&Value1));
-    ASSERT_FALSE(IsSequence(Value1));
-    ASSERT_EQ(0x3554, DLMSValueGet<LONG_UNSIGNED_CType>(Value1));
+    REQUIRE(COSEMType::VALUE_RETRIEVED == Test1.GetNextValue(&Value1));
+    REQUIRE_FALSE(IsSequence(Value1));
+    REQUIRE(0x3554 == DLMSValueGet<LONG_UNSIGNED_CType>(Value1));
 
     Vector1.Clear();
     Test1.Clear();
-    ASSERT_TRUE(Test1.SelectChoice(COSEMDataType::LONG64));
-    ASSERT_TRUE(Test1.Append(-38373878373383));
+    REQUIRE(Test1.SelectChoice(COSEMDataType::LONG64));
+    REQUIRE(Test1.Append(-38373878373383));
     Test1.GetBytes(&Vector1);
-    ASSERT_EQ(Vector1, DLMSVector({ COSEMDataType::LONG64, 0xFF, 0xFF, 0xDD, 0x19, 0x62, 0x9C, 0x63, 0xF9 }));
+    REQUIRE(Vector1 == DLMSVector({ COSEMDataType::LONG64, 0xFF, 0xFF, 0xDD, 0x19, 0x62, 0x9C, 0x63, 0xF9 }));
     Test1.Rewind();
-    ASSERT_EQ(COSEMType::VALUE_RETRIEVED, Test1.GetNextValue(&Value1));
-    ASSERT_FALSE(IsSequence(Value1));
-    ASSERT_EQ(-38373878373383, DLMSValueGet<LONG64_CType>(Value1));
+    REQUIRE(COSEMType::VALUE_RETRIEVED == Test1.GetNextValue(&Value1));
+    REQUIRE_FALSE(IsSequence(Value1));
+    REQUIRE(-38373878373383 == DLMSValueGet<LONG64_CType>(Value1));
 
     Vector1.Clear();
     Test1.Clear();
-    ASSERT_TRUE(Test1.SelectChoice(COSEMDataType::LONG64_UNSIGNED));
-    ASSERT_TRUE(Test1.Append(0x494849474342));
+    REQUIRE(Test1.SelectChoice(COSEMDataType::LONG64_UNSIGNED));
+    REQUIRE(Test1.Append(0x494849474342));
     Test1.GetBytes(&Vector1);
-    ASSERT_EQ(Vector1, DLMSVector({ COSEMDataType::LONG64_UNSIGNED, 0x00, 0x00, 0x49, 0x48, 0x49, 0x47, 0x43, 0x42 }));
+    REQUIRE(Vector1 == DLMSVector({ COSEMDataType::LONG64_UNSIGNED, 0x00, 0x00, 0x49, 0x48, 0x49, 0x47, 0x43, 0x42 }));
     Test1.Rewind();
-    ASSERT_EQ(COSEMType::VALUE_RETRIEVED, Test1.GetNextValue(&Value1));
-    ASSERT_FALSE(IsSequence(Value1));
-    ASSERT_EQ(0x494849474342, DLMSValueGet<LONG64_UNSIGNED_CType>(Value1));
+    REQUIRE(COSEMType::VALUE_RETRIEVED == Test1.GetNextValue(&Value1));
+    REQUIRE_FALSE(IsSequence(Value1));
+    REQUIRE(0x494849474342 == DLMSValueGet<LONG64_UNSIGNED_CType>(Value1));
 
 //    Test1.Clear();
-//    ASSERT_TRUE(Test1.SelectChoice(COSEMDataType::FLOAT32));
-//    ASSERT_TRUE(Test1.Append(-4.56843f));
+//    REQUIRE(Test1.SelectChoice(COSEMDataType::FLOAT32));
+//    REQUIRE(Test1.Append(-4.56843f));
 //
 //    Test1.Clear();
-//    ASSERT_TRUE(Test1.SelectChoice(COSEMDataType::FLOAT64));
-//    ASSERT_TRUE(Test1.Append(-443243243234.613234343));
+//    REQUIRE(Test1.SelectChoice(COSEMDataType::FLOAT64));
+//    REQUIRE(Test1.Append(-443243243234.613234343));
     
 }
 

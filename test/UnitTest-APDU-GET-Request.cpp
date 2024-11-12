@@ -70,9 +70,38 @@
 // DEALINGS IN THE SOFTWARE.
 // 
 
-#include <gtest/gtest.h>
+#include "APDU/GET-Request.h"
+#if USE_CATCH2_VERSION == 2
+#  define CATCH_CONFIG_MAIN
+#  include <catch2/catch.hpp>
+#elif USE_CATCH2_VERSION == 3
+#  include <catch2/catch_test_macros.hpp>
+#else
+#  error "Catch2 version unknown"
+#endif
 
-TEST(LinuxMemoryTest, Alloc) 
+using namespace EPRI;
+
+static const std::vector<uint8_t> FINAL = 
+{ 
+    0xC0, 0x01, 0x45, 0x00, 0x07, 0x00, 0x00, 0x63, 
+    0x62, 0x01, 0xFF, 0x02, 0x00
+};
+
+TEST_CASE("GET_Request GeneralUsage") 
 {
-
+    Get_Request_Normal Request;
+    DLMSVector         Data(FINAL);
+    
+    REQUIRE(Request.Parse(&Data,1, 1));
+    REQUIRE(0x45 == Request.invoke_id_and_priority);
+    REQUIRE(0x0007 == Request.cosem_attribute_descriptor.class_id);
+    REQUIRE(DLMSVector({0x00, 0x00, 0x63, 0x62, 0x01, 0xFF}) == Request.cosem_attribute_descriptor.instance_id);
+    REQUIRE(0x02 == Request.cosem_attribute_descriptor.attribute_id);
+    
+    REQUIRE(FINAL == Request.GetBytes());
+    Request.cosem_attribute_descriptor.attribute_id = 4;
+    REQUIRE(
+        std::vector<uint8_t>({ 0xC0, 0x01, 0x45, 0x00, 0x07, 0x00, 0x00, 0x63, 0x62, 0x01, 0xFF, 0x04, 0x00 }) ==
+        Request.GetBytes());
 }

@@ -70,85 +70,59 @@
 // DEALINGS IN THE SOFTWARE.
 // 
 
-#include <gtest/gtest.h>
+#include "APDU/RLRE.h"
+#if USE_CATCH2_VERSION == 2
+#  define CATCH_CONFIG_MAIN
+#  include <catch2/catch.hpp>
+#elif USE_CATCH2_VERSION == 3
+#  include <catch2/catch_test_macros.hpp>
+#else
+#  error "Catch2 version unknown"
+#endif
 
-#include "../../lib/DLMS-COSEM/include/interfaces/ICOSEMInterface.h"
+using namespace EPRI;
 
-namespace EPRI
+static const std::vector<uint8_t> FINAL = 
+{ 
+    0x63, 0x15, 0x80, 0x01, 0x00, 0xBE, 0x10, 0x04, 0x0E, 0x08, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00,
+    0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07
+};
+
+TEST_CASE("RLRE Build") 
 {
+    RLRE r1;
     
-    class ISimpleClass : public ICOSEMInterface
-    {
-    public:
-        ISimpleClass()
-            : ICOSEMInterface(0, 0)
-        {
-        }
-        virtual ~ISimpleClass()
-        {
-        }
-        
-        enum Attributes : ObjectAttributeIdType
-        {
-            ATTR_SIMPLE = 2,
-            ATTR_SIMPLE_TWO = 3
-        };
-        
-        COSEMAttribute<ATTR_SIMPLE, OctetStringSchema, 0x08>     simple;
-        COSEMAttribute<ATTR_SIMPLE_TWO, OctetStringSchema, 0x10> simple2;
-        
-    };
+    REQUIRE(r1.reason.Append(int8_t(EPRI::RLRE::ReleaseResponseReason::normal))); 
+    //
+    // Just the application_context_name does not make a valid RLRQ...
+    //
+    REQUIRE_FALSE(r1.IsValid());
+    std::vector<uint8_t> R1CHECK_REASON = { 0x80, 0x01, 0x00 };
+    REQUIRE(static_cast<std::vector<uint8_t>>(r1.reason) == R1CHECK_REASON);
     
-    class ISimpleObject : public ISimpleClass, public ICOSEMObject
-    {
-    public:
-        ISimpleObject()
-            : ICOSEMObject({0,1,0,0,0,0})
-        {
-        }
-        virtual ~ISimpleObject()
-        {
-        }
-        
-    protected:
-        virtual APDUConstants::Data_Access_Result InternalGet(const AssociationContext& Context,
-            ICOSEMAttribute * pAttribute, 
-            const Cosem_Attribute_Descriptor& Descriptor, 
-            SelectiveAccess * pSelectiveAccess) final
-        {
-            return APDUConstants::Data_Access_Result::other_reason;
-        }
-        
+    REQUIRE(r1.user_information.Append(DLMSVector({ 0x08, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00,
+                                                        0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07 })));
+    std::vector<uint8_t> RLRE_VEC = r1.GetBytes();
+    REQUIRE(RLRE_VEC == FINAL);
+    
+}
 
-    };
+TEST_CASE("RLRE Parse") 
+{
+    RLRE        r1;
+    DLMSVector  Data(FINAL);
+    ASNType             UserInformation(ASN::OCTET_STRING, 
+                                        DLMSVector({ 0x08, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00,
+                                                     0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07 }));
     
-    class SimpleObjectFixture :
-        public ISimpleObject,
-        public::testing::Test
-    {
-    public:
-        SimpleObjectFixture()
-        {
-        }
-        
-    protected:
-        
-    };
+    REQUIRE(r1.Parse(&Data, 1, 1));
+
+    DLMSValue   Value1;
+    REQUIRE(ASNType::GetNextResult::VALUE_RETRIEVED == r1.reason.GetNextValue(&Value1));
+    REQUIRE(DLMSValueGet<int8_t>(Value1) == EPRI::RLRE::ReleaseResponseReason::normal); 
     
-    TEST_F(SimpleObjectFixture, Construct)
-    {
-    }
-    
-    TEST_F(SimpleObjectFixture, Get)
-    {
-    }
-    
-    TEST_F(SimpleObjectFixture, Set)
-    {
-    }
-    
-    TEST_F(SimpleObjectFixture, Action)
-    {
-    }
+    ASNType Current;
+    REQUIRE(ASNType::GetNextResult::VALUE_RETRIEVED == r1.user_information.GetNextValue(&Current));
+    REQUIRE(UserInformation == Current);
 
 }

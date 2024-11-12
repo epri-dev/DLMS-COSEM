@@ -70,72 +70,108 @@
 // DEALINGS IN THE SOFTWARE.
 // 
 
-#include <gtest/gtest.h>
+#if USE_CATCH2_VERSION == 2
+#  define CATCH_CONFIG_MAIN
+#  include <catch2/catch.hpp>
+#elif USE_CATCH2_VERSION == 3
+#  include <catch2/catch_test_macros.hpp>
+#else
+#  error "Catch2 version unknown"
+#endif
 
-#include "../../lib/DLMS-COSEM/include/HDLCLLC.h"
-#include "../../lib/DLMS-COSEM/hdlc/HDLCLLC.cpp"
-#include "DummySerial.h"
+#include <string>
 
-namespace EPRI
+#include "StateMachine.h"
+
+using namespace EPRI;
+
+TEST_CASE("StateMachine Basics") 
 {
-
-    static DummySerial    TestSerial;
-
-    class HDLCLLCFixture : public HDLCClientLLC, public ::testing::Test
+    class MyMachine : public StateMachine
     {
     public:
-        HDLCLLCFixture()
-            : HDLCClientLLC(HDLCAddress(0x02), &TestSerial, HDLCOptions({ false, 3, 500 }))
-            , m_MyServer(HDLCAddress(0x01), &TestSerial, HDLCOptions({ false, 3, 500 }), 10)
+        struct MyMachineData : public EventData
         {
-        }
-        virtual void SetUp()
+            MyMachineData(int Data) :
+                m_Data(Data)
+            {
+            }
+            int m_Data;
+            virtual void Release()
+            {
+                delete this;
+            }
+        };
+        
+        MyMachine() = delete;
+        MyMachine(int * pCounter)
+            : StateMachine(ST_MAX_STATES),
+            m_pCounter(pCounter)
         {
+            BEGIN_STATE_MAP
+                STATE_MAP_ENTRY(ST_STATE_1, MyMachine::ST_State1)
+                STATE_MAP_ENTRY(ST_STATE_2, MyMachine::ST_State2)
+                STATE_MAP_ENTRY(ST_STATE_3, MyMachine::ST_State3)
+            END_STATE_MAP
+
+            ST_State1();
         }
-        virtual void TearDown()
+        
+        bool MyExternalEvent1()
         {
+            bool bAllowed = false;
+            BEGIN_TRANSITION_MAP
+                TRANSITION_MAP_ENTRY(ST_STATE_1, ST_STATE_2)
+                TRANSITION_MAP_ENTRY(ST_STATE_2, EVENT_IGNORED)
+                TRANSITION_MAP_ENTRY(ST_STATE_3, EVENT_IGNORED)
+            END_TRANSITION_MAP(bAllowed, nullptr);
+            return bAllowed;
         }
-    
-        HDLCServerLLC m_MyServer;
+        
+        bool MyExternalEvent2(MyMachineData * pData)
+        {
+            bool bAllowed = false;
+             BEGIN_TRANSITION_MAP
+                TRANSITION_MAP_ENTRY(ST_STATE_1, CANNOT_HAPPEN)
+                TRANSITION_MAP_ENTRY(ST_STATE_2, ST_STATE_3)
+                TRANSITION_MAP_ENTRY(ST_STATE_3, EVENT_IGNORED)
+            END_TRANSITION_MAP(bAllowed, pData);
+            return bAllowed;
+        }
+ 
+    private:
+        int * m_pCounter;
+        
+        void ST_State1(EventData * pData = nullptr)
+        {
+            (*m_pCounter)++;
+        }
+        void ST_State2(EventData * pData = nullptr)
+        {
+            (*m_pCounter)++;
+        }
+        void ST_State3(EventData * pData)
+        {
+            MyMachineData * pMyData = dynamic_cast<MyMachineData *>(pData);
+            (*m_pCounter)++;
+            (*m_pCounter) += pMyData->m_Data;
+        }
+        
+            
+        enum States : uint8_t
+        {
+            ST_STATE_1 = 0,
+            ST_STATE_2,
+            ST_STATE_3,
+            ST_MAX_STATES
+        };
+        
     };
-
-    TEST_F(HDLCLLCFixture, ConnectTest)
-    {
-#ifdef TODO
-        bool          bConfirmation = false;
-        bool          bIndication = false;
-        HDLCLLCFixture::CallbackFunction ConnectConfirm = [&](const BaseCallbackParameter& _) -> bool
-        {
-            bConfirmation = true;
-            return true;
-        };
-        HDLCLLCFixture::CallbackFunction ConnectIndication = [&](const BaseCallbackParameter& _) -> bool
-        {
-            bIndication = true;
-            return true;
-        };
-        //
-        // Attempt to connect to our dummy server...
-        //
-        RegisterConnectConfirm(ConnectConfirm);
-        EXPECT_TRUE(ConnectRequest(DLConnectRequestOrIndication(HDLCAddress(0x01))));
-        //
-        // Run the server...
-        //
-        EXPECT_TRUE(bIndication);
-        m_MyServer.ConnectResponse(DLConnectConfirmOrResponse(HDLCAddress(0x02)));
-        //
-        // Run the client...
-        //
-        ASSERT_TRUE(bConfirmation);
-        //
-        // We are already connected, so let's send a simple message...
-        //
-        const uint8_t SAMPLE_DATA[] = "COME HERE WATSON, I NEED YOU!";
-        std::vector<uint8_t> DATA(SAMPLE_DATA,
-            SAMPLE_DATA + sizeof(SAMPLE_DATA));
-        EXPECT_TRUE(DataRequest(DLDataRequestParameter(HDLCAddress(0x01), HDLCControl::INFO, DATA)));
-#endif
-    }
-
+    int       Counter = 0;
+    MyMachine M(&Counter);
+    
+    M.MyExternalEvent1();
+    M.MyExternalEvent2(new MyMachine::MyMachineData(42));
+    REQUIRE(45 == Counter);
+    
 }

@@ -70,37 +70,24 @@
 // DEALINGS IN THE SOFTWARE.
 // 
 
-#include <gtest/gtest.h>
+#if USE_CATCH2_VERSION == 2
+#  define CATCH_CONFIG_MAIN
+#  include <catch2/catch.hpp>
+#elif USE_CATCH2_VERSION == 3
+#  include <catch2/catch_test_macros.hpp>
+#else
+#  error "Catch2 version unknown"
+#endif
 
-#include "../../lib/DLMS-COSEM/APDU/ACTION-Response.cpp"
+#include "hdlc/HDLCMAC.h"
+#include "DummySerial.h"
 
 using namespace EPRI;
 
-//<action-response-normal>
-//  <invoke-id-and-priority>
-//    <invoke-id>1</invoke-id>
-//    <is-priority>True</is-priority>
-//    <requires-confirmation>False</requires-confirmation>
-//  </invoke-id-and-priority>
-//  <response>
-//    <action-result-code raw="0">Success</action-result-code>
-//  </response>
-//</action-response-normal>
-static const std::vector<uint8_t> FINAL = 
-{ 
-    0xC7, 0x01, 0x81, 0x00, 0x00
-};
+static DummySerial    TestSerial;
 
-TEST(ACTION_Response, GeneralUsage) 
+TEST_CASE("HDLCMAC Constructor") 
 {
-    Action_Response_Normal Response;
-    DLMSVector             Data(FINAL);
-    
-    ASSERT_TRUE(Response.Parse(&Data, 1, 1));
-    ASSERT_EQ(0x81, Response.invoke_id_and_priority);
-    ASSERT_EQ(Response.single_response.result, APDUConstants::Action_Result::success);
-    ASSERT_FALSE((bool) Response.single_response.return_parameters);
-    
-    ASSERT_EQ(FINAL, Response.GetBytes());
-    
+#ifdef TODO
+#endif
 }

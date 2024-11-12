@@ -70,10 +70,72 @@
 // DEALINGS IN THE SOFTWARE.
 // 
 
-#include <gtest/gtest.h>
+#if USE_CATCH2_VERSION == 2
+#  define CATCH_CONFIG_MAIN
+#  include <catch2/catch.hpp>
+#elif USE_CATCH2_VERSION == 3
+#  include <catch2/catch_test_macros.hpp>
+#else
+#  error "Catch2 version unknown"
+#endif
 
-int main(int argc, char **argv) 
+#include "HDLCLLC.h"
+#include "DummySerial.h"
+
+namespace EPRI
 {
-	testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
+
+    static DummySerial    TestSerial;
+
+    class HDLCLLCFixture : public HDLCClientLLC
+    {
+    public:
+        HDLCLLCFixture()
+            : HDLCClientLLC(HDLCAddress(0x02), &TestSerial, HDLCOptions({ false, 3, 500 }))
+            , m_MyServer(HDLCAddress(0x01), &TestSerial, HDLCOptions({ false, 3, 500 }), 10)
+        {
+        }
+    
+        HDLCServerLLC m_MyServer;
+    };
+
+    TEST_CASE("HDLCLLCFixture ConnectTest")
+    {
+#ifdef TODO
+        bool          bConfirmation = false;
+        bool          bIndication = false;
+        HDLCLLCFixture::CallbackFunction ConnectConfirm = [&](const BaseCallbackParameter& _) -> bool
+        {
+            bConfirmation = true;
+            return true;
+        };
+        HDLCLLCFixture::CallbackFunction ConnectIndication = [&](const BaseCallbackParameter& _) -> bool
+        {
+            bIndication = true;
+            return true;
+        };
+        //
+        // Attempt to connect to our dummy server...
+        //
+        RegisterConnectConfirm(ConnectConfirm);
+        EXPECT_TRUE(ConnectRequest(DLConnectRequestOrIndication(HDLCAddress(0x01))));
+        //
+        // Run the server...
+        //
+        EXPECT_TRUE(bIndication);
+        m_MyServer.ConnectResponse(DLConnectConfirmOrResponse(HDLCAddress(0x02)));
+        //
+        // Run the client...
+        //
+        ASSERT_TRUE(bConfirmation);
+        //
+        // We are already connected, so let's send a simple message...
+        //
+        const uint8_t SAMPLE_DATA[] = "COME HERE WATSON, I NEED YOU!";
+        std::vector<uint8_t> DATA(SAMPLE_DATA,
+            SAMPLE_DATA + sizeof(SAMPLE_DATA));
+        EXPECT_TRUE(DataRequest(DLDataRequestParameter(HDLCAddress(0x01), HDLCControl::INFO, DATA)));
+#endif
+    }
+
 }
