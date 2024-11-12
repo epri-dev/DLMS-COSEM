@@ -70,53 +70,49 @@
 // DEALINGS IN THE SOFTWARE.
 // 
 
-#include <gtest/gtest.h>
+#include "APDU/xDLMS.h"
+#if USE_CATCH2_VERSION == 2
+#  define CATCH_CONFIG_MAIN
+#  include <catch2/catch.hpp>
+#elif USE_CATCH2_VERSION == 3
+#  include <catch2/catch_test_macros.hpp>
+#else
+#  error "Catch2 version unknown"
+#endif
 
-#include "../../lib/DLMS-COSEM/APDU/RLRE.cpp"
+#include <string>
+#include "COSEM.h"
+
+// #include "../../lib/DLMS-COSEM/COSEMObjectInstanceID.cpp"
 
 using namespace EPRI;
 
-static const std::vector<uint8_t> FINAL = 
-{ 
-    0x63, 0x15, 0x80, 0x01, 0x00, 0xBE, 0x10, 0x04, 0x0E, 0x08, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00,
-    0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07
-};
-
-TEST(RLRE, Build) 
+TEST_CASE("COSEMObjectInstanceID Constructors") 
 {
-    RLRE r1;
+    // Empty
+    COSEMObjectInstanceID  ID1;
+    REQUIRE(ID1.IsEmpty());
     
-    ASSERT_TRUE(r1.reason.Append(int8_t(EPRI::RLRE::ReleaseResponseReason::normal))); 
-    //
-    // Just the application_context_name does not make a valid RLRQ...
-    //
-    ASSERT_FALSE(r1.IsValid());
-    std::vector<uint8_t> R1CHECK_REASON = { 0x80, 0x01, 0x00 };
-    ASSERT_TRUE(r1.reason == R1CHECK_REASON);
+    DLMSVector             Vector1({ 1, 2, 3, 4, 5, 6 });
+    REQUIRE(ID1.Parse(&Vector1));
+    REQUIRE("1-2:3.4.5*6" == ID1.ToString());
     
-    ASSERT_TRUE(r1.user_information.Append(DLMSVector({ 0x08, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00,
-                                                        0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07 })));
-    std::vector<uint8_t> RLRE_VEC = r1.GetBytes();
-    ASSERT_TRUE(RLRE_VEC == FINAL);
-    
-}
+    COSEMObjectInstanceID  ID2({ 3, 4, 5, 6, 7, 8 });
+    REQUIRE("3-4:5.6.7*8" == ID2.ToString());
+    REQUIRE_FALSE(ID2.IsEmpty());
+   
+        
+    REQUIRE(3 == ID2.GetValueGroup(COSEMObjectInstanceID::VALUE_GROUP_A));
+    REQUIRE(4 == ID2.GetValueGroup(COSEMObjectInstanceID::VALUE_GROUP_B));
+    REQUIRE(5 == ID2.GetValueGroup(COSEMObjectInstanceID::VALUE_GROUP_C));
+    REQUIRE(6 == ID2.GetValueGroup(COSEMObjectInstanceID::VALUE_GROUP_D));
+    REQUIRE(7 == ID2.GetValueGroup(COSEMObjectInstanceID::VALUE_GROUP_E));
+    REQUIRE(8 == ID2.GetValueGroup(COSEMObjectInstanceID::VALUE_GROUP_F));
 
-TEST(RLRE, Parse) 
-{
-    RLRE        r1;
-    DLMSVector  Data(FINAL);
-    ASNType             UserInformation(ASN::OCTET_STRING, 
-                                        DLMSVector({ 0x08, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00,
-                                                     0x00, 0x38, 0x1F, 0x00, 0x9B, 0x00, 0x07 }));
-    
-    ASSERT_TRUE(r1.Parse(&Data, 1, 1));
+    REQUIRE(ID2 != ID1);
+    REQUIRE(ID2 == COSEMObjectInstanceID({ 3, 4, 5, 6, 7, 8 }));
 
-    DLMSValue   Value1;
-    ASSERT_EQ(ASNType::GetNextResult::VALUE_RETRIEVED, r1.reason.GetNextValue(&Value1));
-    ASSERT_EQ(DLMSValueGet<int8_t>(Value1), EPRI::RLRE::ReleaseResponseReason::normal); 
+    DLMSVector Vector2 = ID2;
+    REQUIRE(Vector2 == DLMSVector({ 3, 4, 5, 6, 7, 8 }));
     
-    ASNType Current;
-    ASSERT_EQ(ASNType::GetNextResult::VALUE_RETRIEVED, r1.user_information.GetNextValue(&Current));
-    ASSERT_TRUE(UserInformation == Current);
-
 }

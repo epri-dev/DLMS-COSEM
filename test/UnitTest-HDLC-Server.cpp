@@ -70,9 +70,16 @@
 // DEALINGS IN THE SOFTWARE.
 // 
 
-#include <gtest/gtest.h>
+#if USE_CATCH2_VERSION == 2
+#  define CATCH_CONFIG_MAIN
+#  include <catch2/catch.hpp>
+#elif USE_CATCH2_VERSION == 3
+#  include <catch2/catch_test_macros.hpp>
+#else
+#  error "Catch2 version unknown"
+#endif
 
-#include "../../lib/DLMS-COSEM/hdlc/HDLCServer.cpp"
+#include "HDLCLLC.h"
 #include "DummySerial.h"
 
 using namespace EPRI;
@@ -80,7 +87,7 @@ using namespace EPRI;
 static DummySerial    TestSerial;
 
 
-class HDLCServerFixture : public HDLCServer, public testing::Test
+class HDLCServerFixture : public HDLCServer
 {
 public:
     HDLCServerFixture()
@@ -89,6 +96,8 @@ public:
     }
 };
 
-TEST_F(HDLCServerFixture, Test)
+TEST_CASE("HDLCServerFixture Test")
 {
+#ifdef TODO
+#endif
 }

@@ -70,16 +70,38 @@
 // DEALINGS IN THE SOFTWARE.
 // 
 
-#include <gtest/gtest.h>
+#if USE_CATCH2_VERSION == 2
+#  define CATCH_CONFIG_MAIN
+#  include <catch2/catch.hpp>
+#elif USE_CATCH2_VERSION == 3
+#  include <catch2/catch_test_macros.hpp>
+#else
+#  error "Catch2 version unknown"
+#endif
 
-#include "../../lib/DLMS-COSEM/hdlc/HDLCStatistics.cpp"
-#include "../../lib/DLMS-COSEM/hdlc/HDLCMAC.cpp"
-#include "DummySerial.h"
+
+#include <string>
+#include "hdlc/HDLCAddress.h"
 
 using namespace EPRI;
 
-static DummySerial    TestSerial;
-
-TEST(HDLCMAC, Constructor) 
+TEST_CASE("HDLCAddress ConstructorsAndComparisons") 
 {
+    HDLCAddress hdlc1(0x01);
+    uint8_t hdlc1_EXPECTED[] = { 0x03 };
+    REQUIRE(0 == std::memcmp(&hdlc1, hdlc1_EXPECTED, sizeof(hdlc1_EXPECTED)));
+    
+    HDLCAddress hdlc2(uint8_t(0x67), uint8_t(0x7f));
+    uint8_t hdlc2_EXPECTED[] = { 0xCE, 0xFF };
+    REQUIRE(0 == std::memcmp(&hdlc2, hdlc2_EXPECTED, sizeof(hdlc2_EXPECTED)));
+    
+    HDLCAddress hdlc3(uint16_t(0x1234), uint16_t(0x3FFF));
+    uint8_t hdlc3_EXPECTED[] = { 0x48, 0x68, 0xFE, 0xFF };
+    REQUIRE(0 == std::memcmp(&hdlc3, hdlc3_EXPECTED, sizeof(hdlc3_EXPECTED)));
+    
+    REQUIRE_FALSE(hdlc1 == hdlc2);
+    hdlc1 = hdlc2;
+    REQUIRE(hdlc1 == hdlc2);
+
 }
+

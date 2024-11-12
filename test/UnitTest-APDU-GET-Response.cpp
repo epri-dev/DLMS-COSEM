@@ -70,42 +70,36 @@
 // DEALINGS IN THE SOFTWARE.
 // 
 
-#include <gtest/gtest.h>
-
-#include "../../lib/DLMS-COSEM/APDU/RLRQ.cpp"
+#include "APDU/GET-Response.h"
+#if USE_CATCH2_VERSION == 2
+#  define CATCH_CONFIG_MAIN
+#  include <catch2/catch.hpp>
+#elif USE_CATCH2_VERSION == 3
+#  include <catch2/catch_test_macros.hpp>
+#else
+#  error "Catch2 version unknown"
+#endif
 
 using namespace EPRI;
 
 static const std::vector<uint8_t> FINAL = 
 { 
-    0x62, 0x00, 
+    0xC4, 0x01, 0x43, 0x00, 0x09, 0x0C, 0x07, 0xE0, 0x01, 0x04, 0x01, 0x09, 0x32, 0x0A, 0x00, 0x80, 
+    0x00, 0x00
 };
-    
-TEST(RLRQ, GeneralUsage) 
-{
-    RLRQ r1;
-    
-//    ASSERT_TRUE(r1.reason.Append(int8_t(EPRI::RLRQ::ReleaseRequestReason::normal))); 
-//    //
-//    // Just the application_context_name does not make a valid RLRQ...
-//    //
-//    ASSERT_FALSE(r1.IsValid());
-//    std::vector<uint8_t> R1CHECK_REASON = { 0x00 };
-//    ASSERT_TRUE(r1.reason == R1CHECK_REASON);
-       
-    std::vector<uint8_t> RLRQ_VEC = r1.GetBytes();
-    ASSERT_TRUE(RLRQ_VEC == FINAL);
-    
-}
 
-TEST(RLRQ, Parse) 
+TEST_CASE("GET_Response GeneralUsage") 
 {
-    RLRQ        r1;
-    DLMSVector  Data(FINAL);
+    Get_Response_Normal Response;
+    DLMSVector          Data(FINAL);
     
-    ASSERT_TRUE(r1.Parse(&Data,1, 1)); 
-
-    DLMSValue   Value1;
-    ASSERT_EQ(ASNType::GetNextResult::VALUE_EMPTY, r1.reason.GetNextValue(&Value1));
-//    ASSERT_EQ(DLMSValueGet<int8_t>(Value1), EPRI::RLRQ::ReleaseRequestReason::normal);
+    REQUIRE(Response.Parse(&Data, 1, 1));
+    REQUIRE(0x43 == Response.invoke_id_and_priority);
+    REQUIRE(Get_Data_Result_Choice::data == Response.result.index());
+    REQUIRE(DLMSVector({0x09, 0x0C, 0x07, 0xE0, 0x01, 0x04, 0x01, 0x09, 0x32, 0x0A, 0x00, 0x80, 
+                          0x00, 0x00}) == 
+              std::get<DLMSVector>(Response.result));
+    
+    REQUIRE(FINAL == Response.GetBytes());
+    
 }

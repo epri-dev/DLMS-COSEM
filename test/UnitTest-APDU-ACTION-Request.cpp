@@ -70,30 +70,88 @@
 // DEALINGS IN THE SOFTWARE.
 // 
 
-#include <gtest/gtest.h>
-#include <string>
-
-#include "../../lib/DLMS-COSEM/include/hdlc/HDLCAddress.h"
+#include "APDU/ACTION-Request.h"
+#if USE_CATCH2_VERSION == 2
+#  define CATCH_CONFIG_MAIN
+#  include <catch2/catch.hpp>
+#elif USE_CATCH2_VERSION == 3
+#  include <catch2/catch_test_macros.hpp>
+#else
+#  error "Catch2 version unknown"
+#endif
 
 using namespace EPRI;
 
-TEST(HDLCAddress, ConstructorsAndComparisons) 
+//<action-request-normal>
+//  <invoke-id-and-priority>
+//    <invoke-id>1</invoke-id>
+//    <is-priority>True</is-priority>
+//    <requires-confirmation>False</requires-confirmation>
+//  </invoke-id-and-priority>
+//  <cosem-method-descriptor>
+//    <class-id>9</class-id>
+//    <instance-id raw="00 00 0a 00 00 ff">0-0:10.0.0.255</instance-id>
+//    <method-id>1</method-id>
+//  </cosem-method-descriptor>
+//  <method-invocation-parameters>
+//    <long-unsigned>2</long-unsigned>
+//  </method-invocation-parameters>
+//</action-request-normal>
+static const std::vector<uint8_t> FINAL = 
+{ 
+    0xC3, 0x01, 0x81, 0x00, 0x09, 0x00, 0x00, 0x0A, 
+    0x00, 0x00, 0xFF, 0x01, 0x01, 0x12, 0x00, 0x02
+};
+
+//<action-request-normal>
+//  <invoke-id-and-priority>
+//    <invoke-id>1</invoke-id>
+//    <is-priority>True</is-priority>
+//    <requires-confirmation>False</requires-confirmation>
+//  </invoke-id-and-priority>
+//  <cosem-method-descriptor>
+//    <class-id>9</class-id>
+//    <instance-id raw="00 00 0a 00 00 ff">0-0:10.0.0.255</instance-id>
+//    <method-id>1</method-id>
+//  </cosem-method-descriptor>
+//</action-request-normal>
+static const std::vector<uint8_t> FINAL1 = 
+{ 
+    0xC3, 0x01, 0x81, 0x09, 0x09, 0x01, 0x10, 0x0A, 
+    0x42, 0x34, 0xFF, 0x01, 0x00
+};
+
+TEST_CASE("ACTION_Request GeneralUsage") 
 {
-    HDLCAddress hdlc1(0x01);
-    uint8_t hdlc1_EXPECTED[] = { 0x03 };
-    EXPECT_EQ(0, std::memcmp(&hdlc1, hdlc1_EXPECTED, sizeof(hdlc1_EXPECTED)));
+    Action_Request_Normal Request;
+    DLMSVector            Data(FINAL);
     
-    HDLCAddress hdlc2(uint8_t(0x67), uint8_t(0x7f));
-    uint8_t hdlc2_EXPECTED[] = { 0xCE, 0xFF };
-    EXPECT_EQ(0, std::memcmp(&hdlc2, hdlc2_EXPECTED, sizeof(hdlc2_EXPECTED)));
+    REQUIRE(Request.Parse(&Data, 1, 1));
+    REQUIRE(0x81 == Request.invoke_id_and_priority);
+    REQUIRE(0x0009 == Request.cosem_method_descriptor.class_id);
+    REQUIRE(DLMSVector({0x00, 0x00, 0x0A, 0x00, 0x00, 0xFF}) == Request.cosem_method_descriptor.instance_id);
+    REQUIRE(0x01 == Request.cosem_method_descriptor.method_id);
+    REQUIRE((bool)Request.method_invocation_parameters);
+    REQUIRE(DLMSVector({ 0x01, 0x12, 0x00, 0x02 }) ==
+              Request.method_invocation_parameters.value());
     
-    HDLCAddress hdlc3(uint16_t(0x1234), uint16_t(0x3FFF));
-    uint8_t hdlc3_EXPECTED[] = { 0x48, 0x68, 0xFE, 0xFF };
-    EXPECT_EQ(0, std::memcmp(&hdlc3, hdlc3_EXPECTED, sizeof(hdlc3_EXPECTED)));
+    REQUIRE(FINAL == Request.GetBytes());
+    Request.cosem_method_descriptor.method_id = 4;
+    REQUIRE(
+        std::vector<uint8_t>({ 0xC3, 0x01, 0x81, 0x00, 0x09, 0x00, 0x00, 0x0A, 
+                               0x00, 0x00, 0xFF, 0x04, 0x01, 0x12, 0x00, 0x02 }) ==
+        Request.GetBytes());
     
-    EXPECT_FALSE(hdlc1 == hdlc2);
-    hdlc1 = hdlc2;
-    EXPECT_TRUE(hdlc1 == hdlc2);
 
+    DLMSVector            Data1(FINAL1);
+    Request.Clear();
+    REQUIRE(Request.Parse(&Data1, 1, 1));
+    REQUIRE(0x81 == Request.invoke_id_and_priority);
+    REQUIRE(0x0909 == Request.cosem_method_descriptor.class_id);
+    REQUIRE(DLMSVector({ 0x01, 0x10, 0x0A, 0x42, 0x34, 0xFF }) == Request.cosem_method_descriptor.instance_id);
+    REQUIRE(0x01 == Request.cosem_method_descriptor.method_id);
+    REQUIRE_FALSE((bool)Request.method_invocation_parameters);
+    
+    REQUIRE(FINAL1 == Request.GetBytes());
+    
 }
-

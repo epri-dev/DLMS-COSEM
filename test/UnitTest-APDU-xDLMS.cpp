@@ -70,100 +70,72 @@
 // DEALINGS IN THE SOFTWARE.
 // 
 
-#include <gtest/gtest.h>
-#include <string>
-
-#include "../../lib/DLMS-COSEM/StateMachine.cpp"
+#include "APDU/xDLMS.h"
+#if USE_CATCH2_VERSION == 2
+#  define CATCH_CONFIG_MAIN
+#  include <catch2/catch.hpp>
+#elif USE_CATCH2_VERSION == 3
+#  include <catch2/catch_test_macros.hpp>
+#else
+#  error "Catch2 version unknown"
+#endif
 
 using namespace EPRI;
 
-TEST(StateMachine, Basics) 
+TEST_CASE("xDLMS Constructors") 
 {
-    class MyMachine : public StateMachine
-    {
-    public:
-        struct MyMachineData : public EventData
-        {
-            MyMachineData(int Data) :
-                m_Data(Data)
-            {
-            }
-            int m_Data;
-            virtual void Release()
-            {
-                delete this;
-            }
-        };
-        
-        MyMachine() = delete;
-        MyMachine(int * pCounter)
-            : StateMachine(ST_MAX_STATES),
-            m_pCounter(pCounter)
-        {
-            BEGIN_STATE_MAP
-                STATE_MAP_ENTRY(ST_STATE_1, MyMachine::ST_State1)
-                STATE_MAP_ENTRY(ST_STATE_2, MyMachine::ST_State2)
-                STATE_MAP_ENTRY(ST_STATE_3, MyMachine::ST_State3)
-            END_STATE_MAP
-
-            ST_State1();
-        }
-        
-        bool MyExternalEvent1()
-        {
-            bool bAllowed = false;
-            BEGIN_TRANSITION_MAP
-                TRANSITION_MAP_ENTRY(ST_STATE_1, ST_STATE_2)
-                TRANSITION_MAP_ENTRY(ST_STATE_2, EVENT_IGNORED)
-                TRANSITION_MAP_ENTRY(ST_STATE_3, EVENT_IGNORED)
-            END_TRANSITION_MAP(bAllowed, nullptr);
-            return bAllowed;
-        }
-        
-        bool MyExternalEvent2(MyMachineData * pData)
-        {
-            bool bAllowed = false;
-             BEGIN_TRANSITION_MAP
-                TRANSITION_MAP_ENTRY(ST_STATE_1, CANNOT_HAPPEN)
-                TRANSITION_MAP_ENTRY(ST_STATE_2, ST_STATE_3)
-                TRANSITION_MAP_ENTRY(ST_STATE_3, EVENT_IGNORED)
-            END_TRANSITION_MAP(bAllowed, pData);
-            return bAllowed;
-        }
- 
-    private:
-        int * m_pCounter;
-        
-        void ST_State1(EventData * pData = nullptr)
-        {
-            (*m_pCounter)++;
-        }
-        void ST_State2(EventData * pData = nullptr)
-        {
-            (*m_pCounter)++;
-        }
-        void ST_State3(EventData * pData)
-        {
-            MyMachineData * pMyData = dynamic_cast<MyMachineData *>(pData);
-            (*m_pCounter)++;
-            (*m_pCounter) += pMyData->m_Data;
-        }
-        
-            
-        enum States : uint8_t
-        {
-            ST_STATE_1 = 0,
-            ST_STATE_2,
-            ST_STATE_3,
-            ST_MAX_STATES
-        };
-        
-    };
-    int       Counter = 0;
-    MyMachine M(&Counter);
+    xDLMS::InitiateRequest IRQ1;
+    REQUIRE_FALSE(IRQ1.Initialized());
     
-    M.MyExternalEvent1();
-    M.MyExternalEvent2(new MyMachine::MyMachineData(42));
-    ASSERT_EQ(45, Counter);
+    xDLMS::InitiateRequest IRQ2(42,
+        xDLMS::AvailableStackConformance);
+    REQUIRE(IRQ2.Initialized());
+    REQUIRE(IRQ2.APDUSize() == 42);
+    REQUIRE(IRQ2.ConformanceBits() == xDLMS::AvailableStackConformance);
+    REQUIRE(IRQ2.DLMSVersion() == APDUConstants::CURRENT_DLMS_VERSION);
+    REQUIRE(IsBlank(IRQ2.DedicatedKey())); 
+    REQUIRE(IsBlank(IRQ2.QOS())); 
+    
+    std::vector<uint8_t> IRQ2Bytes = IRQ2.GetBytes();   
+    std::vector<uint8_t> IRQ2Expected( { 0x01, 0x00, 0x00, 0x00, 0x06, 0x5F, 0x1F, 
+            0x04, 0x00, 0x00, 0x00, 0x19, 0x00, 0x2A } );
+    REQUIRE(IRQ2Expected == IRQ2Bytes);
+    
+    DLMSVector ParseBytes(IRQ2Expected);
+    IRQ2.Clear();  
+    REQUIRE_FALSE(IRQ2.Initialized()); 
+    REQUIRE(IRQ2.Parse(&ParseBytes)); 
+    REQUIRE(IRQ2.Initialized());
+    REQUIRE(IRQ2.APDUSize() == 42);
+    REQUIRE(IRQ2.ConformanceBits() == xDLMS::AvailableStackConformance);
+    REQUIRE(IRQ2.DLMSVersion() == APDUConstants::CURRENT_DLMS_VERSION);
+    REQUIRE(IsBlank(IRQ2.DedicatedKey())); 
+    REQUIRE(IsBlank(IRQ2.QOS())); 
+     
+    xDLMS::InitiateResponse IRE1;
+    REQUIRE_FALSE(IRE1.Initialized()); 
+    
+    xDLMS::InitiateResponse IRE2(640);
+    REQUIRE(IRE2.Initialized());
+    REQUIRE(IRE2.APDUSize() == 640);
+    REQUIRE(IRE2.ConformanceBits() == xDLMS::AvailableStackConformance);
+    REQUIRE(IRE2.DLMSVersion() == APDUConstants::CURRENT_DLMS_VERSION);
+    REQUIRE(IsBlank(IRE2.QOS())); 
+    
+    std::vector<uint8_t> IRE2Bytes = IRE2.GetBytes();;
+    std::vector<uint8_t> IRE2Expected( { 0x08, 0x00, 0x06, 0x5F, 0x1F, 
+            0x04, 0x00, 0x00, 0x00, 0x19, 0x02, 0x80, 0x00, 0x07 } );
+    REQUIRE(IRE2Expected == IRE2Bytes);
+    
+    ParseBytes = IRE2Expected;
+    IRE2.Clear();  
+    REQUIRE_FALSE(IRE2.Initialized()); 
+    REQUIRE(IRE2.Parse(&ParseBytes)); 
+    REQUIRE(IRE2.Initialized());
+    REQUIRE(IRE2.APDUSize() == 640);
+    REQUIRE(IRE2.ConformanceBits() == xDLMS::AvailableStackConformance);
+    REQUIRE(IRE2.DLMSVersion() == APDUConstants::CURRENT_DLMS_VERSION);
+    REQUIRE(IsBlank(IRE2.QOS())); 
+    
     
 }

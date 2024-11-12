@@ -70,30 +70,92 @@
 // DEALINGS IN THE SOFTWARE.
 // 
 
-#include <gtest/gtest.h>
+#include "APDU/xDLMS.h"
+#if USE_CATCH2_VERSION == 2
+#  define CATCH_CONFIG_MAIN
+#  include <catch2/catch.hpp>
+#elif USE_CATCH2_VERSION == 3
+#  include <catch2/catch_test_macros.hpp>
+#else
+#  error "Catch2 version unknown"
+#endif
 
-#include "../../lib/DLMS-COSEM/APDU/GET-Response.cpp"
+//#include "../../lib/DLMS-COSEM/COSEMClient.cpp"
+#include "COSEM.h"
+#include "HDLCLLC.h"
+#include "DummySerial.h"
 
-using namespace EPRI;
-
-static const std::vector<uint8_t> FINAL = 
-{ 
-    0xC4, 0x01, 0x43, 0x00, 0x09, 0x0C, 0x07, 0xE0, 0x01, 0x04, 0x01, 0x09, 0x32, 0x0A, 0x00, 0x80, 
-    0x00, 0x00
-};
-
-TEST(GET_Response, GeneralUsage) 
+namespace EPRI
 {
-    Get_Response_Normal Response;
-    DLMSVector          Data(FINAL);
+    static DummySerial    TestSerial;
+
+    class COSEMClientFixture : public COSEMClient
+    {
+    public:
+        COSEMClientFixture() : 
+            COSEMClient(0x02),
+            m_MyClient(HDLCAddress(0x02), &TestSerial, HDLCOptions({ false, 3, 500 })),
+            m_MyServer(HDLCAddress(0x03), &TestSerial, HDLCOptions({ false, 3, 500 }))
+        {
+        }
+        
+    // protected:
+        virtual void SetUp()
+        {
+            //
+            // Register the transport with COSEM...
+            //
+            RegisterTransport(&m_MyClient);
+        }
+        
+        HDLCClientLLC m_MyClient;
+        HDLCServerLLC m_MyServer;
+    };
+
     
-    ASSERT_TRUE(Response.Parse(&Data, 1, 1));
-    ASSERT_EQ(0x43, Response.invoke_id_and_priority);
-    ASSERT_EQ(Get_Data_Result_Choice::data, Response.result.index());
-    ASSERT_EQ(DLMSVector({0x09, 0x0C, 0x07, 0xE0, 0x01, 0x04, 0x01, 0x09, 0x32, 0x0A, 0x00, 0x80, 
-                          0x00, 0x00}), 
-              std::get<DLMSVector>(Response.result));
+    TEST_CASE("COSEMClientFixture APPConnectRequestFailBeforeDLConnect")
+    {
+        COSEMClientFixture fixture;
+        // We should not be able to perform a COSEM-CONNECT until
+        // we are connected at the transport.
+        //
+        REQUIRE_FALSE(fixture.OpenRequest(APPOpenRequestOrIndication(0x02, 0x03, xDLMS::InitiateRequest(),
+                                                            COSEMSecurityOptions())));
+    }
     
-    ASSERT_EQ(FINAL, Response.GetBytes());
-    
+    TEST_CASE("COSEMClientFixture ConnectRequest")
+    {
+#ifdef TODO
+        COSEMClientFixture fixture;
+
+        //
+        // Get them connected...
+        //
+        bool bConfirmation = false;
+        HDLCClientLLC::CallbackFunction ConnectConfirm = [&](const BaseCallbackParameter& _) -> bool
+        {
+            bConfirmation = true;
+            return true;
+        };
+        //
+        // Register the other callbacks...
+        //
+        fixture.m_MyClient.RegisterConnectConfirm(ConnectConfirm);
+        REQUIRE(fixture.m_MyClient.ConnectRequest(DLConnectRequestOrIndication(HDLCAddress(0x03))));
+        //
+        // Run the server...
+        //
+        fixture.m_MyServer.ConnectResponse(DLConnectConfirmOrResponse(HDLCAddress(0x02)));
+        //
+        // Run the client...
+        //
+        REQUIRE(bConfirmation);
+        //
+        // We are DL connected, we can now issue an APP Connect
+        //
+        REQUIRE(fixture.OpenRequest(APPOpenRequestOrIndication(0x02, 0x03, xDLMS::InitiateRequest(),
+                                                            COSEMSecurityOptions())));
+#endif
+    }
+
 }

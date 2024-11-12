@@ -70,32 +70,100 @@
 // DEALINGS IN THE SOFTWARE.
 // 
 
-#include <gtest/gtest.h>
+#if USE_CATCH2_VERSION == 2
+#  define CATCH_CONFIG_MAIN
+#  include <catch2/catch.hpp>
+#elif USE_CATCH2_VERSION == 3
+#  include <catch2/catch_test_macros.hpp>
+#else
+#  error "Catch2 version unknown"
+#endif
 
-#include "../../lib/DLMS-COSEM/APDU/GET-Request.cpp"
+#include "interfaces/ICOSEMInterface.h"
+#include "DummySerial.h"
 
-using namespace EPRI;
-
-static const std::vector<uint8_t> FINAL = 
-{ 
-    0xC0, 0x01, 0x45, 0x00, 0x07, 0x00, 0x00, 0x63, 
-    0x62, 0x01, 0xFF, 0x02, 0x00
-};
-
-TEST(GET_Request, GeneralUsage) 
+namespace EPRI
 {
-    Get_Request_Normal Request;
-    DLMSVector         Data(FINAL);
     
-    ASSERT_TRUE(Request.Parse(&Data,1, 1));
-    ASSERT_EQ(0x45, Request.invoke_id_and_priority);
-    ASSERT_EQ(0x0007, Request.cosem_attribute_descriptor.class_id);
-    ASSERT_EQ(DLMSVector({0x00, 0x00, 0x63, 0x62, 0x01, 0xFF}), Request.cosem_attribute_descriptor.instance_id);
-    ASSERT_EQ(0x02, Request.cosem_attribute_descriptor.attribute_id);
+    class ISimpleClass : public ICOSEMInterface
+    {
+    public:
+        ISimpleClass()
+            : ICOSEMInterface(0, 0)
+        {
+        }
+        virtual ~ISimpleClass()
+        {
+        }
+        
+        enum Attributes : ObjectAttributeIdType
+        {
+            ATTR_SIMPLE = 2,
+            ATTR_SIMPLE_TWO = 3
+        };
+        
+        COSEMAttribute<ATTR_SIMPLE, OctetStringSchema, 0x08>     simple;
+        COSEMAttribute<ATTR_SIMPLE_TWO, OctetStringSchema, 0x10> simple2;
+        
+    };
     
-    ASSERT_EQ(FINAL, Request.GetBytes());
-    Request.cosem_attribute_descriptor.attribute_id = 4;
-    ASSERT_EQ(
-        std::vector<uint8_t>({ 0xC0, 0x01, 0x45, 0x00, 0x07, 0x00, 0x00, 0x63, 0x62, 0x01, 0xFF, 0x04, 0x00 }),
-        Request.GetBytes());
+    class ISimpleObject : public ISimpleClass, public ICOSEMObject
+    {
+    public:
+        ISimpleObject()
+            : ICOSEMObject({0,1,0,0,0,0})
+        {
+        }
+        virtual ~ISimpleObject()
+        {
+        }
+        
+    protected:
+        virtual APDUConstants::Data_Access_Result InternalGet(const AssociationContext& Context,
+            ICOSEMAttribute * pAttribute, 
+            const Cosem_Attribute_Descriptor& Descriptor, 
+            SelectiveAccess * pSelectiveAccess) final
+        {
+            return APDUConstants::Data_Access_Result::other_reason;
+        }
+        
+
+    };
+    
+    class SimpleObjectFixture :
+        public ISimpleObject
+    {
+    public:
+        SimpleObjectFixture()
+        {
+        }
+        
+    protected:
+        
+    };
+        
+    TEST_CASE("SimpleObjectFixture Construct")
+    {
+#ifdef TODO
+#endif
+    }
+
+    TEST_CASE("SimpleObjectFixture Get")
+    {
+#ifdef TODO
+#endif
+    }
+
+    TEST_CASE("SimpleObjectFixture Set")
+    {
+#ifdef TODO
+#endif
+    }
+
+    TEST_CASE("SimpleObjectFixture Action")
+    {
+#ifdef TODO
+#endif
+    }
+
 }
