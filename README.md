@@ -70,10 +70,10 @@ For the STM32 Nucleo F207ZG development board:
 
 To create doxygen documentation:
 
-	cd [DLMS-COSEM Directory]
-	doxygen
+    cmake -DWITH-DOC=ON -S . -B build
+    cmake --build build -t doc
 
-	The output will be located in [DLMS-COSEM Directory]/docs. 
+	The output can be accessed by browsing to build/doc/html/index.html. 
 
 For additional detailed information regarding the project, please refer to the Developer Guide.
 
