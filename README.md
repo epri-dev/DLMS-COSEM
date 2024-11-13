@@ -4,10 +4,10 @@ The goal of this project is to create an open reference implementation of a DLMS
 
 To build:
 
-    mkdir bin
-    cd bin
-    cmake ..
-    make
+    cmake --DWITH_TEST=ON -DWITH_DOC=ON -B build
+    cmake --build build
+
+(Note that WITH_TEST and WITH_DOC are both set to OFF by default. Their use is optional.)
 
 To run:
 
@@ -17,12 +17,12 @@ Open a console.
 
 Open another console for the Server.
 
-	cd [DLMS-COSEM Directory]/bin/src/Linux
+	cd [DLMS-COSEM Directory]/build/src/Linux
 	./Linux -S
 
 Open another console for the Client.
 
-	cd [DLMS-COSEM Directory]/bin/src/Linux
+	cd [DLMS-COSEM Directory]/build/src/Linux
 	./Linux
 
 The Client and Server applications are menu-driven.  Start the server listening first, then TCP Connect, COSEM Open, COSEM Get, and COSEM Release.
@@ -42,8 +42,8 @@ These classes are not fully implemented, but they give the reader an indication 
 
 To run unit tests.
 
-	cd [DLMS-COSEM Directory]/bin/test/DLMS-COSEM-TEST
-	./DLMS-COSEM-TEST
+	cd [DLMS-COSEM Directory]
+    cmake --build build -t test
 
 For the STM32 Nucleo F207ZG development board:
 
