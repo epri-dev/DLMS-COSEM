@@ -292,7 +292,7 @@ namespace EPRI
         {
             size_t                         ActualBytes = 0;
             DLMSOptional<asio::error_code> TimerResult;
-            asio::steady_timer             SynchronousTimer(m_Port.get_io_service());
+            asio::steady_timer             SynchronousTimer(m_Port.get_executor());
             SynchronousTimer.expires_from_now(std::chrono::milliseconds(TimeOutInMS));
             
             ActualBytes = asio::read(m_Port,
