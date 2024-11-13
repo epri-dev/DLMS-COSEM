@@ -1,9 +1,7 @@
 To build, 
 
-mkdir build
-cd build
-cmake ..
-make
+cmake -S . -B build
+cmake --build build
 
 If this fails with not finding the Asio installation folder,
 
